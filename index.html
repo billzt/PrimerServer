@@ -16,18 +16,197 @@
         
         <!-- font-awesome CSS -->
         <link rel="stylesheet" href="css/font-awesome.min.css">
+        
+        <!-- JQuery Validation CSS -->
+        <link rel="stylesheet" href="css/validationEngine.jquery.css" />
+        
+        <!-- Own CSS -->
+        <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
     
         <div class="container" role="main">
-            <h1>Head</h1>
-            <span class="fa fa-spinner fa-spin fa-4x"></span>
+            <h1>Batch PCR Primer Design &amp; Specificity Check</h1>
+            <form class="form-horizontal" method="post" enctype="multipart/form-data" id="form-primer">
+                <input type="hidden" name="app-type" value="design" />
+                <div class="row">
+                    <div class="col-md-8">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#design" role="tab" data-toggle="tab">Design &amp; Check</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#check" role="tab" data-toggle="tab">Check Only</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade in active" id="design">
+                                <fieldset>
+                                    <legend>Define Regions</legend>
+                                    <textarea class="form-control monospace-style" rows="8" name="template-regions"></textarea>
+                                </fieldset>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h2 class="panel-title">
+                                            Setting Parameters
+                                            <span data-toggle="collapse" data-target="#parameter-design">
+                                                <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
+                                            </span>
+                                        </h2>
+                                    </div>
+                                    <div id="parameter-design" class="panel-body collapse">
+                                        <div class="form-group row has-feedback">
+                                            <label class="col-sm-3 control-label">Primer Size (bp):</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Min</span>
+                                                    <input type="text" name="PRIMER_MIN_SIZE" value="18" class="form-control validate[required]" />
+                                                    <span class="input-group-addon">Opt</span>
+                                                    <input type="text" name="PRIMER_OPT_SIZE" value="20" class="form-control" />
+                                                    <span class="input-group-addon">Max</span>
+                                                    <input type="text" name="PRIMER_MAX_SIZE" value="23" class="form-control" />
+                                                </div>
+                                                <span class="glyphicon form-control-feedback"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 control-label">Primer G+C (%):</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Min</span>
+                                                    <input type="text" name="PRIMER_MIN_GC" value="35.0" class="form-control" />
+                                                    <span class="input-group-addon">Opt</span>
+                                                    <input type="text" name="PRIMER_OPT_GC_PERCENT" value="50.0" class="form-control" />
+                                                    <span class="input-group-addon">Max</span>
+                                                    <input type="text" name="PRIMER_MAX_GC" value="65.0" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 control-label">Primer Tm (&deg;C):</label>
+                                            <div class="col-sm-9">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Min</span>
+                                                    <input type="text" name="PRIMER_MIN_TM" value="57.0" class="form-control" />
+                                                    <span class="input-group-addon">Opt</span>
+                                                    <input type="text" name="PRIMER_OPT_TM" value="60.0" class="form-control" />
+                                                    <span class="input-group-addon">Max</span>
+                                                    <input type="text" name="PRIMER_MAX_TM" value="63.0" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 control-label">Primer Pair Tm Max Diff. (&deg;C):</label>
+                                            <div class="col-sm-3">
+                                                <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" class="form-control" />
+                                            </div>
+                                            <label class="col-sm-3 control-label">Number To Return:</label>
+                                            <div class="col-sm-3">
+                                                <input type="text" name="PRIMER_NUM_RETURN" value="30" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 control-label">3' End Distance (bp) Between:</label>
+                                            <div class="col-sm-6">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Left Primers</span>
+                                                    <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" class="form-control" />
+                                                    <span class="input-group-addon">Right Primers</span>
+                                                    <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-3 control-label">Max 3' Stability:</label>
+                                            <div class="col-sm-3">
+                                                <input type="text" name="PRIMER_MAX_END_STABILITY" value="9.0" class="form-control" />
+                                            </div>
+                                            <label class="col-sm-3 control-label">Lowercase masking:</label>
+                                            <div class="col-sm-3">
+                                                <div class="radio"><label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=1 checked />Yes</label></div>
+                                                <div class="radio"><label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=0  />No</label></div>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-4 control-label">TH: Max Self Complementarity (&deg;C):</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" name="PRIMER_MAX_SELF_ANY_TH" value="45.0" class="form-control" />
+                                            </div>
+                                            <label class="col-sm-4 control-label">TH: Max Pair Complementarity (&deg;C):</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" name="PRIMER_PAIR_MAX_COMPL_ANY_TH" value="45.0" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-4 control-label">TH: Max 3' Self Complementarity (&deg;C):</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" name="PRIMER_MAX_SELF_END_TH" value="35.0" class="form-control" />
+                                            </div>
+                                            <label class="col-sm-4 control-label">TH: Max 3' Pair Complementarity (&deg;C):</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" name="PRIMER_PAIR_MAX_COMPL_END_TH" value="35.0" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <label class="col-sm-4 control-label">TH: Max Primer Hairpin (&deg;C):</label>
+                                            <div class="col-sm-2">
+                                                <input type="text" name="PRIMER_MAX_HAIRPIN_TH" value="24.0" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="check">
+                                Check
+                            </div>
+                            <input type="submit" value="Submit" class="btn btn-primary" /> 
+                            <input type="reset"  value="Reset" class="btn btn-default" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <fieldset>
+                            <legend>Select Databases</legend>
+                        </fieldset>
+                    </div>
+                </div>
+            </form>
             
+            <div id="result" class="hidden"><span class="fa fa-spinner fa-spin fa-4x"></span></div>
+            <div id="test"></div>
+            
+            <!-- Modal for Showing Specificity Check Result -->
+            <div class="modal fade" id="specificity-check-modal" tabindex="-1" role="dialog">
+              <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Specificity Check (MFEPrimer) Result</h4>
+                  </div>
+                  <div class="modal-body">
+                    <span class="fa fa-spinner fa-spin fa-4x"></span>
+                    <pre></pre>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
         
-        <!-- jQuery (Required) -->
+        <!-- jQuery -->
         <script src="js/jquery.min.js"></script>
         <!-- Bootstrap JS -->
         <script src="js/bootstrap.min.js"></script>
+        <!-- Form submit -->
+        <script src="js/jquery.form.min.js"></script>
+        <!-- jQuery Validation -->
+        <script src="js/jquery.validationEngine.min.js"></script>
+        <script src="js/jquery.validationEngine-en.js"></script>
+        <!-- Timer -->
+        <script src="js/jquery.timer.js"></script>
+        <!-- Own JS -->
+        <script src="js/primer.js"></script>
     </body>
 </html>
