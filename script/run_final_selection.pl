@@ -64,6 +64,7 @@ my %data_for_primer;
     
     if ($detail==1) {
         print {$out_fh} <<"END";
+<h2 class="page-header">Result</h2>
 <div class="panel-group" id="primers-result" role="tablist">
 END
     }

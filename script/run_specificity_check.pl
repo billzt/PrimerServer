@@ -12,6 +12,8 @@ Required:
 --input     
 --db 
 Optional:
+--size_start
+--size_stop
 --pypy
 --outputdir
 --help      Print this help and exit
@@ -22,6 +24,8 @@ my $input;
 my $db;
 my $pypy = "pypy";
 my $dir = ".";
+my $size_start = 50;
+my $size_stop = 5000;
 
 GetOptions(
     'help'          =>  \$help,
@@ -29,6 +33,8 @@ GetOptions(
     'db=s'          =>  \$db,
     'pypy=s'        =>  \$pypy,
     'outputdir=s'   =>  \$dir,
+    'size_start=i'  =>  \$size_start,
+    'size_stop=i'   =>  \$size_stop,
 );
 
 if ($help or !$input or !$db) {
@@ -61,7 +67,7 @@ while (<$in_fh>) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
     }
     close $tmp_out_fh;
-    system "$pypy ../MFEprimer/MFEprimer.py -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
+    system "$pypy ../MFEprimer/MFEprimer.py -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
     
     my $hit_num_line = `grep 'potential PCR amplicon' $dir/tmp.MFEPrimer/$id.$rank.txt.out`;
     my ($hit_num) = $hit_num_line=~/Distribution of (\d+) potential PCR amplicon/;

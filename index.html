@@ -48,14 +48,14 @@
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h2 class="panel-title">
-                                            Setting Parameters
+                                            Primer Design Parameters Setting
                                             <span data-toggle="collapse" data-target="#parameter-design">
                                                 <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
                                             </span>
                                         </h2>
                                     </div>
                                     <div id="parameter-design" class="panel-body collapse">
-                                        <div class="form-group row has-feedback">
+                                        <div class="form-group row">
                                             <label class="col-sm-3 control-label">Primer Size (bp):</label>
                                             <div class="col-sm-9">
                                                 <div class="input-group">
@@ -66,7 +66,6 @@
                                                     <span class="input-group-addon">Max</span>
                                                     <input type="text" name="PRIMER_MAX_SIZE" value="23" class="form-control" />
                                                 </div>
-                                                <span class="glyphicon form-control-feedback"></span>
                                             </div>
                                         </div>
                                         <div class="form-group row">
@@ -100,7 +99,7 @@
                                             <div class="col-sm-3">
                                                 <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" class="form-control" />
                                             </div>
-                                            <label class="col-sm-3 control-label">Number To Return:</label>
+                                            <label class="col-sm-3 control-label">No. Primers To Return:</label>
                                             <div class="col-sm-3">
                                                 <input type="text" name="PRIMER_NUM_RETURN" value="30" class="form-control" />
                                             </div>
@@ -126,8 +125,8 @@
                                                 <div class="radio"><label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=1 checked />Yes</label></div>
                                                 <div class="radio"><label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=0  />No</label></div>
                                             </div>
-
                                         </div>
+                                        <h4 class="page-header">Thermodynamic Secondary Structure Alignments Setting</h4>
                                         <div class="form-group row">
                                             <label class="col-sm-4 control-label">TH: Max Self Complementarity (&deg;C):</label>
                                             <div class="col-sm-2">
@@ -160,6 +159,35 @@
                             <div role="tabpanel" class="tab-pane fade" id="check">
                                 Check
                             </div>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h2 class="panel-title">
+                                        Specificity Cheking Parameters Setting
+                                        <span data-toggle="collapse" data-target="#parameter-check">
+                                            <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
+                                        </span>
+                                    </h2>
+                                </div>
+                                <div id="parameter-check" class="panel-body collapse in">
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="retain" value="10" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 control-label">Checking Prodcut Size (bp):</label>
+                                        <div class="col-sm-6">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Min</span>
+                                                <input type="text" name="size_start" value="70" class="form-control" />
+                                                <span class="input-group-addon">Max</span>
+                                                <input type="text" name="size_stop" value="1000" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <input type="submit" value="Submit" class="btn btn-primary" /> 
                             <input type="reset"  value="Reset" class="btn btn-default" />
                         </div>
@@ -173,7 +201,6 @@
             </form>
             
             <div id="result" class="hidden"><span class="fa fa-spinner fa-spin fa-4x"></span></div>
-            <div id="test"></div>
             
             <!-- Modal for Showing Specificity Check Result -->
             <div class="modal fade" id="specificity-check-modal" tabindex="-1" role="dialog">

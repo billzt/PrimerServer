@@ -17,7 +17,7 @@ $path_samtools = $config['samtools'];
 $path_primer3 = $config['primer3'];
 $path_pypy = $config['pypy'];
 
-// design Primers
+// design & check Primers
 if ($type=='design') {
     
     // generate Primer3 setting file
@@ -68,12 +68,12 @@ END;
     
     // Run MFEPrimer, generate [specificity.check.result.txt]
     $command = "perl run_specificity_check.pl --input=$working_dir/primer3output.simple.table.txt "
-               ."--db=../db/Ghir.NAU.genomic --pypy=$path_pypy --outputdir=$working_dir";
+               ."--db=../db/Ghir.NAU.genomic --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop]";
     exec($command);
     
     // Retrieve Results, generate [primer.final.result.html]
     $command = "perl run_final_selection.pl --primer3result=$working_dir/primer3output.txt "
-              ."--specificity=$working_dir/specificity.check.result.txt --detail=1 --retain=10 "
+              ."--specificity=$working_dir/specificity.check.result.txt --detail=1 --retain=$_POST[retain] "
               ."--outputdir=$working_dir";
     exec($command);
     
