@@ -8,7 +8,13 @@ $(function () {
             container: 'body'
         });
     });
-
+    
+    // select template: options
+    $.get('script/db.php', function(data){
+        $('[name="select-template"]').append(data);
+        $('[name="select-template"]').append('<option value="custom">Custom...</option>');
+        $('[name="select-template"]').selectpicker('refresh');        
+    });
 
     // test Only
     //$('#test').load('script/primer.final.result.html');

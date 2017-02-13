@@ -13,6 +13,8 @@
         
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" href="css/bootstrap.min.css" >
+        <!-- Bootstrap-Select plugin CSS -->
+        <link rel="stylesheet" href="css/bootstrap-select.min.css" >
         
         <!-- font-awesome CSS -->
         <link rel="stylesheet" href="css/font-awesome.min.css">
@@ -43,12 +45,18 @@
                             <div role="tabpanel" class="tab-pane fade in active" id="design">
                                 <fieldset>
                                     <legend>Define Regions</legend>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Species</span>
+                                        <select class="form-control selectpicker show-tick" name="select-template" 
+                                        data-size="10" data-live-search="true" title="Select your template species">
+                                        </select>
+                                    </div>
                                     <textarea class="form-control monospace-style" rows="8" name="template-regions"></textarea>
                                 </fieldset>
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h2 class="panel-title">
-                                            Primer Design Parameters Setting
+                                            Setting Primer Design Parameters
                                             <span data-toggle="collapse" data-target="#parameter-design">
                                                 <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
                                             </span>
@@ -159,38 +167,38 @@
                             <div role="tabpanel" class="tab-pane fade" id="check">
                                 Check
                             </div>
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h2 class="panel-title">
-                                        Specificity Cheking Parameters Setting
-                                        <span data-toggle="collapse" data-target="#parameter-check">
-                                            <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
-                                        </span>
-                                    </h2>
-                                </div>
-                                <div id="parameter-check" class="panel-body collapse in">
-                                    <div class="form-group row">
-                                        <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
-                                        <div class="col-sm-3">
-                                            <input type="text" name="retain" value="10" class="form-control" />
-                                        </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h2 class="panel-title">
+                                    Setting Specificity Cheking Parameters
+                                    <span data-toggle="collapse" data-target="#parameter-check">
+                                        <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
+                                    </span>
+                                </h2>
+                            </div>
+                            <div id="parameter-check" class="panel-body collapse in">
+                                <div class="form-group row">
+                                    <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
+                                    <div class="col-sm-3">
+                                        <input type="text" name="retain" value="10" class="form-control" />
                                     </div>
-                                    <div class="form-group row">
-                                        <label class="col-sm-4 control-label">Checking Prodcut Size (bp):</label>
-                                        <div class="col-sm-6">
-                                            <div class="input-group">
-                                                <span class="input-group-addon">Min</span>
-                                                <input type="text" name="size_start" value="70" class="form-control" />
-                                                <span class="input-group-addon">Max</span>
-                                                <input type="text" name="size_stop" value="1000" class="form-control" />
-                                            </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-4 control-label">Checking Prodcut Size (bp):</label>
+                                    <div class="col-sm-6">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Min</span>
+                                            <input type="text" name="size_start" value="70" class="form-control" />
+                                            <span class="input-group-addon">Max</span>
+                                            <input type="text" name="size_stop" value="1000" class="form-control" />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <input type="submit" value="Submit" class="btn btn-primary" /> 
-                            <input type="reset"  value="Reset" class="btn btn-default" />
                         </div>
+                        <input type="submit" value="Submit" class="btn btn-primary" /> 
+                        <input type="reset"  value="Reset" class="btn btn-default" />
                     </div>
                     <div class="col-md-4">
                         <fieldset>
@@ -226,6 +234,8 @@
         <script src="js/jquery.min.js"></script>
         <!-- Bootstrap JS -->
         <script src="js/bootstrap.min.js"></script>
+        <!-- Bootstrap Select JS -->
+        <script src="js/bootstrap-select.min.js"></script>
         <!-- Form submit -->
         <script src="js/jquery.form.min.js"></script>
         <!-- jQuery Validation -->

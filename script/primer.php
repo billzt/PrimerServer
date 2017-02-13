@@ -50,7 +50,11 @@ PRIMER_MAX_HAIRPIN_TH=$_POST[PRIMER_MAX_HAIRPIN_TH]
 END;
     file_put_contents("$working_dir/p3_settings_file", $p3_settings_string);
     
-    // collect user's input data
+    // ####### collect user's input data #######
+    // template species
+    $template_tax = $_POST['select-template'];
+    
+    // input region
     $input_regions = stripslashes(strip_tags(trim($_POST['template-regions'])));
     $input_regions_array = array_filter(explode("\n", $input_regions), create_function('$v','return !empty($v);'));
     $input_region_num = count($input_regions_array);
@@ -61,7 +65,7 @@ END;
     
     // Run primer3, generate [primer3output.txt] and [primer3output.simple.table.txt]
     $command = "perl run_primer3.pl --input=$working_dir/perl_input_region.tmp "
-               ."--db=../db/Ghir.NAU.genomic --primer3setting=$working_dir/p3_settings_file "
+               ."--db=../db/$template_tax --primer3setting=$working_dir/p3_settings_file "
                ."--primer3bin=$path_primer3 --samtools=$path_samtools "
                ."--outputdir=$working_dir";
     exec($command);
