@@ -1,4 +1,4 @@
-// actions after document ready
+// Actions after document ready
 $(function () {
     // Tooltip for bootstrap
     $('[data-toggle="tooltip"]').tooltip({html: true});
@@ -12,7 +12,7 @@ $(function () {
     // select template: options
     $.get('script/db.php', function(data){
         $('[name="select-template"]').append(data);
-        $('[name="select-template"]').append('<option value="custom">Custom...</option>');
+        $('[name="select-template"]').append('<optgroup label="Custom"><option value="custom">Custom Template Sequences...</option></optgroup>');
         $('[name="select-template"]').selectpicker('refresh');        
     });
 
@@ -26,10 +26,20 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     $("[name='app-type']").val(type);
 });
 
-// remove flanking blanks after text input
+// Remove flanking blanks after text input
 $(':text').blur(function(){
     var val = $(this).val();
     $(this).val($.trim(val));
+});
+
+// If users select custom template, then showing custom template FASTA sequence input textarea
+$('[name="select-template"]').on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+    if (event.target.value=='custom') {
+        $('[name="custom-template-sequences"]').parent().removeClass('hidden');
+    }
+    else {
+        $('[name="custom-template-sequences"]').parent().addClass('hidden');
+    }
 });
 
 // form validation & submit

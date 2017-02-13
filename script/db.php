@@ -18,6 +18,7 @@ if ($groups) {
             $file = "../db/$value.fai";
             
             // sub text (ID format)
+            $id_array = array();
             exec("cut -f 1 $file | grep -i -v 'scaffold'", $id_array);
             $id_start = $id_array[0];
             $id_end = end($id_array);
@@ -38,6 +39,7 @@ else {
         $name = $value;
         
         // sub text (ID format)
+        $id_array = array();
         exec("cut -f 1 $file | grep -i -v 'scaffold'", $id_array);
         $id_start = $id_array[0];
         $id_end = end($id_array);

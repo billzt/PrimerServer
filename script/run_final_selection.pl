@@ -142,6 +142,7 @@ END
                     <p>Left primer: $PRIMER_LEFT_EXPLAIN</p>
                     <p>Right primer: $PRIMER_RIGHT_EXPLAIN</p>
                     <p>Pair: $PRIMER_PAIR_EXPLAIN</p>
+                    <b>If you did not see any explainations here, then it is probably that you give wrong sequence IDs</b>
                 </div>
             </div>
 END

@@ -53,8 +53,23 @@ END;
     // ####### collect user's input data #######
     // template species
     $template_tax = $_POST['select-template'];
+    if ($template_tax=='custom') {
+        file_put_contents("../db/custom", $_POST['custom-template-sequences']);
+        // check whether file custom is a DNA FASTA format file
+        exec("$path_samtools faidx ../db/custom");
+        if (!file_exists('../db/custom.fai')) {  // index FASTA is not OK
+?>
+<div class="alert alert-danger" role="alert">
+    Error: Building index of your input FASTA failed! Either your input sequences are not in FASTA
+    format or there are some error in this web setting.
+</div>
+
+<?php
+            exit(0);
+        }
+    }
     
-    // input region
+    //  input region 
     $input_regions = stripslashes(strip_tags(trim($_POST['template-regions'])));
     $input_regions_array = array_filter(explode("\n", $input_regions), create_function('$v','return !empty($v);'));
     $input_region_num = count($input_regions_array);
@@ -85,3 +100,4 @@ END;
 }
 
 
+?>
