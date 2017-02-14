@@ -123,7 +123,8 @@ END
             </div>
             <div class="col-md-1">
 END
-        if ($hit_num_for_primer{$id} && values %{$hit_num_for_primer{$id}}~~1 ) {
+        my @hit_nums = values(%{$hit_num_for_primer{$id}});
+        if ($hit_num_for_primer{$id} && 1~~@hit_nums ) {
             print {$out_fh} <<"END";
                 <span class="glyphicon glyphicon-ok"></span>
 END

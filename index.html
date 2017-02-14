@@ -45,15 +45,15 @@
                             <legend>Define Regions</legend>
                             <div class="input-group">
                                 <span class="input-group-addon">Species</span>
-                                <select class="form-control selectpicker show-tick" name="select-template" 
-                                data-size="10" data-live-search="true" title="Select your template species">
+                                <select class="form-control selectpicker show-tick validate[required]" name="select-template" 
+                                data-size="10" data-live-search="true" title="Select your template species (allow 1)">
                                 </select>
                             </div>
-                            <textarea class="form-control monospace-style" rows="8" name="template-regions"></textarea>
+                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" name="template-regions"></textarea>
                         </fieldset>
                         <fieldset class="hidden">
                             <legend>Input Custom Template Sequences</legend>
-                            <textarea class="form-control monospace-style" rows="8" name="custom-template-sequences"></textarea>
+                            <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8" name="custom-template-sequences"></textarea>
                         </fieldset>
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -70,11 +70,14 @@
                                     <div class="col-sm-9">
                                         <div class="input-group">
                                             <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_SIZE" value="18" class="form-control validate[required]" />
+                                            <input type="text" name="PRIMER_MIN_SIZE" value="18" 
+                                                class="form-control validate[required, custom[integer], min[1], max[35]]" />
                                             <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_SIZE" value="20" class="form-control" />
+                                            <input type="text" name="PRIMER_OPT_SIZE" value="20" 
+                                                class="form-control validate[required, custom[integer], min[1], max[35]]" />
                                             <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_SIZE" value="23" class="form-control" />
+                                            <input type="text" name="PRIMER_MAX_SIZE" value="23" 
+                                                class="form-control validate[required, custom[integer], min[1], max[35]]" />
                                         </div>
                                     </div>
                                 </div>
@@ -83,11 +86,14 @@
                                     <div class="col-sm-9">
                                         <div class="input-group">
                                             <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_GC" value="35.0" class="form-control" />
+                                            <input type="text" name="PRIMER_MIN_GC" value="35.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                             <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_GC_PERCENT" value="50.0" class="form-control" />
+                                            <input type="text" name="PRIMER_OPT_GC_PERCENT" value="50.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                             <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_GC" value="65.0" class="form-control" />
+                                            <input type="text" name="PRIMER_MAX_GC" value="65.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                         </div>
                                     </div>
                                 </div>
@@ -96,22 +102,27 @@
                                     <div class="col-sm-9">
                                         <div class="input-group">
                                             <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_TM" value="57.0" class="form-control" />
+                                            <input type="text" name="PRIMER_MIN_TM" value="57.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                             <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_TM" value="60.0" class="form-control" />
+                                            <input type="text" name="PRIMER_OPT_TM" value="60.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                             <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_TM" value="63.0" class="form-control" />
+                                            <input type="text" name="PRIMER_MAX_TM" value="63.0" 
+                                                class="form-control validate[required, custom[number], min[0], max[100]]" />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="col-sm-3 control-label">Primer Pair Tm Max Diff. (&deg;C):</label>
                                     <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" class="form-control" />
+                                        <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                     <label class="col-sm-3 control-label">No. Primers To Return:</label>
                                     <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_NUM_RETURN" value="30" class="form-control" />
+                                        <input type="text" name="PRIMER_NUM_RETURN" value="30" 
+                                        class="form-control validate[required, custom[integer], min[1], max[1000]]" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -119,16 +130,19 @@
                                     <div class="col-sm-6">
                                         <div class="input-group">
                                             <span class="input-group-addon">Left Primers</span>
-                                            <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" class="form-control" />
+                                            <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" 
+                                            class="form-control validate[required, custom[integer], min[-1], max[35]]" />
                                             <span class="input-group-addon">Right Primers</span>
-                                            <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" class="form-control" />
+                                            <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" 
+                                            class="form-control validate[required, custom[integer], min[-1], max[35]]" />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="col-sm-3 control-label">Max 3' Stability:</label>
                                     <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_MAX_END_STABILITY" value="9.0" class="form-control" />
+                                        <input type="text" name="PRIMER_MAX_END_STABILITY" value="9.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[999]]" />
                                     </div>
                                     <label class="col-sm-3 control-label">Lowercase masking:</label>
                                     <div class="col-sm-3">
@@ -140,27 +154,32 @@
                                 <div class="form-group row">
                                     <label class="col-sm-4 control-label">TH: Max Self Complementarity (&deg;C):</label>
                                     <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_SELF_ANY_TH" value="45.0" class="form-control" />
+                                        <input type="text" name="PRIMER_MAX_SELF_ANY_TH" value="45.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                     <label class="col-sm-4 control-label">TH: Max Pair Complementarity (&deg;C):</label>
                                     <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_ANY_TH" value="45.0" class="form-control" />
+                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_ANY_TH" value="45.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="col-sm-4 control-label">TH: Max 3' Self Complementarity (&deg;C):</label>
                                     <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_SELF_END_TH" value="35.0" class="form-control" />
+                                        <input type="text" name="PRIMER_MAX_SELF_END_TH" value="35.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                     <label class="col-sm-4 control-label">TH: Max 3' Pair Complementarity (&deg;C):</label>
                                     <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_END_TH" value="35.0" class="form-control" />
+                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_END_TH" value="35.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label class="col-sm-4 control-label">TH: Max Primer Hairpin (&deg;C):</label>
                                     <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_HAIRPIN_TH" value="24.0" class="form-control" />
+                                        <input type="text" name="PRIMER_MAX_HAIRPIN_TH" value="24.0" 
+                                        class="form-control validate[required, custom[number], min[0], max[100]]" />
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +188,7 @@
                     <div role="tabpanel" class="tab-pane fade" id="check">
                         <fieldset>
                             <legend>Input Primer Sequences (5' to 3')</legend>
-                            <textarea class="form-control monospace-style" rows="8" name="check-primers"></textarea>
+                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" name="check-primers"></textarea>
                         </fieldset>
                     </div>
                 </div>
@@ -186,7 +205,8 @@
                         <div class="form-group row">
                             <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
                             <div class="col-sm-3">
-                                <input type="text" name="retain" value="10" class="form-control" />
+                                <input type="text" name="retain" value="10" 
+                                class="form-control validate[required, custom[integer], min[1], max[20]]" />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -194,17 +214,19 @@
                             <div class="col-sm-6">
                                 <div class="input-group">
                                     <span class="input-group-addon">Min</span>
-                                    <input type="text" name="size_start" value="70" class="form-control" />
+                                    <input type="text" name="size_start" value="70" 
+                                    class="form-control validate[required, custom[integer], min[1], max[100000]]" />
                                     <span class="input-group-addon">Max</span>
-                                    <input type="text" name="size_stop" value="1000" class="form-control" />
+                                    <input type="text" name="size_stop" value="1000" 
+                                    class="form-control validate[required, custom[integer], min[1], max[100000]]" />
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon">Checking Databases</span>
-                        <select class="form-control selectpicker show-tick" name="select-database[]" 
-                        data-size="10" data-live-search="true" title="Select your databases" multiple 
+                        <select class="form-control selectpicker show-tick validate[required]" name="select-database[]" 
+                        data-size="10" data-live-search="true" title="Select your databases (Max 4)" multiple 
                         data-selected-text-format="count>1" data-max-options="4">
                         </select>
                     </div>
