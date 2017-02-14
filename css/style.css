@@ -31,3 +31,29 @@ legend {
     border: none;
 }
 
+textarea {
+    background-color: #bfffdf !important;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 80px;
+}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: #D9DBE0;
+  text-align: center;
+}
+.container .text-muted {
+  margin: 20px 0;
+}

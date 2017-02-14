@@ -86,8 +86,9 @@ END;
     exec($command);
     
     // Run MFEPrimer, generate [specificity.check.result.txt]
+    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
     $command = "perl run_specificity_check.pl --input=$working_dir/primer3output.simple.table.txt "
-               ."--db=../db/Ghir.NAU.genomic --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop]";
+               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop]";
     exec($command);
     
     // Retrieve Results, generate [primer.final.result.html]
@@ -98,6 +99,26 @@ END;
     
     echo file_get_contents("$working_dir/primer.final.result.html");
 }
-
-
+// check Primers Only
+else {
+    
+    // input primers
+    $input_primers = stripslashes(strip_tags(trim($_POST['check-primers'])));
+    $input_primers_array = array_filter(explode("\n", $input_primers), create_function('$v','return !empty($v);'));
+    $input_primers_num = count($input_primers_array);
+    $input_primers_array = array_unique($input_primers_array);
+    $input_primers_num_unique = count($input_primers_array);
+    $input_primers = implode("\n", $input_primers_array);
+    file_put_contents("$working_dir/check.only.tmp", $input_primers);
+    
+    // db
+    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
+    
+    // Run MFEPrimer, generate [specificity.check.result.html]
+    $command = "perl run_specificity_check.pl --input=$working_dir/check.only.tmp "
+               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop] --detail=1";
+    exec($command);
+    
+    echo file_get_contents("$working_dir/specificity.check.result.html");
+}
 ?>

@@ -9,15 +9,21 @@ $(function () {
         });
     });
     
+    // footer year
+    var date = new Date();
+    $('#current-year').html(date.getFullYear());
+    
     // select template: options
     $.get('script/db.php', function(data){
         $('[name="select-template"]').append(data);
+        $('[name="select-database[]"]').append(data);
         $('[name="select-template"]').append('<optgroup label="Custom"><option value="custom">Custom Template Sequences...</option></optgroup>');
-        $('[name="select-template"]').selectpicker('refresh');        
+        $('[name="select-template"]').selectpicker('refresh'); 
+        $('[name="select-database[]"]').selectpicker('refresh');        
     });
 
     // test Only
-    //$('#test').load('script/primer.final.result.html');
+    //$('#test').load('script/specificity.check.result.html');
 });
 
 // Define App type: design OR check
