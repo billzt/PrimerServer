@@ -92,8 +92,7 @@ $(function () {
     function AjaxSubmit() {
         var options = { 
             target: '#result',   // target element(s) to be updated with server response 
-            //url: 'script/primer.php',
-            url: 'test.php', // test only
+            url: 'script/primer.php',
             beforeSubmit: ScrollToResult,
             success: ScrollToResult,
         }; 

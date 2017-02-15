@@ -2,6 +2,7 @@
 
 // Generate random session directory
 session_start();
+echo '<h2 class="page-header">Result</h2>';
 $session_id = session_id();
 $working_dir = "../tmp/$session_id";
 if (!file_exists($working_dir)) {
@@ -11,11 +12,14 @@ if (!file_exists($working_dir)) {
 // App type
 $type = $_POST['app-type'];
 
-// Program Path
+// Program Path and parameter
 $config = parse_ini_file("../config.ini");
 $path_samtools = $config['samtools'];
 $path_primer3 = $config['primer3'];
 $path_pypy = $config['pypy'];
+$limit_site = $config['limitSite'];
+$limit_primer = $config['limitPrimer'];
+$limit_database = $config['limitDatabase'];
 
 // design & check Primers
 if ($type=='design') {
@@ -75,6 +79,22 @@ END;
     $input_region_num = count($input_regions_array);
     $input_regions_array = array_unique($input_regions_array);
     $input_region_num_unique = count($input_regions_array);
+?>
+<div class="alert alert-info alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <b><?php echo $input_region_num ?></b> site(s) detected; <b><?php echo $input_region_num_unique ?></b> site(s) used
+</div>
+<?php
+    if ($input_region_num_unique>$limit_site) {
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    Warning: Too many sites. <b><?php echo $input_region_num_unique ?></b> sites detected. However we only allow 
+    <b><?php echo $limit_site ?></b> sites at one time.
+</div>
+<?php
+        exit(0);
+    }
     $input_regions = implode("\n", $input_regions_array);
     file_put_contents("$working_dir/perl_input_region.tmp", $input_regions);
     
@@ -86,6 +106,16 @@ END;
     exec($command);
     
     // Run MFEPrimer, generate [specificity.check.result.txt]
+    if (count($_POST['select-database'])>$limit_database) {
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    Warning: Too many databases selected. <b><?php echo count($_POST['select-database']) ?></b> databases detected. However we only allow 
+    <b><?php echo $limit_database ?></b> databases at one time.
+</div>
+<?php
+        exit(0);
+    }    
     $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
     $command = "perl run_specificity_check.pl --input=$working_dir/primer3output.simple.table.txt "
                ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop]";
@@ -108,6 +138,22 @@ else {
     $input_primers_num = count($input_primers_array);
     $input_primers_array = array_unique($input_primers_array);
     $input_primers_num_unique = count($input_primers_array);
+?>
+<div class="alert alert-info alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <b><?php echo $input_primers_num ?></b> primer group(s) detected; <b><?php echo $input_primers_num_unique ?></b> primer group(s) used
+</div>
+<?php
+    if ($input_primers_num_unique>$limit_primer) {
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    Warning: Too many primers. <b><?php echo $input_primers_num_unique ?></b> primer groups detected. However we only allow 
+    <b><?php echo $limit_primer ?></b> primer groups at one time.
+</div>
+<?php
+        exit(0);
+    }
     $input_primers = implode("\n", $input_primers_array);
     file_put_contents("$working_dir/check.only.tmp", $input_primers);
     
@@ -115,6 +161,16 @@ else {
     $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
     
     // Run MFEPrimer, generate [specificity.check.result.html]
+    if (count($_POST['select-database'])>$limit_database) {
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    Warning: Too many databases selected. <b><?php echo count($_POST['select-database']) ?></b> databases detected. However we only allow 
+    <b><?php echo $limit_database ?></b> databases at one time.
+</div>
+<?php
+        exit(0);
+    } 
     $command = "perl run_specificity_check.pl --input=$working_dir/check.only.tmp "
                ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop] --detail=1";
     exec($command);
