@@ -13,6 +13,7 @@ $(function () {
     $('#current-year').html(date.getFullYear());
     
     // select template: options
+    var originalValFor = new Object;
     $.get('script/db.php', function(data){
         $('[name="select-template"]').append(data);
         $('[name="select-database[]"]').append(data);
@@ -20,7 +21,6 @@ $(function () {
         
         // get all the default values
         var inputs = $(':text.save-input');
-        var originalValFor = new Object;
         for (var i=0; i<inputs.length; i++) {
             var el = inputs[i];
             originalValFor[el.name] = el.defaultValue;
@@ -67,10 +67,16 @@ $(function () {
         $("[name='app-type']").val(type);
     });
 
-    // Remove flanking blanks after text input
+    // Remove flanking blanks after text input; If it is blank, fill original value for it
     $(':text').blur(function(){
-        var val = $(this).val();
-        $(this).val($.trim(val));
+        var val = $.trim($(this).val());
+        if (val!='') {
+            $(this).val(val);
+        }
+        else {
+            var el = $(this);
+            $(this).val(originalValFor[el[0].name]);
+        }
     });
 
     // If users select (Or inintially load) custom template, then showing custom template FASTA sequence input textarea
