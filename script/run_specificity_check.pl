@@ -189,7 +189,7 @@ END
                 
             print {$out_fh} <<"END";
                                         <tr>
-                                            <th>Hit Number</th>
+                                            <th>Possible Amplicons Number</th>
                                             <td>$hit_num 
                                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out">
                                                     <span class="glyphicon glyphicon-hand-right"></span>

@@ -261,7 +261,7 @@ END
                                             <td colspan="9">$penalty_pair</td>
                                         </tr>
                                         <tr>
-                                            <th>Hit Number</th>
+                                            <th>Possible Amplicons Number</th>
                                             <td colspan="9">$hit_num 
                                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
