@@ -35,6 +35,10 @@ textarea {
     background-color: #bfffdf !important;
 }
 
+.help-icon {
+    cursor: pointer;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {

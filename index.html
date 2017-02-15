@@ -42,14 +42,19 @@
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane fade in active" id="design">
                         <fieldset>
-                            <legend>Define Regions</legend>
+                            <legend>Define Regions 
+                                <small><span class="glyphicon glyphicon-question-sign help-icon" data-toggle="modal"
+                                data-target="#input-help"></span></small> 
+                            </legend>
                             <div class="input-group">
                                 <span class="input-group-addon">Species</span>
                                 <select class="form-control selectpicker show-tick save-input validate[required]" name="select-template" 
                                 data-size="10" data-live-search="true" title="Select your template species (allow 1)">
                                 </select>
                             </div>
-                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" name="template-regions"></textarea>
+                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
+                            placeholder="Input your regions, one per line, space delimited: ID TargetPos TargetLength MaxProductSize MinProductSize" 
+                            name="template-regions"></textarea>
                         </fieldset>
                         <fieldset class="hidden">
                             <legend>Input Custom Template Sequences</legend>
@@ -192,8 +197,13 @@
                     </div>
                     <div role="tabpanel" class="tab-pane fade" id="check">
                         <fieldset>
-                            <legend>Input Primer Sequences (5' to 3')</legend>
-                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" name="check-primers"></textarea>
+                            <legend>Input Primer Sequences (5' to 3')
+                                <small><span class="glyphicon glyphicon-question-sign help-icon" data-toggle="modal"
+                                data-target="#input-help"></span></small> 
+                            </legend>
+                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
+                            placeholder="Input your primer groups, one per line, space delimited: SiteID PrimerRank Seq1 Seq2 ..." 
+                            name="check-primers"></textarea>
                         </fieldset>
                     </div>
                 </div>
@@ -241,27 +251,69 @@
 
             </form>
             
-            <div id="result" class="hidden"><span class="fa fa-spinner fa-spin fa-4x"></span></div>
-            <div id="test"></div>
+            <div class="row">
+                <div id="result" class="hidden"><span class="fa fa-spinner fa-spin fa-4x"></span></div>
+                <div id="test"></div>
+            </div>
             
-            <!-- Modal for Showing Specificity Check Result -->
-            <div class="modal fade" id="specificity-check-modal" tabindex="-1" role="dialog">
-              <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Specificity Check (MFEPrimer) Result</h4>
-                  </div>
-                  <div class="modal-body">
-                    <span class="fa fa-spinner fa-spin fa-4x"></span>
-                    <pre></pre>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  </div>
-                </div>
+        </div>
+        
+        <!-- Modal for Showing Specificity Check Result -->
+        <div class="modal fade" id="specificity-check-modal" tabindex="-1" role="dialog">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Specificity Check (MFEPrimer) Result</h4>
+              </div>
+              <div class="modal-body">
+                <span class="fa fa-spinner fa-spin fa-4x"></span>
+                <pre></pre>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>
+          </div>
+        </div>
+        
+        <!-- Modal for help information -->
+        <div class="modal fade" id="input-help" tabindex="-1" role="dialog">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Input Help</h4>
+              </div>
+              <div class="modal-body">
+                <h4 class="page-header">Design Primers &amp; Check</h4>
+                <p>Format: One site per line, space delimited <code>ID TargetPos TargetLength MaxProductSize MinProductSize</code></p>
+                <p>Example:</p>
+                <pre>
+D05  53118102    6   100 150
+D05  53199470    7   100 150
+D05  53108768    13  100 150
+D03  37527300    20  300 600
+                </pre>
+                
+                <h4 class="page-header">Check Primers Only</h4>
+                <p>Format: One primer group per line, space delimited: <code>SiteID PrimerRank Seq1 Seq2 ...</code></p>
+                <p>Example:</p>
+                <pre>
+D05-53118102-6	0	CAATCTCTTCATGTTCAACCTGT	GACACGGCTAAAATCAATGGCA
+D05-53199470-7	0	AGTGTAGGCAGTGAAAGATCCT	AGTTAACTCTCAAGCCTAGGGG
+D05-53199470-7	1	AGGCAGTGAAAGATCCTAATTCT	TGTGCTCCCTCAATCCAATGT
+D05-53199470-7	2	TGTAGGCAGTGAAAGATCCTAAT	TGCTCCCTCAATCCAATGTAGT
+D03-37527300-20	1	CACACACACAAGCAAGCCTG	TGCTCCTCAATCGATTCAGGT
+D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
+                </pre>
+                
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- Footer -->
