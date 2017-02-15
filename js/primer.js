@@ -73,8 +73,8 @@ $(function () {
         $(this).val($.trim(val));
     });
 
-    // If users select custom template, then showing custom template FASTA sequence input textarea
-    $('[name="select-template"]').on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+    // If users select (Or inintially load) custom template, then showing custom template FASTA sequence input textarea
+    $('[name="select-template"]').on('changed.bs.select refreshed.bs.select', function (event, clickedIndex, newValue, oldValue) {
         if (event.target.value=='custom') {
             $('[name="custom-template-sequences"]').parent().removeClass('hidden');
         }
