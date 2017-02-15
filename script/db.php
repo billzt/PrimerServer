@@ -19,12 +19,12 @@ if ($groups) {
             
             // sub text (ID format)
             $id_array = array();
-            exec("cut -f 1 $file | grep -i -v 'scaffold' | sort -V", $id_array);
+            exec("cut -f 1 $file | grep -i -v 'scaffold' | head -n 50 | sort -V", $id_array);
             $id_start = $id_array[0];
             $id_end = end($id_array);
             
 ?>
-    <option data-subtext="<?php echo "$id_start ~ $id_end" ?>" value="<?php echo $value ?>"><?php echo $name ?></option>
+    <option data-subtext=" ID e.g.: <?php echo "$id_start ~ $id_end" ?>" value="<?php echo $value ?>"><?php echo $name ?></option>
 <?php
         }
 ?>
