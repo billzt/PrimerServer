@@ -94,7 +94,8 @@ END
                 </a>
             </h4>
             <div class="col-md-3">
-                <small class="site-detail" data-pos="$target_start" data-length="$target_length">Chromosome $chr; Target Pos: $target_start; Target Length: $target_length</small>
+                <small class="site-detail" data-seq="$chr" data-pos="$target_start" 
+                data-length="$target_length">Template $chr; Target Pos: $target_start; Target Length: $target_length</small>
             </div>
             <div class="col-md-2">
                 <span class="badge">$primer_num</span> Primer(s)

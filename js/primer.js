@@ -131,6 +131,10 @@ $(function () {
         var axis = d3.svg.axis().scale(axisScale).orient('top').ticks(10);
         svg.append('g').attr('class', 'axis').call(axis); // axis: translate(x,y) is no longer needed as PanZoom can do it
         
+        // Text
+        var template = el.prev().find('.site-detail').data('seq');
+        svg.append('text').attr('x','0').attr('y','-30').text('Template '+template).attr('font-size', '120%');
+        
         // target region
         var targetPos = el.prev().find('.site-detail').data('pos');
         var targetLen = el.prev().find('.site-detail').data('length');
