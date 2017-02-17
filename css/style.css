@@ -39,6 +39,19 @@ textarea {
     cursor: pointer;
 }
 
+/* SVG axis */
+.axis path,
+.axis line{
+    fill: none;
+    stroke: blue;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-size: 11px;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {

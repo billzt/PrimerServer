@@ -94,7 +94,7 @@ END
                 </a>
             </h4>
             <div class="col-md-3">
-                <small>Chromosome $chr; Target Pos: $target_start; Target Length: $target_length</small>
+                <small class="site-detail" data-pos="$target_start" data-length="$target_length">Chromosome $chr; Target Pos: $target_start; Target Length: $target_length</small>
             </div>
             <div class="col-md-2">
                 <span class="badge">$primer_num</span> Primer(s)
@@ -150,7 +150,7 @@ END
         else {
             if ($detail==1) {
                 print {$out_fh} <<"END";
-            <div class="well">Figure</div>
+            <div class="PrimerFigure"></div>
             <ul class="list-group">
 END
             }
@@ -209,7 +209,7 @@ END
 END
                     }
                     print {$out_fh} <<"END";
-                        <h4 class="list-group-item-heading">Primer $primer_output_rank</h4>
+                        <h4 class="list-group-item-heading" id="Site$site_num-Primer$primer_output_rank">Primer $primer_output_rank</h4>
                         <div class="list-group-item-text">
                             <div class="table-responsive">
                                 <table class="table table-borderless">
@@ -232,7 +232,7 @@ END
                                             <th>Left Primer</th>
                                             <td><span class="monospace-style">$seq_F</span></td>
                                             <td>$len_F</td>
-                                            <td>$start_F-$end_F</td>
+                                            <td class="primer-left-region">$start_F-$end_F</td>
                                             <td>$Tm_F</td>
                                             <td>$GC_F</td>
                                             <td>$self_any_F</td>
@@ -244,7 +244,7 @@ END
                                             <th>Right Primer</th>
                                             <td><span class="monospace-style">$seq_R</span></td>
                                             <td>$len_R</td>
-                                            <td>$start_R-$end_R</td>
+                                            <td class="primer-right-region">$start_R-$end_R</td>
                                             <td>$Tm_R</td>
                                             <td>$GC_R</td>
                                             <td>$self_any_R</td>
@@ -262,7 +262,7 @@ END
                                         </tr>
                                         <tr>
                                             <th>Possible Amplicons Number</th>
-                                            <td colspan="9">$hit_num 
+                                            <td colspan="9" class="hit-num" data-hit="$hit_num">$hit_num 
                                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
