@@ -252,7 +252,7 @@
             </form>
             
             <div class="row">
-                <div id="result" class="hidden"><span class="fa fa-spinner fa-spin fa-4x"></span></div>
+                <div id="result"></div>
                 <div id="test"></div>
             </div>
             
@@ -272,6 +272,21 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal for Running -->
+        <div class="modal fade" id="running-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Running...</h4>
+              </div>
+              <div class="modal-body">
+                <p><span class="fa fa-spinner fa-spin fa-4x"></span></p>
+                <p>If you did not get any result in &ge; 5 minites, then you might reduce the amount of your input sites.</p>
               </div>
             </div>
           </div>

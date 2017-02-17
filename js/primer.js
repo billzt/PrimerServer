@@ -225,6 +225,7 @@ $(function () {
             url: 'script/primer.php',
             beforeSubmit: ScrollToResult,
             success: function () {
+                $('#running-modal').modal('hide');
                 ScrollToResult();
                 // call Complex functions
                 GenerateGraph($('#site-1'));
@@ -237,7 +238,7 @@ $(function () {
             }
         }; 
         
-        $('#result').removeClass('hidden').html('<span class="fa fa-spinner fa-spin fa-4x"></span>');
+        $('#running-modal').modal('show');
         $('#form-primer').ajaxSubmit(options);
     };
     $('#form-primer').validationEngine('attach', {
