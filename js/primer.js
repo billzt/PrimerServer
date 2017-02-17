@@ -129,7 +129,7 @@ $(function () {
     })
     
     // test Only
-    //$('#test').load('script/specificity.check.result.html');
+    // $('#test').load('primer.final.result.html');
 });
 
 

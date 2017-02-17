@@ -18,6 +18,7 @@ Optional:
 --outputdir
 --detail
 --retain
+--MFEPrimer
 --help      Print this help and exit
 END_USAGE
 
@@ -30,6 +31,7 @@ my $size_start = 50;
 my $size_stop = 5000;
 my $detail = 0;
 my $retain = 10;
+my $MFEPrimer = "../MFEprimer/MFEprimer.py";
 
 GetOptions(
     'help'          =>  \$help,
@@ -82,7 +84,7 @@ while (<$in_fh>) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
     }
     close $tmp_out_fh;
-    system "$pypy ../MFEprimer/MFEprimer.py -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
+    system "$pypy $MFEPrimer -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
     
     my $hit_num_line = `grep 'potential PCR amplicon' $dir/tmp.MFEPrimer/$id.$rank.txt.out`;
     my ($hit_num) = $hit_num_line=~/Distribution of (\d+) potential PCR amplicon/;
