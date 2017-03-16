@@ -286,11 +286,13 @@
                 <h4 class="modal-title">Running...</h4>
               </div>
               <div class="modal-body">
-                <h4>Sites</h4>
+                <h4></h4>
                 <div class="progress">
                   <div class="progress-bar progress-bar-striped active" role="progressbar"></div>
                 </div>
-                <p>If you did not get any result in &ge; 5 minites, then you might reduce the amount of your input sites.</p>
+                <div class="alert alert-warning" role="alert">
+                    If you did not get any result in &ge; 5 minites, then you might reduce the amount of your input sites.
+                </div>
               </div>
             </div>
           </div>
@@ -309,10 +311,11 @@
                 <p>Format: One site per line, space delimited <code>ID TargetPos TargetLength MinProductSize MaxProductSize</code></p>
                 <p>Example:</p>
                 <pre>
-D05  53118102    6   100 150
-D05  53199470    7   100 150
-D05  53108768    13  100 150
-D03  37527300    20  300 600
+D05	1006384	25	100	300
+D05	1180338	18	100	300
+D05	1008251	19	100	300
+D05	1009127	29	100	300
+D05	1063718	26	100	300
                 </pre>
                 
                 <h4 class="page-header">Check Primers Only</h4>

@@ -63,7 +63,7 @@ if (system("which pypy >/dev/null 2>&1")!=0 && system("$pypy >/dev/null 2>&1")!=
     # die "Can not find file $db\n";
 # }
 
-####### Generate MFEPrimer input and Run one by one #########
+####### Generate MFEPrimer input and Run  #########
 open my $in_fh, "<", $input;
 my $out_fh;
 if ($detail==0) {
@@ -72,7 +72,10 @@ if ($detail==0) {
 else {
     open $out_fh, ">", "$dir/specificity.check.result.html";
 }
-mkdir "$dir/tmp.MFEPrimer" unless (-e "$dir/tmp.MFEPrimer");
+mkdir "$dir/tmp.MFEPrimer";
+if (!-e "$dir/result.MFEPrimer") {
+    mkdir "$dir/result.MFEPrimer";
+}
 my %hit_num_for_primer;
 my %primer_seq_for;
 my @ids;    # Only used to keep order of site id;
@@ -84,6 +87,13 @@ while (<$in_fh>) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
     }
     close $tmp_out_fh;
+}
+close $in_fh;
+
+open $in_fh, "<", $input;
+while (<$in_fh>) {
+    chomp;
+    my ($id, $rank, @seqs) = split;
     system "$pypy $MFEPrimer -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
     
     my $hit_num_line = `grep 'potential PCR amplicon' $dir/tmp.MFEPrimer/$id.$rank.txt.out`;
@@ -92,9 +102,11 @@ while (<$in_fh>) {
     $hit_num_for_primer{$id}{$rank} = $hit_num;
     $primer_seq_for{$id}{$rank} = [@seqs];
     push @ids, $id if(!($id~~@ids));
-    system "rm -f $dir/tmp.MFEPrimer/$id.$rank.txt";
+    
+    system "cp $dir/tmp.MFEPrimer/$id.$rank.txt.out $dir/result.MFEPrimer/$id.$rank.txt.out";
 }
 close $in_fh;
+system "rm -rf $dir/tmp.MFEPrimer";
 
 if ($detail==1) {
         print {$out_fh} <<"END";

@@ -227,7 +227,6 @@ $(function () {
         var options = { 
             target: '#result',   // target element(s) to be updated with server response 
             url: 'script/primer.php',
-            beforeSubmit: ScrollToResult,
             success: function () {
                 $('#running-modal').modal('hide');
                 ScrollToResult();
@@ -242,6 +241,8 @@ $(function () {
             }
         }; 
         
+        $('#running-modal .modal-body h4').html('');
+        $('#running-modal .progress-bar').css('width', '0%').html('');
         $('#running-modal').modal('show');
         $('#form-primer').ajaxSubmit(options);
     };
@@ -267,7 +268,25 @@ $(function () {
     })
     
     // When running, showing a progress bar
-    //$('#running-modal').modal('show');
+    var timer = $.timer(function(){
+        $.get('script/modal_progress.php', function(data) {
+            var progress_data = JSON.parse(data); // total, finished, percent
+            if (progress_data.total>0) {
+                $('#running-modal .modal-body h4').html(progress_data.total+' Primers generated');
+                $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' Primers finished');
+                if (progress_data.percent>=100) {
+                    timer.stop();
+                    $('.progress-bar').removeClass('active').html('Completed');
+                }                    
+            }
+        });
+    });
+    $('#running-modal').on('shown.bs.modal', function(){
+        timer.set({ time : 1000, autostart : true });
+    });
+    $('#running-modal').on('hidden.bs.modal', function(){
+        timer.stop();
+    });
     
     // $('#test').load('primer.final.result.html', function(){});
 });

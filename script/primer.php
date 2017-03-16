@@ -6,6 +6,7 @@ echo '<h2 class="page-header">Result</h2>';
 $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
+session_write_close();  // This is very important as this script might execute for a long time
 if (!file_exists($working_dir)) {
     mkdir($working_dir);
 }
