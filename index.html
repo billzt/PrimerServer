@@ -279,13 +279,17 @@
         
         <!-- Modal for Running -->
         <div class="modal fade" id="running-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-          <div class="modal-dialog" role="document">
+          <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Running...</h4>
               </div>
               <div class="modal-body">
-                <p><span class="fa fa-spinner fa-spin fa-4x"></span></p>
+                <h4>Sites</h4>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped active" role="progressbar"></div>
+                </div>
                 <p>If you did not get any result in &ge; 5 minites, then you might reduce the amount of your input sites.</p>
               </div>
             </div>
@@ -361,6 +365,8 @@ D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
         <script src="js/d3.min.js"></script>
         <!-- SVG zoom -->
         <script src="js/svg-pan-zoom.min.js"></script>
+        <!-- JQuery Timer -->
+        <script src="js/jquery.timer.js"></script>
         <!-- Own JS -->
         <script src="js/primer.js"></script>
     </body>
