@@ -260,11 +260,14 @@ $(function () {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var fileName = button.data('whatever');
         var modal = $(this);
-        $.get('script/modal.php', {file: fileName}, function(data) {
+        $.get('script/modal_MFEPrimer_result.php', {file: fileName}, function(data) {
             modal.find('.modal-body .fa-spinner').addClass('hidden');
             modal.find('.modal-body pre').html(data);
         });
     })
+    
+    // When running, showing a progress bar
+    //$('#running-modal').modal('show');
     
     // $('#test').load('primer.final.result.html', function(){});
 });
