@@ -241,7 +241,7 @@ $(function () {
             }
         }; 
         
-        $('#running-modal .modal-body h4').html('');
+        $('#running-modal .modal-body h4').html('<span class="fa fa-spinner fa-spin fa-4x"></span>');
         $('#running-modal .progress-bar').css('width', '0%').html('');
         $('#running-modal').modal('show');
         $('#form-primer').ajaxSubmit(options);
