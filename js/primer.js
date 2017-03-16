@@ -201,7 +201,7 @@ $(function () {
         
         // Pan and Zoom
         if ($('.PrimerFigure svg').length>0) {
-            var zoomObj = svgPanZoom('.PrimerFigure svg', {controlIconsEnabled:true});
+            var zoomObj = svgPanZoom('.PrimerFigure svg');
             $(window).resize(function(){
                 zoomObj.resize();
                 zoomObj.fit();
