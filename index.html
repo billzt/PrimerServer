@@ -256,7 +256,21 @@
                 <div id="test"></div>
             </div>
             
+            <div class="row hidden" id="download-primer">
+                <div class="col-sm-6">
+                    <div class="input-group">
+                      <span class="input-group-addon">Download Primers with hits &le;</span>
+                      <input type="number" class="form-control" value=1 />
+                      <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button">
+                            <span class="glyphicon glyphicon-download"></span>
+                        </button>
+                      </span>
+                    </div>
+                </div>
+            </div>
         </div>
+        
         
         <!-- Modal for Showing Specificity Check Result -->
         <div class="modal fade" id="specificity-check-modal" tabindex="-1" role="dialog">
@@ -370,6 +384,8 @@ D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
         <script src="js/svg-pan-zoom.min.js"></script>
         <!-- JQuery Timer -->
         <script src="js/jquery.timer.js"></script>
+        <!-- File Download -->
+        <script src="js/FileSaver.min.js"></script>
         <!-- Own JS -->
         <script src="js/primer.js"></script>
     </body>

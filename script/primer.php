@@ -2,7 +2,6 @@
 
 // Generate random session directory
 session_start();
-echo '<h2 class="page-header">Result</h2>';
 $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
@@ -13,6 +12,11 @@ if (!file_exists($working_dir)) {
 
 // App type
 $type = $_POST['app-type'];
+switch($type) {
+    case 'design': echo '<h2 class="page-header">Primers Design &amp; Check Result</h2>';break;
+    case 'check': echo '<h2 class="page-header">Primers Check Result</h2>';break;
+    default: break;
+}
 
 // Program Path and parameter
 $config = parse_ini_file("../config.ini");

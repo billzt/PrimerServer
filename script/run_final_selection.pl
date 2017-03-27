@@ -259,7 +259,7 @@ END
                                         </tr>
                                         <tr>
                                             <th>Penalty</th>
-                                            <td colspan="9">$penalty_pair</td>
+                                            <td colspan="9" class="penalty">$penalty_pair</td>
                                         </tr>
                                         <tr>
                                             <th>Possible Amplicons Number</th>

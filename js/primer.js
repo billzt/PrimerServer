@@ -63,6 +63,7 @@ $(function () {
     });
     
     // Define App type: design OR check
+    $("[name='app-type']").val('design');   // Make sure the default value is "design"
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var type = $(e.target).attr('href').replace('#', '');
         $("[name='app-type']").val(type);
@@ -230,14 +231,19 @@ $(function () {
             success: function () {
                 $('#running-modal').modal('hide');
                 ScrollToResult();
-                // call Complex functions
-                GenerateGraph($('#site-1'));
-                $('#primers-result').find('.collapse').on('shown.bs.collapse', function (e) {
-                    GenerateGraph($(this));
-                });
-                $('#primers-result').find('.collapse').on('hidden.bs.collapse', function (e) {
-                    $(this).find('.PrimerFigure').html('');
-                });   
+                // call Complex functions if we are in design & check mode
+                if ($('[name="app-type"]').val()=='design') {
+                    GenerateGraph($('#site-1'));
+                    $('#primers-result').find('.collapse').on('shown.bs.collapse', function (e) {
+                        GenerateGraph($(this));
+                    });
+                    $('#primers-result').find('.collapse').on('hidden.bs.collapse', function (e) {
+                        $(this).find('.PrimerFigure').html('');
+                    });                    
+                }
+
+                // show download area
+                $('#download-primer').removeClass('hidden');
             }
         }; 
         
@@ -288,7 +294,65 @@ $(function () {
         timer.stop();
     });
     
-    // $('#test').load('primer.final.result.html', function(){});
+    // Download primers from Web UI
+    // Check whether user input is good
+    $('#download-primer input').blur(function(){
+        var max_hit = $(this).val();
+        if (parseInt(max_hit,10)==max_hit) {
+            $('#download-primer button').prop('disabled', false);
+        }
+        else {
+            $('#download-primer button').prop('disabled', true);
+        }
+    });
+    $('#download-primer button').click(function(){
+        // Get User Input
+        var max_hit = $('#download-primer input').val();
+        
+        var download_text = "#Site_ID\tPrimer_Rank\tPenalty_Score\tHit_Num\tPrimers\n";
+        var sites = $('#primers-result .panel');
+        for (var i=0; i<sites.length; i++) {
+            var site_id = $(sites[i]).find('.panel-heading').find('small');
+            var primers = $(sites[i]).find('.panel-body').find('.list-group-item');
+            for (var j=0; j<primers.length; j++) {
+                // deside whether to print this ID or not
+                var hit_num = $(primers[j]).find('.hit-num').data('hit');
+                if (hit_num>max_hit) {
+                    continue;
+                }
+                
+                // print site ID
+                if (site_id.data('seq')) {
+                    download_text += site_id.data('seq')+'-'+site_id.data('pos')+'-'+site_id.data('length')+"\t";
+                }
+                else {
+                    download_text += site_id.html() + "\t";
+                }
+                
+                // print primers
+                var primer_id = $(primers[j]).find('.list-group-item-heading').html();
+                var primer_seqs = $(primers[j]).find('.list-group-item-text').find('.monospace-style');
+                var penalty = $(primers[j]).find('.penalty');
+                
+                download_text += primer_id + "\t";
+                if (penalty.length>0) {
+                    download_text += penalty.html() + "\t";
+                }
+                else {
+                    download_text += "\t";
+                }
+                download_text += hit_num + "\t";
+                for (var k=0; k<primer_seqs.length; k++) {
+                    download_text += $(primer_seqs[k]).html() + "\t";
+                }
+                download_text += "\n";
+            }
+        }
+        var blob = new Blob([download_text], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "primer.list.txt"); 
+    });
+    
+    //$('#test').load('primer.final.result.html');
 });
 
 
