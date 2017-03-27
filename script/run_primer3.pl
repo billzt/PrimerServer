@@ -71,6 +71,7 @@ while (<$input_fh>) {
         die "Not 5 columns in line $_. Perhaps there is some input error\n";
     }
     my ($chr, $target_start, $target_length, $size_min, $size_max) = split;
+    $target_start =~ s/,//g;
     my $retrieve_start = $target_start-$size_max>0 ? $target_start-$size_max : 1;
     my $retrieve_end = $target_start+$target_length+$size_max;
     push @samtools_regions, "$chr:$retrieve_start-$retrieve_end";
