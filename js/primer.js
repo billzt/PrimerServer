@@ -65,6 +65,24 @@ $(function () {
                 +option_text+' <span class="glyphicon glyphicon-download"></span></a>');
             }
         }
+        
+        // App type: design OR check
+        // when the document is ready, show the last App type select by users
+        $('a[href="#'+$("[name='app-type']").val()+'"]').tab('show');
+        
+        // Paramter panel collapse
+        if ($("[name='parameter-design']").val()=='hide') {
+            $('#parameter-design').collapse('hide');
+        }
+        else {
+            $('#parameter-design').collapse('show');
+        }
+        if ($("[name='parameter-check']").val()=='hide') {
+            $('#parameter-check').collapse('hide');
+        }
+        else {
+            $('#parameter-check').collapse('show');
+        }
     });
     
     
@@ -74,13 +92,26 @@ $(function () {
         $('[name="select-database[]"]').selectpicker('val', ''); 
     });
     
-    // Define App type: design OR check
-    $("[name='app-type']").val('design');   // Make sure the default value is "design"
+    // change App type when user change it
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var type = $(e.target).attr('href').replace('#', '');
         $("[name='app-type']").val(type);
     });
-
+    
+    // change panel collapse state when user change it
+    $('#parameter-design').on('shown.bs.collapse', function(){
+        $("[name='parameter-design']").val('show');
+    });
+    $('#parameter-design').on('hidden.bs.collapse', function(){
+        $("[name='parameter-design']").val('hide');
+    });
+    $('#parameter-check').on('shown.bs.collapse', function(){
+        $("[name='parameter-check']").val('show');
+    });
+    $('#parameter-check').on('hidden.bs.collapse', function(){
+        $("[name='parameter-check']").val('hide');
+    });
+    
     // Remove flanking blanks after text input; If it is blank, fill original value for it
     $(':text').blur(function(){
         var val = $.trim($(this).val());

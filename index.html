@@ -30,7 +30,7 @@
         <div class="container" role="main">
             <h1>PCR Primers Batch Design &amp; Specificity Check</h1>
             <form class="form-horizontal" method="post" enctype="multipart/form-data" id="form-primer">
-                <input type="hidden" name="app-type" value="design" />
+                <input type="hidden" name="app-type" value="design" class="save-input" />
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active">
                         <a href="#design" role="tab" data-toggle="tab">Design &amp; Check</a>
@@ -71,6 +71,7 @@
                                 </h2>
                             </div>
                             <div id="parameter-design" class="panel-body collapse">
+                                <input type="hidden" name="parameter-design" value="hide" class="save-input" />
                                 <div class="form-group row">
                                     <label class="col-sm-3 control-label">Primer Size (bp):</label>
                                     <div class="col-sm-9">
@@ -217,6 +218,7 @@
                         </h2>
                     </div>
                     <div id="parameter-check" class="panel-body collapse in">
+                        <input type="hidden" name="parameter-check" value="show" class="save-input" />
                         <div class="form-group row">
                             <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
                             <div class="col-sm-3">
