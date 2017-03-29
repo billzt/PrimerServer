@@ -255,7 +255,7 @@ $(function () {
                 }
 
                 // show download area
-                if ($('#primers-result').length()>0) {
+                if ($('#primers-result').length>0) {
                     $('#download-primer').removeClass('hidden');
                 }
                 else {
