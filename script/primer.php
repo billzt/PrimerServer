@@ -30,6 +30,9 @@ $limit_database = $config['limitDatabase'];
 // design & check Primers
 if ($type=='design') {
     
+    // check parameter
+    require 'parameter_checker.php';
+    
     // generate Primer3 setting file
     $p3_settings_string =  <<<END
 Primer3 File - http://primer3.sourceforge.net

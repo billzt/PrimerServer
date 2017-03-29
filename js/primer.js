@@ -255,7 +255,12 @@ $(function () {
                 }
 
                 // show download area
-                $('#download-primer').removeClass('hidden');
+                if ($('#primers-result').length()>0) {
+                    $('#download-primer').removeClass('hidden');
+                }
+                else {
+                    $('#download-primer').addClass('hidden');
+                }
             }
         }; 
         

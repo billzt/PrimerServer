@@ -137,10 +137,10 @@
                                         <div class="input-group">
                                             <span class="input-group-addon">Left Primers</span>
                                             <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" 
-                                            class="form-control save-input validate[required, custom[integer], min[-1], max[35]]" />
+                                            class="form-control save-input validate[required, custom[integer], min[-1]]" />
                                             <span class="input-group-addon">Right Primers</span>
                                             <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" 
-                                            class="form-control save-input validate[required, custom[integer], min[-1], max[35]]" />
+                                            class="form-control save-input validate[required, custom[integer], min[-1]]" />
                                         </div>
                                     </div>
                                 </div>
@@ -221,7 +221,7 @@
                             <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
                             <div class="col-sm-3">
                                 <input type="text" name="retain" value="10" 
-                                class="form-control save-input validate[required, custom[integer], min[1], max[20]]" />
+                                class="form-control save-input validate[required, custom[integer], min[1], max[1000]]" />
                             </div>
                         </div>
                         <div class="form-group row">
@@ -296,7 +296,6 @@
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
                 <h4 class="modal-title">Running...</h4>
               </div>
               <div class="modal-body">
