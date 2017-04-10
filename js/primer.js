@@ -101,15 +101,19 @@ $(function () {
     // change panel collapse state when user change it
     $('#parameter-design').on('shown.bs.collapse', function(){
         $("[name='parameter-design']").val('show');
+        $("[data-target='#parameter-design'] i").removeClass('fa-caret-up').addClass('fa-caret-down');
     });
     $('#parameter-design').on('hidden.bs.collapse', function(){
         $("[name='parameter-design']").val('hide');
+        $("[data-target='#parameter-design'] i").removeClass('fa-caret-down').addClass('fa-caret-up');
     });
     $('#parameter-check').on('shown.bs.collapse', function(){
         $("[name='parameter-check']").val('show');
+        $("[data-target='#parameter-check'] i").removeClass('fa-caret-up').addClass('fa-caret-down');
     });
     $('#parameter-check').on('hidden.bs.collapse', function(){
         $("[name='parameter-check']").val('hide');
+        $("[data-target='#parameter-check'] i").removeClass('fa-caret-down').addClass('fa-caret-up');
     });
     
     // Remove flanking blanks after text input; If it is blank, fill original value for it
