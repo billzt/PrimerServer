@@ -3,7 +3,7 @@
 use 5.010;
 use strict;
 use warnings;
-use Fatal qw/open close chdir/;
+use Fatal qw/open close chdir mkdir/;
 use Getopt::Long;
 
 my $usage = <<"END_USAGE";
@@ -13,7 +13,7 @@ Required:
             template_ID target_start    target_length   product_size_min    product_size_max
 --db        
 Optional:
---samtools  Your Samtools Path : [/path/to/samtools]
+--samtools
 --primer3bin
 --primer3setting
 --outputdir
@@ -26,7 +26,7 @@ my $samtools = "samtools";
 my $primer3bin = "primer3_core";
 my $primer3setting = "";
 my $db;
-my $dir = ".";
+my $dir = "PrimerServerOutput";
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -57,6 +57,11 @@ if (!-e($input)) {
 }
 if (!-e($db)) {
     die "Can not find file $db\n";
+}
+
+####### Make the working directory #########
+if (!-e($dir)) {
+    mkdir $dir;
 }
 
 ####### Retrieve template sequence by samtools #########
@@ -118,6 +123,7 @@ else {
     local $/ = "\n=\n";
     open my $tmp_in_fh, "<", "$dir/primer3output.txt";
     open my $simple_out_fh, ">", "$dir/primer3output.simple.table.txt";
+    print {$simple_out_fh} "#Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\n";
     while (<$tmp_in_fh>) {
         chomp;
         my ($id) = /SEQUENCE_ID=(\S+)/;

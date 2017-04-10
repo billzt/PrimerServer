@@ -66,6 +66,9 @@ my %data_for_primer;
 <div class="panel-group" id="primers-result" role="tablist">
 END
     }
+    else {
+        print {$out_fh} "### Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\tTarget_Amplicon_Size\tPrimer_Pair_Penalty_Score\tPossible_Amplicon_Number\n";
+    }
     
     my $site_num = 0;
     while (<$in_fh>) {

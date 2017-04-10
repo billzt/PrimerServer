@@ -82,7 +82,7 @@ END;
         }
     }
     
-    //  input region 
+    //  input region and checking database
     $input_regions = stripslashes(strip_tags(trim($_POST['template-regions'])));
     $input_regions_array = array_filter(explode("\n", $input_regions), create_function('$v','return !empty($v);'));
     $input_region_num = count($input_regions_array);
@@ -104,17 +104,6 @@ END;
 <?php
         exit(0);
     }
-    $input_regions = implode("\n", $input_regions_array);
-    file_put_contents("$working_dir/perl_input_region.tmp", $input_regions);
-    
-    // Run primer3, generate [primer3output.txt] and [primer3output.simple.table.txt]
-    $command = "perl run_primer3.pl --input=$working_dir/perl_input_region.tmp "
-               ."--db=../db/$template_tax --primer3setting=$working_dir/p3_settings_file "
-               ."--primer3bin=$path_primer3 --samtools=$path_samtools "
-               ."--outputdir=$working_dir";
-    exec($command);
-    
-    // Run MFEPrimer, generate [specificity.check.result.txt]
     if (count($_POST['select-database'])>$limit_database) {
 ?>
 <div class="alert alert-danger alert-dismissible" role="alert">
@@ -124,16 +113,19 @@ END;
 </div>
 <?php
         exit(0);
-    }    
-    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    $command = "perl run_specificity_check.pl --input=$working_dir/primer3output.simple.table.txt "
-               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop]";
-    exec($command);
+    }   
     
-    // Retrieve Results, generate [primer.final.result.html]
-    $command = "perl run_final_selection.pl --primer3result=$working_dir/primer3output.txt "
-              ."--specificity=$working_dir/specificity.check.result.txt --detail=1 --retain=$_POST[retain] "
-              ."--outputdir=$working_dir";
+    $input_regions = implode("\n", $input_regions_array);
+    file_put_contents("$working_dir/perl_input_region.tmp", $input_regions);
+    
+    // Run Pipeline: Design and Check
+    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
+    $command = "perl pipeline_design_check.pl --input=$working_dir/perl_input_region.tmp "
+               ."--template=../db/$template_tax --primer3setting=$working_dir/p3_settings_file "
+               ."--primer3bin=$path_primer3 --samtools=$path_samtools --MFEprimer=../MFEprimer/MFEprimer.py "
+               ."--checkingdb='$db' --pypy=$path_pypy --checking_size_start=$_POST[size_start] "
+               ."--checking_size_stop=$_POST[size_stop] --output_detail=1 --primer_num_retain=$_POST[retain] "
+               ."--outputdir=$working_dir";
     exec($command);
     
     echo file_get_contents("$working_dir/primer.final.result.html");
@@ -180,8 +172,9 @@ else {
 <?php
         exit(0);
     } 
-    $command = "perl run_specificity_check.pl --input=$working_dir/check.only.tmp "
-               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] --size_stop=$_POST[size_stop] --detail=1";
+    $command = "perl _run_specificity_check.pl --input=$working_dir/check.only.tmp "
+               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] "
+               ."--size_stop=$_POST[size_stop] --detail=1 --MFEprimer=../MFEprimer/MFEprimer.py";
     exec($command);
     
     echo file_get_contents("$working_dir/specificity.check.result.html");

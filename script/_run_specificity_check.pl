@@ -18,7 +18,7 @@ Optional:
 --outputdir
 --detail
 --retain
---MFEPrimer
+--MFEprimer
 --help      Print this help and exit
 END_USAGE
 
@@ -31,13 +31,14 @@ my $size_start = 50;
 my $size_stop = 5000;
 my $detail = 0;
 my $retain = 10;
-my $MFEPrimer = "../MFEprimer/MFEprimer.py";
+my $MFEPrimer = "MFEprimer.py";
 
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
     'db=s'          =>  \$db,
     'pypy=s'        =>  \$pypy,
+    'MFEprimer=s'   =>  \$MFEPrimer,
     'outputdir=s'   =>  \$dir,
     'size_start=i'  =>  \$size_start,
     'size_stop=i'   =>  \$size_stop,
@@ -54,14 +55,11 @@ if ($help or !$input or !$db) {
 if (system("which pypy >/dev/null 2>&1")!=0 && system("$pypy >/dev/null 2>&1")!=0) {   # Pypy path is error
     die "Can not find Pypy\n";
 }
-
-####### Check query and db #########
-# if (!-e($input)) {
-    # die "Can not find file $input\n";
-# }
-# if (!-e($db)) {
-    # die "Can not find file $db\n";
-# }
+if (system("which $MFEPrimer >/dev/null 2>&1")!=0 && system("$MFEPrimer >/dev/null 2>&1")!=0) {   # MFEPrimer path is error
+    die "Can not find MFEprimer\n";
+}
+$MFEPrimer = `which $MFEPrimer`;
+chomp($MFEPrimer);
 
 ####### Generate MFEPrimer input and Run  #########
 open my $in_fh, "<", $input;
@@ -81,6 +79,7 @@ my %primer_seq_for;
 my @ids;    # Only used to keep order of site id;
 while (<$in_fh>) {
     chomp;
+    next if (/^#/);
     my ($id, $rank, @seqs) = split;
     open my $tmp_out_fh, ">", "$dir/tmp.MFEPrimer/$id.$rank.txt";
     for my $i (0..$#seqs) {
@@ -90,9 +89,14 @@ while (<$in_fh>) {
 }
 close $in_fh;
 
+if ($detail==0) {
+    print {$out_fh} "#Site_ID\tPrimer_Rank\tPossible_Amplicon_Number\tPrimer_Seqs\n";
+}
+
 open $in_fh, "<", $input;
 while (<$in_fh>) {
     chomp;
+    next if (/^#/);
     my ($id, $rank, @seqs) = split;
     system "$pypy $MFEPrimer -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
     
