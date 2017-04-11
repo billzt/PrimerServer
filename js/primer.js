@@ -9,10 +9,6 @@ $(function () {
         });
     });
     
-    // footer year
-    var date = new Date();
-    $('#current-year').html(date.getFullYear());
-    
     // select template: options
     var originalValFor = new Object;
     $.get('script/db.php', function(data){

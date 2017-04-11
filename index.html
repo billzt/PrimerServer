@@ -22,6 +22,8 @@
         <!-- JQuery Validation CSS -->
         <link rel="stylesheet" href="css/validationEngine.jquery.css" />
         
+        <link rel="stylesheet" href="css/gh-fork-ribbon.min.css" />
+        
         <!-- Own CSS -->
         <link rel="stylesheet" href="css/style.css">
     </head>
@@ -53,7 +55,7 @@
                                 </select>
                             </div>
                             <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
-                            placeholder="Input your regions, one per line, space delimited: ID TargetPos TargetLength MinProductSize MaxProductSize" 
+                            placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength] [MinProductSize] [MaxProductSize]" 
                             name="template-regions"></textarea>
                         </fieldset>
                         <fieldset class="hidden">
@@ -367,11 +369,9 @@ D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
         <footer class="footer">
             <div class="container">
                 <p class="text-muted">
-                    &copy; 2016-<span id="current-year"></span> Biotechnology Research Institute, Chinese Academy of Agricultural Sciences &nbsp;
+                    Hosted by Biotechnology Research Institute, Chinese Academy of Agricultural Sciences &nbsp;
                     <a href="mailto:zhutao@caas.cn" 
-                    title="Addr: No.12 Zhongguancun South Street, Beijing 100081, China<br/>
-                    Tel: 86-10-82106127<br/>
-                    Email: zhutao@caas.cn" data-toggle="tooltip"><span class="glyphicon glyphicon-envelope"></span></a>
+                    title="Email: zhutao@caas.cn" data-toggle="tooltip"><span class="glyphicon glyphicon-envelope"></span></a>
                 </p>
             </div>
         </footer>
@@ -399,5 +399,7 @@ D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
         <script src="js/FileSaver.min.js"></script>
         <!-- Own JS -->
         <script src="js/primer.js"></script>
+        
+        <a class="github-fork-ribbon" href="https://github.com/billzt/PrimerServer" title="Fork me on GitHub" target="_blank">Fork me on GitHub</a>
     </body>
 </html>
