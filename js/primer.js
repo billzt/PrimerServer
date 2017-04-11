@@ -307,6 +307,18 @@ $(function () {
     $('#form-primer').validationEngine('attach', {
         autoHidePrompt: true,
         autoHideDelay: 5000,
+        onFieldFailure: function(field) {
+            if (field) {    // A bug: it will return an extra undef field
+                field.parents('.panel').find('[data-target]').removeAttr('data-toggle');
+                field.parents('.panel').find('i').css('cursor', 'not-allowed');
+            }
+        },
+        onFieldSuccess: function(field) {
+            if (field) {
+                field.parents('.panel').find('[data-target]').attr('data-toggle', 'collapse');
+                field.parents('.panel').find('i').css('cursor', 'pointer');
+            }
+        },
         onValidationComplete: function(form, status) {
             if (status) {
                 AjaxSubmit();
