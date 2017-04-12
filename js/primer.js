@@ -171,8 +171,8 @@ $(function () {
         // axis
         var axisStart = getMinOfArray(allPoses);
         var axisEnd = getMaxOfArray(allPoses);
-        var axisScale = d3.scale.linear().domain([axisStart, axisEnd]).range([0, 1000]);
-        var axis = d3.svg.axis().scale(axisScale).orient('top').ticks(10);
+        var axisScale = d3.scaleLinear().domain([axisStart, axisEnd]).range([0, 1000]);
+        var axis = d3.axisTop().scale(axisScale).ticks(10);
         svg.append('g').attr('class', 'axis').call(axis); // axis: translate(x,y) is no longer needed as PanZoom can do it
         
         // Text
@@ -189,15 +189,14 @@ $(function () {
            .attr("fill", "none").attr('stroke', 'red').attr('stroke-width', '3');
         
         // Primer Group
-        var colorScale = d3.scale.linear().domain([1, 100]).range([0, 32]);
+        var colorScale = d3.scaleLinear().domain([1, 100]).range([0, 32]);
         function AddPrimer(LprimerStart, LprimerEnd, RprimerStart, RprimerEnd, i, h, id) {
             var primerGroup = svg.append('a').attr('xlink:href','#'+id).attr('class', 'primerGroup')
                             .attr('title', 'Primer '+i).append('g');
             var baseY = rectHight+30*(i-1);
-            var lineFunction = d3.svg.line()
+            var lineFunction = d3.line()
                 .x(function(d) { return Math.round(axisScale(d.x)); })
-                .y(function(d) { return d.y; })
-                .interpolate("linear");
+                .y(function(d) { return d.y; });
             var color = 'rgb('+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+')';
             
             // Left Primer
