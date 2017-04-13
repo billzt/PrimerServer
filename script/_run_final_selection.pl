@@ -267,7 +267,8 @@ END
                                         <tr>
                                             <th>Possible Amplicons Number</th>
                                             <td colspan="9" class="hit-num" data-hit="$hit_num">$hit_num 
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out">
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out"
+                                                data-targetsize="$size">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
                                             </td>

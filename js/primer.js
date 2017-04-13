@@ -326,9 +326,36 @@ $(function () {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var fileName = button.data('whatever');
         var modal = $(this);
+        var target_band_size = button.data('targetsize');
         $.get('script/modal_MFEPrimer_result.php', {file: fileName}, function(data) {
+            var result_data = JSON.parse(data);
             modal.find('.modal-body .fa-spinner').addClass('hidden');
-            modal.find('.modal-body pre').html(data);
+            modal.find('.modal-body pre').html(result_data.file);
+            
+            /*************** Virtual electrophoresis ***************************/
+            var sizes = result_data.sizes.map(function(x){return x*1});
+            var gel = electrophoresis();
+            $("#ve").html("");
+            var svg = d3.select("#ve").append("svg")
+              .attr("width", 240)
+              .attr("height", 600)
+              .call(gel.makeGel); // Make black background first.
+            var words = [[100, 250, 500, 750, 1000, 2000],sizes];
+            var names = ["Marker", "Amplicons"];
+            // You can set every parameter by dictionary or method-chain. Example: {DNA: text} or .DNA(text).
+            gel = electrophoresis().lane_number(2).tooltip_name_offsetX(-10).duration(1000).enzymes(words)
+            .names(names).tooltip_band_offsetX(40).tooltip_band_offsetY(10);
+            svg.call(gel);
+          
+            var bands = $('.gel-band text');
+            for (var i=0; i<bands.length; i++) {
+                var this_size = $(bands[i]).html();
+                $(bands[i]).html(this_size+ ' bp');
+                if (this_size == target_band_size) {
+                    $(bands[i]).attr('fill','red').attr('font-weight','bold');
+                }
+            }
+            /*************** Virtual electrophoresis finished ***************************/
         });
     })
     
