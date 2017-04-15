@@ -23,6 +23,8 @@ Optional Parameters:
                         Default: [pypy] (Assume in your system PATH)
     --MFEprimer         Your MFEprimer.py path: /path/to/MFEprimer.py
                         Default: [MFEprimer.py] (Assume in your system PATH)
+    --num_cpu           The number of CPUs used to run multiple MFEprimer instances simultaneously.
+                        Default: 1
     --checkingdb        one or multiple FASTA file (indexed by MFEPrimer) of your background genome/transcriptome.
                         Default: the same as --template
     --checking_size_start
@@ -55,6 +57,7 @@ my $pypy = "pypy";
 my $MFEPrimer = "MFEprimer.py";
 my $detail = 0;
 my $retain = 10;
+my $cpu = 1;
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -67,6 +70,7 @@ GetOptions(
     'checkingdb=s'    =>  \$checkingdb,
     'checking_size_start=i' => \$size_start,
     'checking_size_stop=i' => \$size_stop,
+    'num_cpu=i'     =>  \$cpu,
     'output_detail=i' => \$detail,
     'primer_num_retain=i' => \$retain,
     'outputdir=s'   =>  \$dir,
@@ -113,7 +117,7 @@ if ($primer3setting) {
 system $cmd;
 
 ####### Run MFEPrimer, generate [specificity.check.result.txt] ##########
-$cmd = "perl _run_specificity_check.pl --input=$dir/primer3output.simple.table.txt --MFEPrimer=$MFEPrimer "
+$cmd = "perl _run_specificity_check.pl --input=$dir/primer3output.simple.table.txt --MFEPrimer=$MFEPrimer --num_cpu=$cpu "
             ."--db='$checkingdb' --pypy=$pypy --outputdir=$dir --size_start=$size_start --size_stop=$size_stop";
 system $cmd;
 

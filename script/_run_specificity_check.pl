@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
+use threads;
+use threads::shared;
 
 my $usage = <<"END_USAGE";
 usage: $0 --input=<user input table> --db=<db1> <db2> ... [Option]
@@ -12,6 +14,7 @@ Required:
 --input     
 --db 
 Optional:
+--num_cpu
 --size_start
 --size_stop
 --pypy
@@ -32,6 +35,7 @@ my $size_stop = 5000;
 my $detail = 0;
 my $retain = 10;
 my $MFEPrimer = "MFEprimer.py";
+my $cpu = 1;
 
 GetOptions(
     'help'          =>  \$help,
@@ -44,6 +48,7 @@ GetOptions(
     'size_stop=i'   =>  \$size_stop,
     'detail=i'      =>  \$detail,
     'retain=i'      =>  \$retain,
+    'num_cpu=i'     =>  \$cpu,
 );
 
 if ($help or !$input or !$db) {
@@ -61,7 +66,7 @@ if (system("which $MFEPrimer >/dev/null 2>&1")!=0 && system("$MFEPrimer >/dev/nu
 $MFEPrimer = `which $MFEPrimer`;
 chomp($MFEPrimer);
 
-####### Generate MFEPrimer input and Run  #########
+####### Generate all MFEPrimer input files  #########
 open my $in_fh, "<", $input;
 my $out_fh;
 if ($detail==0) {
@@ -74,9 +79,11 @@ mkdir "$dir/tmp.MFEPrimer";
 if (!-e "$dir/result.MFEPrimer") {
     mkdir "$dir/result.MFEPrimer";
 }
+my %hit_num_for_primer_shared : shared;
 my %hit_num_for_primer;
 my %primer_seq_for;
 my @ids;    # Only used to keep order of site id;
+my @run_array; # used for multiple CPU running
 while (<$in_fh>) {
     chomp;
     next if (/^#/);
@@ -86,6 +93,9 @@ while (<$in_fh>) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
     }
     close $tmp_out_fh;
+    push @ids, $id if(!($id~~@ids));
+    $primer_seq_for{$id}{$rank} = [@seqs];
+    push @run_array, [$id, $rank];
 }
 close $in_fh;
 
@@ -93,25 +103,53 @@ if ($detail==0) {
     print {$out_fh} "#Site_ID\tPrimer_Rank\tPossible_Amplicon_Number\tPrimer_Seqs\n";
 }
 
-open $in_fh, "<", $input;
-while (<$in_fh>) {
-    chomp;
-    next if (/^#/);
-    my ($id, $rank, @seqs) = split;
-    system "$pypy $MFEPrimer -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
-    
-    my $hit_num_line = `grep 'potential PCR amplicon' $dir/tmp.MFEPrimer/$id.$rank.txt.out`;
-    my ($hit_num) = $hit_num_line=~/Distribution of (\d+) potential PCR amplicon/;
-    print {$out_fh} "$id\t$rank\t$hit_num\t@seqs\n" if ($detail==0);
-    $hit_num_for_primer{$id}{$rank} = $hit_num;
-    $primer_seq_for{$id}{$rank} = [@seqs];
-    push @ids, $id if(!($id~~@ids));
-    
-    system "cp $dir/tmp.MFEPrimer/$id.$rank.txt.out $dir/result.MFEPrimer/$id.$rank.txt.out";
+####### Run MFEPrimer in multiple CPU  #########
+sub run_MFEPrimer {
+    my ($task) = @_;
+    my @task = @{$task};
+    for my $i (@task) {
+        my ($id, $rank) = @{$run_array[$i]};
+        system "$pypy $MFEPrimer -i $dir/tmp.MFEPrimer/$id.$rank.txt -d $db --size_start=$size_start --size_stop=$size_stop >$dir/tmp.MFEPrimer/$id.$rank.txt.out";
+        my $hit_num_line = `grep 'potential PCR amplicon' $dir/tmp.MFEPrimer/$id.$rank.txt.out`;
+        my ($hit_num) = $hit_num_line=~/Distribution of (\d+) potential PCR amplicon/;
+        $hit_num_for_primer_shared{"$id-$rank"} = $hit_num;
+        system "cp $dir/tmp.MFEPrimer/$id.$rank.txt.out $dir/result.MFEPrimer/$id.$rank.txt.out";        
+    }
 }
-close $in_fh;
-system "rm -rf $dir/tmp.MFEPrimer";
 
+my @threads;
+for my $cpu_rank (0..$cpu-1) {
+    # prepare task for this CPU
+    my @task;
+    for my $i (0..$#run_array) {
+        next unless ($i%$cpu==$cpu_rank);
+        push @task, $i;
+    }
+    
+    # run task for this CPU
+    if (@task) {
+        my $thread = threads->create(\&run_MFEPrimer, \@task);
+        push @threads, $thread;        
+    }
+}
+for my $thread (@threads) {
+    $thread->join();
+}
+
+system "rm -rf $dir/tmp.MFEPrimer";
+####### Run MFEPrimer finished  #########
+
+####### Print for Plain Text  #########
+for my $i (0..$#run_array) {
+    my ($id, $rank) = @{$run_array[$i]};
+    my @seqs = @{$primer_seq_for{$id}{$rank}};
+    my $hit_num = $hit_num_for_primer_shared{"$id-$rank"};
+    $hit_num_for_primer{$id}{$rank} = $hit_num;
+    print {$out_fh} "$id\t$rank\t$hit_num\t@seqs\n" if ($detail==0);
+}
+
+
+####### Print HTML  #########
 if ($detail==1) {
         print {$out_fh} <<"END";
 <div class="panel-group" id="primers-result" role="tablist">

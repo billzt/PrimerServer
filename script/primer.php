@@ -26,6 +26,7 @@ $path_pypy = $config['pypy'];
 $limit_site = $config['limitSite'];
 $limit_primer = $config['limitPrimer'];
 $limit_database = $config['limitDatabase'];
+$cpu = $config['useCPU'];
 
 // design & check Primers
 if ($type=='design') {
@@ -124,7 +125,7 @@ END;
                ."--template=../db/$template_tax --primer3setting=$working_dir/p3_settings_file "
                ."--primer3bin=$path_primer3 --samtools=$path_samtools --MFEprimer=../MFEprimer/MFEprimer.py "
                ."--checkingdb='$db' --pypy=$path_pypy --checking_size_start=$_POST[size_start] "
-               ."--checking_size_stop=$_POST[size_stop] --output_detail=1 --primer_num_retain=$_POST[retain] "
+               ."--checking_size_stop=$_POST[size_stop] --output_detail=1 --primer_num_retain=$_POST[retain] --num_cpu=$cpu "
                ."--outputdir=$working_dir";
     exec($command);
     
@@ -174,7 +175,7 @@ else {
     } 
     $command = "perl _run_specificity_check.pl --input=$working_dir/check.only.tmp "
                ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] "
-               ."--size_stop=$_POST[size_stop] --detail=1 --MFEprimer=../MFEprimer/MFEprimer.py";
+               ."--size_stop=$_POST[size_stop] --detail=1 --MFEprimer=../MFEprimer/MFEprimer.py --num_cpu=$cpu";
     exec($command);
     
     echo file_get_contents("$working_dir/specificity.check.result.html");
