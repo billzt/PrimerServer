@@ -395,7 +395,7 @@ $(function () {
         // Get User Input
         var max_hit = $('#download-primer input').val();
         
-        var download_text = "#Site_ID\tPrimer_Rank\tPenalty_Score\tHit_Num\tPrimers\n";
+        var download_text = "#Site_ID\tPrimer_Rank\tPenalty_Score\tTarget_Product_Size\tPossible_Hit_Num\tPrimer_Seq\n";
         var sites = $('#primers-result .panel');
         for (var i=0; i<sites.length; i++) {
             var site_id = $(sites[i]).find('.panel-heading').find('small');
@@ -419,10 +419,17 @@ $(function () {
                 var primer_id = $(primers[j]).find('.list-group-item-heading').html();
                 var primer_seqs = $(primers[j]).find('.list-group-item-text').find('.monospace-style');
                 var penalty = $(primers[j]).find('.penalty');
+                var product_size = $(primers[j]).find('a[href="javascript:void(0)"]').data('targetsize');
                 
                 download_text += primer_id + "\t";
                 if (penalty.length>0) {
                     download_text += penalty.html() + "\t";
+                }
+                else {
+                    download_text += "\t";
+                }
+                if (product_size) {
+                    download_text += product_size + "\t";
                 }
                 else {
                     download_text += "\t";
