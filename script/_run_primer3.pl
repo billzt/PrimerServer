@@ -13,6 +13,7 @@ Required:
             template_ID target_start    target_length   product_size_min    product_size_max
 --db        
 Optional:
+--region_type
 --samtools
 --primer3bin
 --primer3setting
@@ -27,6 +28,7 @@ my $primer3bin = "primer3_core";
 my $primer3setting = "";
 my $db;
 my $dir = "PrimerServerOutput";
+my $region_type = "SEQUENCE_TARGET";
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -35,6 +37,7 @@ GetOptions(
     'primer3bin=s'  =>  \$primer3bin,
     'primer3setting=s'=>\$primer3setting,
     'outputdir=s'   =>  \$dir,
+    'region_type=s' =>  \$region_type,
 );
 
 if ($help or !$input or !$db) {
@@ -101,8 +104,19 @@ system "$samtools faidx $db @samtools_regions >$dir/retrieve.tmp";
         print {$tmp_out_fh} <<"END_USAGE";
 SEQUENCE_ID=$chr-$target_start-$target_length
 SEQUENCE_TEMPLATE=$seq
-SEQUENCE_TARGET=$relative_target_start,$target_length
 PRIMER_PRODUCT_SIZE_RANGE=$size_min-$size_max
+END_USAGE
+        if ($region_type eq "SEQUENCE_TARGET") {
+            print {$tmp_out_fh} <<"END_USAGE";
+SEQUENCE_TARGET=$relative_target_start,$target_length
+END_USAGE
+        }
+        elsif ($region_type eq "FORCE_END") {
+            print {$tmp_out_fh} <<"END_USAGE";
+SEQUENCE_FORCE_LEFT_END=$relative_target_start
+END_USAGE
+        }
+        print {$tmp_out_fh} <<"END_USAGE";
 =
 END_USAGE
     }
