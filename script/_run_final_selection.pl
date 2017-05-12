@@ -12,6 +12,7 @@ Required:
 --primer3result     
 --specificity 
 Optional:
+--region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
 --outputdir
 --detail
 --retain
@@ -24,6 +25,7 @@ my $specificity;
 my $detail = 0;
 my $retain = 10;
 my $dir = ".";
+my $region_type = "SEQUENCE_TARGET";
 
 GetOptions(
     'help'          =>  \$help,
@@ -32,6 +34,7 @@ GetOptions(
     'outputdir=s'   =>  \$dir,
     'detail=i'      =>  \$detail,
     'retain=i'      =>  \$retain,
+    'region_type=s' =>  \$region_type,
 );
 
 if ($help or !$primer3result or !$specificity) {
@@ -78,9 +81,11 @@ END
         
         # SEQUENCE_ID=$chr-$target_start-$target_length 
         # SEQUENCE_TARGET=$relative_target_start,$target_length
+        # OR SEQUENCE_INCLUDED_REGION=$relative_target_start,$target_length
+        # OR ...
         # $relative_target_start = $target_start-$retrieve_start+1 => $retrieve_start=$target_start-$relative_target_start+1
         my ($chr, $target_start, $target_length) = $id=~/^(.*)-(\d+)-(\d+)$/;
-        my ($relative_target_start) = /SEQUENCE_TARGET=(\d+),/;
+        my ($relative_target_start) = /$region_type=(\d+),/;
         my $retrieve_start = $target_start-$relative_target_start+1;
         
         my ($primer_num) = /PRIMER_PAIR_NUM_RETURNED=(\S+)/; $primer_num=$primer_num>$retain?$retain:$primer_num;

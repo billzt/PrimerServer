@@ -14,6 +14,8 @@ Required Parameters:
     --template          a FASTA file (recommend indexed with Samtools) of your template genome/transcriptome
 
 Optional Parameters:
+    --region_type       SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
+                        Default: [SEQUENCE_TARGET]
     --samtools          Your Samtools path: /path/to/samtools   
                         Default: [samtools] (Assume in your system PATH)
     --primer3bin        Your primer3_core path: /path/to/primer3_core
@@ -58,6 +60,7 @@ my $MFEPrimer = "MFEprimer.py";
 my $detail = 0;
 my $retain = 10;
 my $cpu = 1;
+my $region_type = "SEQUENCE_TARGET";
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -74,6 +77,7 @@ GetOptions(
     'output_detail=i' => \$detail,
     'primer_num_retain=i' => \$retain,
     'outputdir=s'   =>  \$dir,
+    'region_type=s' =>  \$region_type,
 );
 if (!$checkingdb) {
     $checkingdb = $template;
@@ -109,7 +113,7 @@ if (!-e($template)) {
 }
 
 ####### Run primer3, generate [primer3output.txt] and [primer3output.simple.table.txt] #########
-my $cmd = "perl _run_primer3.pl --input=$input --db=$template "
+my $cmd = "perl _run_primer3.pl --input=$input --db=$template --region_type=$region_type "
             ."--primer3bin=$primer3bin --samtools=$samtools --outputdir=$dir ";
 if ($primer3setting) {
     $cmd .= "--primer3setting=$primer3setting";
@@ -122,7 +126,7 @@ $cmd = "perl _run_specificity_check.pl --input=$dir/primer3output.simple.table.t
 system $cmd;
 
 ####### Retrieve Results, generate [primer.final.result.txt] ##########
-$cmd = "perl _run_final_selection.pl --primer3result=$dir/primer3output.txt "
+$cmd = "perl _run_final_selection.pl --primer3result=$dir/primer3output.txt --region_type=$region_type "
               ."--specificity=$dir/specificity.check.result.txt --retain=$retain "
               ."--outputdir=$dir";
 if ($detail) {

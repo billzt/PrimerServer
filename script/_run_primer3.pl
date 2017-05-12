@@ -13,7 +13,7 @@ Required:
             template_ID target_start    target_length   product_size_min    product_size_max
 --db        
 Optional:
---region_type
+--region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
 --samtools
 --primer3bin
 --primer3setting
@@ -80,7 +80,7 @@ while (<$input_fh>) {
     }
     my ($chr, $target_start, $target_length, $size_min, $size_max) = split;
     $target_start =~ s/,//g;
-    my $retrieve_start = $target_start-$size_max>0 ? $target_start-$size_max : 1;
+    my $retrieve_start = $target_start-$size_max>0 ? $target_start-$size_max : 1; # Such retrieve region is enough for all the three region types
     my $retrieve_end = $target_start+$target_length+$size_max;
     push @samtools_regions, "$chr:$retrieve_start-$retrieve_end";
     $samtools2region_data{"$chr:$retrieve_start-$retrieve_end"} = [$chr, $target_start, $target_length, $size_min, $size_max];
@@ -109,6 +109,11 @@ END_USAGE
         if ($region_type eq "SEQUENCE_TARGET") {
             print {$tmp_out_fh} <<"END_USAGE";
 SEQUENCE_TARGET=$relative_target_start,$target_length
+END_USAGE
+        }
+        elsif ($region_type eq "SEQUENCE_INCLUDED_REGION") {
+            print {$tmp_out_fh} <<"END_USAGE";
+SEQUENCE_INCLUDED_REGION=$relative_target_start,$target_length
 END_USAGE
         }
         elsif ($region_type eq "FORCE_END") {

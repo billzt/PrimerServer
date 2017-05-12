@@ -122,7 +122,7 @@ END;
     // Run Pipeline: Design and Check
     $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
     $command = "perl pipeline_design_check.pl --input=$working_dir/perl_input_region.tmp "
-               ."--template=../db/$template_tax --primer3setting=$working_dir/p3_settings_file "
+               ."--template=../db/$template_tax --primer3setting=$working_dir/p3_settings_file --region_type=$_POST[region_type] "
                ."--primer3bin=$path_primer3 --samtools=$path_samtools --MFEprimer=../MFEprimer/MFEprimer.py "
                ."--checkingdb='$db' --pypy=$path_pypy --checking_size_start=$_POST[size_start] "
                ."--checking_size_stop=$_POST[size_stop] --output_detail=1 --primer_num_retain=$_POST[retain] --num_cpu=$cpu "

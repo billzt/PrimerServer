@@ -169,8 +169,18 @@ $(function () {
         }
         
         // axis
-        var axisStart = getMinOfArray(allPoses);
-        var axisEnd = getMaxOfArray(allPoses);
+        var axisStart;
+        var axisEnd;
+        var targetPos = el.prev().find('.site-detail').data('pos');
+        var targetLen = el.prev().find('.site-detail').data('length');
+        if ($('[name="region_type"]:checked').val()=='SEQUENCE_INCLUDED_REGION') {
+            axisStart = targetPos-Math.round(targetLen/5)>0 ? targetPos-Math.round(targetLen/5) : 1;
+            axisEnd = targetPos+targetLen+Math.round(targetLen/5);
+        }
+        else if ($('[name="region_type"]:checked').val()=='SEQUENCE_TARGET') {
+            axisStart = getMinOfArray(allPoses);
+            axisEnd = getMaxOfArray(allPoses);
+        }
         var axisScale = d3.scaleLinear().domain([axisStart, axisEnd]).range([0, 1000]);
         var axis = d3.axisTop().scale(axisScale).ticks(10);
         svg.append('g').attr('class', 'axis').call(axis); // axis: translate(x,y) is no longer needed as PanZoom can do it
@@ -180,9 +190,7 @@ $(function () {
         svg.append('text').attr('x','0').attr('y','-30').text('Template '+template).attr('font-size', '120%');
         
         // target region
-        var targetPos = el.prev().find('.site-detail').data('pos');
-        var targetLen = el.prev().find('.site-detail').data('length');
-        var rectHight = 30;
+        var rectHight = 60;
         svg.append('rect').attr('x', axisScale(targetPos))  
            .attr('y', -rectHight/2)  // axis:y-rect:height/2
            .attr('width', axisScale(targetPos+targetLen)-axisScale(targetPos)).attr('height', rectHight)

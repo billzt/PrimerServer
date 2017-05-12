@@ -54,9 +54,24 @@
                                 data-size="10" data-live-search="true" title="Select your template species (allow 1)">
                                 </select>
                             </div>
-                            <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
-                            placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength] [MinProductSize] [MaxProductSize]" 
-                            name="template-regions"></textarea>
+                            <div class="row">
+                                <div class="col-sm-10">
+                                    <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
+                                    placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength] [MinProductSize] [MaxProductSize]" 
+                                    name="template-regions"></textarea>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="radio">
+                                        <label><input type="radio" name="region_type" value="SEQUENCE_TARGET" checked />Target Region</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="region_type" value="SEQUENCE_INCLUDED_REGION"  />Include Region</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="region_type" value="FORCE_END"  />Force 3' End</label>
+                                    </div>
+                                </div>
+                            </div>
                         </fieldset>
                         <fieldset class="hidden">
                             <legend>Input Custom Template Sequences</legend>
