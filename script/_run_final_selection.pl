@@ -82,11 +82,22 @@ END
         # SEQUENCE_ID=$chr-$target_start-$target_length 
         # SEQUENCE_TARGET=$relative_target_start,$target_length
         # OR SEQUENCE_INCLUDED_REGION=$relative_target_start,$target_length
-        # OR ...
+        # OR SEQUENCE_FORCE_LEFT_END=$relative_target_start SEQUENCE_FORCE_RIGHT_END=$relative_target_start
         # $relative_target_start = $target_start-$retrieve_start+1 => $retrieve_start=$target_start-$relative_target_start+1
-        my ($chr, $target_start, $target_length) = $id=~/^(.*)-(\d+)-(\d+)$/;
-        my ($relative_target_start) = /$region_type=(\d+),/;
-        my $retrieve_start = $target_start-$relative_target_start+1;
+        my ($chr, $target_start, $target_length, $tag) = $id=~/^(.*)-(\d+)-(\d+)-?(\w+)?$/;
+        my $relative_target_start;
+        if ($region_type eq 'FORCE_END') {
+            if (/SEQUENCE_FORCE_LEFT_END/) {
+                ($relative_target_start) = /SEQUENCE_FORCE_LEFT_END=(\d+)/;
+            }
+            else {
+                ($relative_target_start) = /SEQUENCE_FORCE_RIGHT_END=(\d+)/;
+            }
+        }
+        else {
+            ($relative_target_start) = /$region_type=(\d+),/;
+        }
+        my $retrieve_start = $target_start-$relative_target_start;
         
         my ($primer_num) = /PRIMER_PAIR_NUM_RETURNED=(\S+)/; $primer_num=$primer_num>$retain?$retain:$primer_num;
 
@@ -103,7 +114,13 @@ END
             </h4>
             <div class="col-md-3">
                 <small class="site-detail" data-seq="$chr" data-pos="$target_start" 
-                data-length="$target_length">Template $chr; Target Pos: $target_start; Target Length: $target_length</small>
+                data-length="$target_length">Template $chr; Target Pos: $target_start; Target Length: $target_length
+END
+            if ($tag) {
+                print {$out_fh} " [$tag] ";
+            }
+            print {$out_fh} <<"END";
+                </small>
             </div>
             <div class="col-md-2">
                 <span class="badge">$primer_num</span> Primer(s)

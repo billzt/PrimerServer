@@ -102,7 +102,7 @@ system "xargs --arg-file=$dir/region.list.tmp $samtools faidx $db >$dir/retrieve
         my $seq = join '', @seqs;
         my ($chr, $target_start, $target_length, $size_min, $size_max) = @{$samtools2region_data{$id}};
         my ($retrieve_start) = $id=~/\:(\d+)-/;
-        my $relative_target_start = $target_start-$retrieve_start+1;
+        my $relative_target_start = $target_start-$retrieve_start;
         
         ### SEQUENCE_TARGET
         if ($region_type eq "SEQUENCE_TARGET") {
@@ -131,12 +131,14 @@ SEQUENCE_TEMPLATE=$seq
 PRIMER_PRODUCT_SIZE_RANGE=$size_min-$size_max
 SEQUENCE_FORCE_LEFT_END=$relative_target_start
 PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE=-1
+PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE=3
 =
 SEQUENCE_ID=$chr-$target_start-$target_length-RIGHT
 SEQUENCE_TEMPLATE=$seq
 PRIMER_PRODUCT_SIZE_RANGE=$size_min-$size_max
 SEQUENCE_FORCE_RIGHT_END=$relative_target_start
 PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE=-1
+PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE=3
 =
 END_USAGE
         }

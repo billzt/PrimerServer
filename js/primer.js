@@ -177,7 +177,8 @@ $(function () {
             axisStart = targetPos-Math.round(targetLen/5)>0 ? targetPos-Math.round(targetLen/5) : 1;
             axisEnd = targetPos+targetLen+Math.round(targetLen/5);
         }
-        else if ($('[name="region_type"]:checked').val()=='SEQUENCE_TARGET') {
+        else if ($('[name="region_type"]:checked').val()=='SEQUENCE_TARGET' || 
+        $('[name="region_type"]:checked').val()=='FORCE_END') {
             axisStart = getMinOfArray(allPoses);
             axisEnd = getMaxOfArray(allPoses);
         }
