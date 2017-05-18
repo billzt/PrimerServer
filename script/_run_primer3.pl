@@ -68,9 +68,9 @@ if (!-e($dir)) {
 }
 
 ####### Retrieve template sequence by samtools #########
-my @samtools_regions;
 my %samtools2region_data;
 open my $input_fh, "<", $input;
+open my $tmp_out_fh, ">", "$dir/region.list.tmp";
 while (<$input_fh>) {
     chomp;
     next if (/^#/);
@@ -82,11 +82,13 @@ while (<$input_fh>) {
     $target_start =~ s/,//g;
     my $retrieve_start = $target_start-$size_max>0 ? $target_start-$size_max : 1; # Such retrieve region is enough for all the three region types
     my $retrieve_end = $target_start+$target_length+$size_max;
-    push @samtools_regions, "$chr:$retrieve_start-$retrieve_end";
+    print {$tmp_out_fh} "$chr:$retrieve_start-$retrieve_end\n";
     $samtools2region_data{"$chr:$retrieve_start-$retrieve_end"} = [$chr, $target_start, $target_length, $size_min, $size_max];
 }
 close $input_fh;
-system "$samtools faidx $db @samtools_regions >$dir/retrieve.tmp";
+close $tmp_out_fh;
+system "xargs --arg-file=$dir/region.list.tmp $samtools faidx $db >$dir/retrieve.tmp";
+
 
 ####### Generate User Input #########
 {
