@@ -173,10 +173,11 @@ END
                 
                 my ($pos_F, $len_F) = /PRIMER_LEFT_ $i =(\d+),(\d+)/x;
                 my ($pos_R, $len_R) = /PRIMER_RIGHT_ $i =(\d+),(\d+)/x;
-                my $start_F = $pos_F+$retrieve_start-1;
+                my $start_F = $pos_F+$retrieve_start;
                 my $end_F = $start_F+$len_F-1;
-                my $start_R = $pos_R+$retrieve_start-1;
-                my $end_R = $start_R+$len_R-1;
+                my $end_R = $pos_R+$retrieve_start;
+                my $start_R = $end_R-$len_R+1;
+                
                 
                 my ($Tm_F) = /PRIMER_LEFT_ $i _TM=(\S+)/x; $Tm_F=sprintf("%.1f", $Tm_F);
                 my ($Tm_R) = /PRIMER_RIGHT_ $i _TM=(\S+)/x; $Tm_R=sprintf("%.1f", $Tm_R);
