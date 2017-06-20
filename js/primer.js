@@ -454,7 +454,6 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
-    //$('#test').load('primer.final.result.html');
 });
 
 
