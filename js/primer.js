@@ -231,7 +231,17 @@ $(function () {
             // Center Line
             var LineData = [{"x": LprimerEnd, "y": baseY}, {"x": RprimerStart, "y": baseY}];
             primerGroup.append('path').attr('d', lineFunction(LineData)).attr("fill", color).attr('stroke', color);
-                          
+            
+            // Text
+            var primerLabel = h==1 ? '[Primer'+i+'] '+h+' Amplicon' : '[Primer'+i+'] '+h+' Amplicons';
+            if (h==1) {
+                primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
+                .attr("y", baseY+5).attr('class', 'primerUniqueLabel').attr('fill', 'red').text(primerLabel);
+            }
+            else {
+                primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
+                .attr("y", baseY+5).attr('class', 'primerLabel').text(primerLabel);
+            }
         }
 
         var primerRank = 1;
@@ -261,10 +271,6 @@ $(function () {
             });            
         }
         
-        // tooltip
-        $(".primerGroup").tooltip({
-            'container': 'body',
-        });
     }
     
     /***************** Complex functions finished  ***********************************************************/
