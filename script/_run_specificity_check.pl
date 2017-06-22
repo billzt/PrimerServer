@@ -5,8 +5,7 @@ use strict;
 use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
-use List::Util qw/max/;
-use Smart::Comments '###';
+use List::Util qw/max min/;
 
 my $usage = <<"END_USAGE";
 usage: $0 --input=<user input table> --db=<db> [Option]
@@ -32,7 +31,7 @@ Optional:
 --conc_Tris
 --conc_Mg
 --conc_dNTPs
---min_Tm
+--min_Tm_diff
 --help      Print this help and exit
 END_USAGE
 
@@ -45,7 +44,7 @@ my $K           = 50;     #mM
 my $Tris        = 10;     #mM
 my $Mg          = 1.5;    #mM  
 my $dNTPs       = 0.2; #mM 
-my $min_Tm      = 37;
+my $min_Tm_diff = 10;
 my $dir = ".";
 my $size_start = 70;
 my $size_stop = 1000;
@@ -76,8 +75,12 @@ GetOptions(
     'conc_Tris=f'   =>  \$Tris,
     'conc_Mg=f'     =>  \$Mg,
     'conc_dNTPs=f'  =>  \$dNTPs,
-    'min_Tm=f'      =>  \$min_Tm,
+    'min_Tm_diff=f' =>  \$min_Tm_diff,
     'blastn=s'      =>  \$blastn,
+    'blast_e_value=f' =>  \$blast_e_value,
+    'blast_word_size=i' => \$blast_word_size,
+    'blast_identity=f' => \$blast_identity,
+    'blast_max_hsps=i' => \$blast_max_hsps
 );
 
 if ($help or !$input or !$db) {
@@ -86,10 +89,10 @@ if ($help or !$input or !$db) {
 }
 
 ####### Check Tool Path #########
-if (system("which samtools >/dev/null 2>&1")!=0 && system("$samtools >/dev/null 2>&1")!=0) {   # Samtools path is error
+if (system("which $samtools >/dev/null 2>&1")!=0 && system("$samtools >/dev/null 2>&1")!=0) {   # Samtools path is error
     die "Can not find Samtools\n";
 }
-if (system("which blastn >/dev/null 2>&1")!=0 && system("$blastn >/dev/null 2>&1")!=0) {   # Blastn path is error
+if (system("which $blastn >/dev/null 2>&1")!=0 && system("$blastn >/dev/null 2>&1")!=0) {   # Blastn path is error
     die "Can not find Blastn\n";
 }
 
@@ -122,7 +125,7 @@ close $tmp_out_fh;
 
 
 ####### Run BLAST #########
-my $blastcmd = "blastn -task blastn-short -query $dir/tmp.specificity.check/primer.query.fa -db $db -evalue $blast_e_value "
+my $blastcmd = "$blastn -task blastn-short -query $dir/tmp.specificity.check/primer.query.fa -db $db -evalue $blast_e_value "
                 ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
                 ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
                 ." -out $dir/tmp.specificity.check/primer.query.fa.out -num_threads $cpu";
@@ -300,8 +303,8 @@ sub NN_Tm {
     my $dH_index    = 0;   # dH_index stands for deta H_index in a table (here position 0)
     my $dS_index    = 1;   # dS_index stands for delta S_index in a table (here position 1)
     
-    my @seq = split //, $seq;
-    my @compl_seq = split //, $compl_seq;
+    my @seq = split //, uc($seq);
+    my @compl_seq = split //, uc($compl_seq);
     
     # General initiation value
     $dH += $DNA_NN_table{'init'}->[$dH_index];
@@ -402,12 +405,14 @@ sub NN_Tm {
 
 sub com {
     my $str = shift;
+    $str = uc($str);
     $str =~ tr/ATGC/TACG/;
     return $str;
 }
 
 sub revcom {
     my $str = shift;
+    $str = uc($str);
     $str =~ tr/ATGC/TACG/;
     return scalar(reverse($str));
 }
@@ -496,6 +501,15 @@ for my $i (0..$#run_array) {
     my ($id, $rank) = @{$run_array[$i]};
     open my $out, ">", "$dir/result.specificity.check/PrimerGroup.$id.$rank.txt";
     my @seqs = @{$primer_seq_for{$id}{$rank}};
+    
+    # calculate primers' own Tm (minimum)
+    my $min_Tm_own = min( map{NN_Tm($_, com($_), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1)}@seqs );
+    print {$out} "Primer Group:\n";
+    for my $j (0..$#seqs) {
+        print {$out} $j+1, ":\t$seqs[$j]", "\n";
+    }
+    print {$out} "Minimum Melting Temperature (°C) for this group: $min_Tm_own\n\n";
+    
     for my $j (0..$#seqs) { # BLAST query ID: $id.$rank.Primer$j
         my $query = "$id.$rank.Primer$j";
         if ($retrieve_region_data{$query}) {
@@ -508,7 +522,7 @@ for my $i (0..$#run_array) {
                 my $next_target_seq = revcom($target_seq{$target_next_region});
                 my $Tm_1 = NN_Tm($query_seq, com($target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
                 my $Tm_2 = NN_Tm($next_query_seq, com($next_target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
-                next if ($Tm_1<$min_Tm or $Tm_2<$min_Tm);
+                next if ($Tm_1<$min_Tm_own-$min_Tm_diff or $Tm_2<$min_Tm_own-$min_Tm_diff);
                 
                 my $end1 = substr($query_seq, -1) eq substr($target_seq, -1) ? 'No' : 'Yes';
                 my $end2 = substr($next_query_seq, -1) eq substr($next_target_seq, -1) ? 'No' : 'Yes';
@@ -643,7 +657,7 @@ END
                                         <tr>
                                             <th>Possible Amplicons Number</th>
                                             <td class="hit-num" data-hit="$hit_num">$hit_num 
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out">
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="PrimerGroup.$id.$i.txt">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
                                             </td>

@@ -22,11 +22,11 @@ switch($type) {
 $config = parse_ini_file("../config.ini");
 $path_samtools = $config['samtools'];
 $path_primer3 = $config['primer3'];
-$path_pypy = $config['pypy'];
+$path_blastn = $config['blastn'];
 $limit_site = $config['limitSite'];
 $limit_primer = $config['limitPrimer'];
-$limit_database = $config['limitDatabase'];
 $cpu = $config['useCPU'];
+$database_dir = $config['database'];
 
 // design & check Primers
 if ($type=='design') {
@@ -68,10 +68,10 @@ END;
     // template species
     $template_tax = $_POST['select-template'];
     if ($template_tax=='custom') {
-        file_put_contents("../db/custom", $_POST['custom-template-sequences']);
+        file_put_contents("$database_dir/custom", $_POST['custom-template-sequences']);
         // check whether file custom is a DNA FASTA format file
-        exec("$path_samtools faidx ../db/custom");
-        if (!file_exists('../db/custom.fai')) {  // index FASTA is not OK
+        exec("$path_samtools faidx $database_dir/custom");
+        if (!file_exists("$database_dir/custom.fai")) {  // index FASTA is not OK
 ?>
 <div class="alert alert-danger" role="alert">
     Error: Building index of your input FASTA failed! Either your input sequences are not in FASTA
@@ -105,28 +105,42 @@ END;
 <?php
         exit(0);
     }
-    if (count($_POST['select-database'])>$limit_database) {
-?>
-<div class="alert alert-danger alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    Warning: Too many databases selected. <b><?php echo count($_POST['select-database']) ?></b> databases detected. However we only allow 
-    <b><?php echo $limit_database ?></b> databases at one time.
-</div>
-<?php
-        exit(0);
-    }   
     
     $input_regions = implode("\n", $input_regions_array);
     file_put_contents("$working_dir/perl_input_region.tmp", $input_regions);
     
     // Run Pipeline: Design and Check
-    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    $command = "perl pipeline_design_check.pl --input=$working_dir/perl_input_region.tmp "
-               ."--template=../db/$template_tax --primer3setting=$working_dir/p3_settings_file --region_type=$_POST[region_type] "
-               ."--primer3bin=$path_primer3 --samtools=$path_samtools --MFEprimer=../MFEprimer/MFEprimer.py "
-               ."--checkingdb='$db' --pypy=$path_pypy --checking_size_start=$_POST[size_start] "
-               ."--checking_size_stop=$_POST[size_stop] --output_detail=1 --primer_num_retain=$_POST[retain] --num_cpu=$cpu "
-               ."--outputdir=$working_dir";
+    // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
+    $db = "$database_dir/".$_POST['select-database'];
+    $command = "perl pipeline_design_check.pl "
+               ."--input=$working_dir/perl_input_region.tmp "
+               ."--template=$database_dir/$template_tax "
+               ."--region_type=$_POST[region_type] "
+               ."--samtools=$path_samtools "
+               ."--primer3bin=$path_primer3  "
+               ."--primer3setting=$working_dir/p3_settings_file "
+               ."--blastn='$path_blastn' "
+               ."--blast_e_value=$_POST[blast_e_value] "
+               ."--blast_word_size=$_POST[blast_word_size] "
+               ."--blast_identity=$_POST[blast_identity] "
+               ."--blast_max_hsps=$_POST[blast_max_hsps] "
+               ."--checkingdb='$db' "
+               ."--checking_size_start=$_POST[size_start] "
+               ."--checking_size_stop=$_POST[size_stop] "
+               ."--primer_num_retain=$_POST[retain] "
+               ."--min_Tm_diff=$_POST[min_Tm_diff] "
+               ."--conc_primer=$_POST[conc_primer] "
+               ."--conc_Na=$_POST[conc_Na] "
+               ."--conc_K=$_POST[conc_K] "
+               ."--conc_Tris=$_POST[conc_Tris] "
+               ."--conc_Mg=$_POST[conc_Mg] "
+               ."--conc_dNTPs=$_POST[conc_dNTPs] "
+               ."--outputdir=$working_dir "
+               ."--num_cpu=$cpu "
+               ."--output_detail ";
+    if ($_POST['use_3_end']==1) {
+        $command .= "--use_3end";
+    }
     exec($command);
     
     echo file_get_contents("$working_dir/primer.final.result.html");
@@ -160,22 +174,32 @@ else {
     file_put_contents("$working_dir/check.only.tmp", $input_primers);
     
     // db
-    $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    
-    // Run MFEPrimer, generate [specificity.check.result.html]
-    if (count($_POST['select-database'])>$limit_database) {
-?>
-<div class="alert alert-danger alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    Warning: Too many databases selected. <b><?php echo count($_POST['select-database']) ?></b> databases detected. However we only allow 
-    <b><?php echo $limit_database ?></b> databases at one time.
-</div>
-<?php
-        exit(0);
-    } 
-    $command = "perl _run_specificity_check.pl --input=$working_dir/check.only.tmp "
-               ."--db='$db' --pypy=$path_pypy --outputdir=$working_dir --size_start=$_POST[size_start] "
-               ."--size_stop=$_POST[size_stop] --detail=1 --MFEprimer=../MFEprimer/MFEprimer.py --num_cpu=$cpu";
+    // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
+    $db = "$database_dir/".$_POST['select-database'];
+    $command = "perl _run_specificity_check.pl "
+               ."--input=$working_dir/check.only.tmp "
+               ."--db='$db' "
+               ."--samtools=$path_samtools "
+               ."--blastn=$path_blastn "
+               ."--blast_e_value=$_POST[blast_e_value] "
+               ."--blast_word_size=$_POST[blast_word_size] "
+               ."--blast_identity=$_POST[blast_identity] "
+               ."--blast_max_hsps=$_POST[blast_max_hsps] "
+               ."--size_start=$_POST[size_start] "
+               ."--size_stop=$_POST[size_stop] "
+               ."--min_Tm_diff=$_POST[min_Tm_diff] "
+               ."--conc_primer=$_POST[conc_primer] "
+               ."--conc_Na=$_POST[conc_Na] "
+               ."--conc_K=$_POST[conc_K] "
+               ."--conc_Tris=$_POST[conc_Tris] "
+               ."--conc_Mg=$_POST[conc_Mg] "
+               ."--conc_dNTPs=$_POST[conc_dNTPs] "
+               ."--outputdir=$working_dir "
+               ."--num_cpu=$cpu "
+               ."--detail ";
+    if ($_POST['use_3_end']==1) {
+        $command .= "--use_3end";
+    }
     exec($command);
     
     echo file_get_contents("$working_dir/specificity.check.result.html");

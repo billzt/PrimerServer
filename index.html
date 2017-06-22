@@ -89,127 +89,132 @@
                             </div>
                             <div id="parameter-design" class="panel-body collapse">
                                 <input type="hidden" name="parameter-design" value="hide" class="save-input" />
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">Primer Size (bp):</label>
-                                    <div class="col-sm-9">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_SIZE" value="18" 
-                                                class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
-                                            <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_SIZE" value="20" 
-                                                class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
-                                            <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_SIZE" value="23" 
-                                                class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
+                                <fieldset>
+                                    <legend>Primer3 Settings</legend>
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">Primer Size (bp):</label>
+                                        <div class="col-sm-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Min</span>
+                                                <input type="text" name="PRIMER_MIN_SIZE" value="18" 
+                                                    class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
+                                                <span class="input-group-addon">Opt</span>
+                                                <input type="text" name="PRIMER_OPT_SIZE" value="20" 
+                                                    class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
+                                                <span class="input-group-addon">Max</span>
+                                                <input type="text" name="PRIMER_MAX_SIZE" value="23" 
+                                                    class="form-control save-input validate[required, custom[integer], min[1], max[35]]" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">Primer G+C (%):</label>
-                                    <div class="col-sm-9">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_GC" value="35.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                            <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_GC_PERCENT" value="50.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                            <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_GC" value="65.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">Primer G+C (%):</label>
+                                        <div class="col-sm-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Min</span>
+                                                <input type="text" name="PRIMER_MIN_GC" value="35.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                                <span class="input-group-addon">Opt</span>
+                                                <input type="text" name="PRIMER_OPT_GC_PERCENT" value="50.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                                <span class="input-group-addon">Max</span>
+                                                <input type="text" name="PRIMER_MAX_GC" value="65.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">Primer Tm (&deg;C):</label>
-                                    <div class="col-sm-9">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Min</span>
-                                            <input type="text" name="PRIMER_MIN_TM" value="57.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                            <span class="input-group-addon">Opt</span>
-                                            <input type="text" name="PRIMER_OPT_TM" value="60.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                            <span class="input-group-addon">Max</span>
-                                            <input type="text" name="PRIMER_MAX_TM" value="63.0" 
-                                                class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">Primer Tm (&deg;C):</label>
+                                        <div class="col-sm-9">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Min</span>
+                                                <input type="text" name="PRIMER_MIN_TM" value="57.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                                <span class="input-group-addon">Opt</span>
+                                                <input type="text" name="PRIMER_OPT_TM" value="60.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                                <span class="input-group-addon">Max</span>
+                                                <input type="text" name="PRIMER_MAX_TM" value="63.0" 
+                                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">Primer Pair Tm Max Diff. (&deg;C):</label>
-                                    <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                    </div>
-                                    <label class="col-sm-3 control-label">No. Primers To Return:</label>
-                                    <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_NUM_RETURN" value="30" 
-                                        class="form-control save-input validate[required, custom[integer], min[1], max[1000]]" />
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">3' End Distance (bp) Between:</label>
-                                    <div class="col-sm-6">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">Left Primers</span>
-                                            <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" 
-                                            class="form-control save-input validate[required, custom[integer], min[-1]]" />
-                                            <span class="input-group-addon">Right Primers</span>
-                                            <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" 
-                                            class="form-control save-input validate[required, custom[integer], min[-1]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">Primer Pair Tm Max Diff. (&deg;C):</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="PRIMER_PAIR_MAX_DIFF_TM" value="3.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
+                                        <label class="col-sm-3 control-label">No. Primers To Return:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="PRIMER_NUM_RETURN" value="30" 
+                                            class="form-control save-input validate[required, custom[integer], min[1], max[1000]]" />
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-3 control-label">Max 3' Stability:</label>
-                                    <div class="col-sm-3">
-                                        <input type="text" name="PRIMER_MAX_END_STABILITY" value="9.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[999]]" />
-                                    </div>
-                                    <label class="col-sm-3 control-label">Lowercase masking:</label>
-                                    <div class="col-sm-3">
-                                        <div class="radio">
-                                            <label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=1 checked />Yes</label>
-                                        </div>
-                                        <div class="radio">
-                                            <label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=0  />No</label>
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">3' End Distance (bp) Between:</label>
+                                        <div class="col-sm-6">
+                                            <div class="input-group">
+                                                <span class="input-group-addon">Left Primers</span>
+                                                <input type="text" name="PRIMER_MIN_LEFT_THREE_PRIME_DISTANCE" value="3" 
+                                                class="form-control save-input validate[required, custom[integer], min[-1]]" />
+                                                <span class="input-group-addon">Right Primers</span>
+                                                <input type="text" name="PRIMER_MIN_RIGHT_THREE_PRIME_DISTANCE" value="3" 
+                                                class="form-control save-input validate[required, custom[integer], min[-1]]" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <h4 class="page-header">Thermodynamic Secondary Structure Alignments Setting</h4>
-                                <div class="form-group row">
-                                    <label class="col-sm-4 control-label">TH: Max Self Complementarity (&deg;C):</label>
-                                    <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_SELF_ANY_TH" value="45.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 control-label">Max 3' Stability:</label>
+                                        <div class="col-sm-3">
+                                            <input type="text" name="PRIMER_MAX_END_STABILITY" value="9.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[999]]" />
+                                        </div>
+                                        <label class="col-sm-3 control-label">Lowercase masking:</label>
+                                        <div class="col-sm-3">
+                                            <div class="radio">
+                                                <label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=1 checked />Yes</label>
+                                            </div>
+                                            <div class="radio">
+                                                <label><input type="radio" name="PRIMER_LOWERCASE_MASKING" value=0  />No</label>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <label class="col-sm-4 control-label">TH: Max Pair Complementarity (&deg;C):</label>
-                                    <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_ANY_TH" value="45.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                </fieldset>
+                                <fieldset>
+                                    <legend>Thermodynamic Secondary Structure Alignments Setting</legend>
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 control-label">TH: Max Self Complementarity (&deg;C):</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="PRIMER_MAX_SELF_ANY_TH" value="45.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
+                                        <label class="col-sm-4 control-label">TH: Max Pair Complementarity (&deg;C):</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="PRIMER_PAIR_MAX_COMPL_ANY_TH" value="45.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-4 control-label">TH: Max 3' Self Complementarity (&deg;C):</label>
-                                    <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_SELF_END_TH" value="35.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 control-label">TH: Max 3' Self Complementarity (&deg;C):</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="PRIMER_MAX_SELF_END_TH" value="35.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
+                                        <label class="col-sm-4 control-label">TH: Max 3' Pair Complementarity (&deg;C):</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="PRIMER_PAIR_MAX_COMPL_END_TH" value="35.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
                                     </div>
-                                    <label class="col-sm-4 control-label">TH: Max 3' Pair Complementarity (&deg;C):</label>
-                                    <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_PAIR_MAX_COMPL_END_TH" value="35.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 control-label">TH: Max Primer Hairpin (&deg;C):</label>
+                                        <div class="col-sm-2">
+                                            <input type="text" name="PRIMER_MAX_HAIRPIN_TH" value="24.0" 
+                                            class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label class="col-sm-4 control-label">TH: Max Primer Hairpin (&deg;C):</label>
-                                    <div class="col-sm-2">
-                                        <input type="text" name="PRIMER_MAX_HAIRPIN_TH" value="24.0" 
-                                        class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
-                                    </div>
-                                </div>
+                                </fieldset>
                             </div>
                         </div>
                     </div>
@@ -230,38 +235,125 @@
                         <h2 class="panel-title">
                             Setting Specificity Checking Parameters
                             <span data-toggle="collapse" data-target="#parameter-check">
-                                <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-down help-icon"></i>
+                                <i title="cilck to hide/show" data-toggle="tooltip" class="fa fa-caret-up help-icon"></i>
                             </span>
                         </h2>
                     </div>
-                    <div id="parameter-check" class="panel-body collapse in">
-                        <input type="hidden" name="parameter-check" value="show" class="save-input" />
-                        <div class="form-group row">
-                            <label class="col-sm-4 control-label">Max. Primers Return Number:</label>
-                            <div class="col-sm-3">
-                                <input type="text" name="retain" value="10" 
-                                class="form-control save-input validate[required, custom[integer], min[1], max[1000]]" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-4 control-label">Checking Prodcut Size (bp):</label>
-                            <div class="col-sm-6">
-                                <div class="input-group">
-                                    <span class="input-group-addon">Min</span>
-                                    <input type="text" name="size_start" value="70" 
-                                    class="form-control save-input validate[required, custom[integer], min[1], max[100000]]" />
-                                    <span class="input-group-addon">Max</span>
-                                    <input type="text" name="size_stop" value="1000" 
-                                    class="form-control save-input validate[required, custom[integer], min[1], max[100000]]" />
+                    <div id="parameter-check" class="panel-body collapse">
+                        <input type="hidden" name="parameter-check" value="hide" class="save-input" />
+                        <fieldset>
+                            <legend>Setting Filter Parameters</legend>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Checking Prodcut Size (bp):</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Min</span>
+                                        <input type="text" name="size_start" value="50" 
+                                        class="form-control save-input validate[required, custom[integer], min[1], max[100000]]" />
+                                        <span class="input-group-addon">Max</span>
+                                        <input type="text" name="size_stop" value="5000" 
+                                        class="form-control save-input validate[required, custom[integer], min[1], max[100000]]" />
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Filter with 3' End Validation:</label>
+                                <div class="col-sm-2">
+                                    <div class="radio">
+                                        <label><input type="radio" name="use_3_end" value=1 />Yes</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="use_3_end" value=0 checked />No</label>
+                                    </div>
+                                </div>
+                                <label class="col-sm-3 control-label">Max. Primers Return Number:</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="retain" value="10" 
+                                    class="form-control save-input validate[required, custom[integer], min[1], max[1000]]" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Min. Tm Difference:</label>
+                                <div class="col-sm-2">
+                                    <div class="input-group">
+                                        <input type="text" name="min_Tm_diff" value="10" 
+                                        class="form-control save-input validate[required, custom[integer], min[10], max[100]]" />
+                                        <span class="input-group-addon">(&deg;C) lower</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Setting BLAST</legend>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">E-value:</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="blast_e_value" value="30000" 
+                                    class="form-control save-input validate[required, custom[number], min[100]]" />
+                                </div>
+                                <label class="col-sm-3 control-label">Word Size:</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="blast_word_size" value="7" 
+                                    class="form-control save-input validate[required, custom[integer], min[4], max[11]]" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Min. Identity (%):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="blast_identity" value="60" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                                <label class="col-sm-3 control-label">Max. HSPs:</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="blast_max_hsps" value="500" 
+                                    class="form-control save-input validate[required, custom[integer], min[1]]" />
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>Setting Experimental Conditions</legend>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Concentration of primers (nM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_primer" value="100" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                                <label class="col-sm-3 control-label">Concentration of dNTPs (mM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_dNTPs" value="0.2" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Concentration of Na<sup>+</sup> (mM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_Na" value="0" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                                <label class="col-sm-3 control-label">Concentration of K<sup>+</sup> (mM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_K" value="50" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3 control-label">Concentration of Tris (mM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_Tris" value="10" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                                <label class="col-sm-3 control-label">Concentration of Mg<sup>2+</sup> (mM):</label>
+                                <div class="col-sm-2">
+                                    <input type="text" name="conc_Mg" value="1.5" 
+                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                </div>
+                            </div>
+                        </fieldset>
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon">Checking Databases</span>
-                        <select class="form-control save-input selectpicker show-tick validate[required]" name="select-database[]" 
-                        data-size="10" data-live-search="true" title="Select your databases (can be multiple)" multiple 
-                        data-selected-text-format="count>1">
+                        <select class="form-control save-input selectpicker show-tick validate[required]" name="select-database" 
+                        data-size="10" data-live-search="true" title="Select your databases">
                         </select>
                     </div>
                 </div>
@@ -328,9 +420,9 @@
               </div>
               <div class="modal-body">
                 <h4><span class="fa fa-spinner fa-spin fa-4x"></span></h4>
-                <div class="progress">
-                  <div class="progress-bar progress-bar-striped active" role="progressbar"></div>
-                </div>
+                <!-- <div class="progress"> -->
+                  <!-- <div class="progress-bar progress-bar-striped active" role="progressbar"></div> -->
+                <!-- </div> -->
                 <div class="alert alert-warning" role="alert">
                     If you did not get any result in &ge; 5 minites, then you might reduce the amount of your input sites.
                 </div>

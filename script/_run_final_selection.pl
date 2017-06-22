@@ -22,7 +22,7 @@ END_USAGE
 my $help;
 my $primer3result;
 my $specificity;
-my $detail = 0;
+my $detail;
 my $retain = 10;
 my $dir = ".";
 my $region_type = "SEQUENCE_TARGET";
@@ -32,7 +32,7 @@ GetOptions(
     'primer3result=s'       =>  \$primer3result,
     'specificity=s'       =>  \$specificity,
     'outputdir=s'   =>  \$dir,
-    'detail=i'      =>  \$detail,
+    'detail'      =>  \$detail,
     'retain=i'      =>  \$retain,
     'region_type=s' =>  \$region_type,
 );
@@ -57,14 +57,14 @@ my %data_for_primer;
     local $/ = "\n=\n";
     open my $in_fh, "<", $primer3result;
     my $out_fh;
-    if ($detail==0) {
+    if (!$detail) {
         open $out_fh, ">", "$dir/primer.final.result.txt";
     }
     else {
         open $out_fh, ">", "$dir/primer.final.result.html";
     }
     
-    if ($detail==1) {
+    if ($detail) {
         print {$out_fh} <<"END";
 <div class="panel-group" id="primers-result" role="tablist">
 END
@@ -101,7 +101,7 @@ END
         
         my ($primer_num) = /PRIMER_PAIR_NUM_RETURNED=(\S+)/; $primer_num=$primer_num>$retain?$retain:$primer_num;
 
-        if ($detail==1) {
+        if ($detail) {
             print {$out_fh} <<"END";
 <div class="panel panel-default">
     <div class="panel-heading" role="tab">
@@ -157,7 +157,7 @@ END
             my ($PRIMER_RIGHT_EXPLAIN) = /PRIMER_RIGHT_EXPLAIN=(.*)/;
             my ($PRIMER_PAIR_EXPLAIN) = /PRIMER_PAIR_EXPLAIN=(.*)/;
             my ($error) = /PRIMER_ERROR=(.*)/;
-            if ($detail==0) {
+            if (!$detail) {
                 print {$out_fh} "$id\tNo_Primer\t$PRIMER_LEFT_EXPLAIN\t$PRIMER_RIGHT_EXPLAIN\t$PRIMER_PAIR_EXPLAIN\n";
             }
             else {
@@ -176,7 +176,7 @@ END
             }
         }
         else {
-            if ($detail==1) {
+            if ($detail) {
                 print {$out_fh} <<"END";
             <div class="PrimerFigure"></div>
             <ul class="list-group">
@@ -223,7 +223,7 @@ END
                 my ($penalty_pair) = /PRIMER_PAIR_ $i _PENALTY=(\S+)/x; $penalty_pair=sprintf("%.1f", $penalty_pair);
                 
                 my $hit_num = $hit_num_for_primer{$id}{$i};
-                if ($detail==0) {
+                if (!$detail) {
                     print {$out_fh} "$id\t$primer_output_rank\t$seq_F\t$seq_R\t$size\t$penalty_pair\t$hit_num\n";
                 }
                 else {
@@ -292,7 +292,7 @@ END
                                         <tr>
                                             <th>Possible Amplicons Number</th>
                                             <td colspan="9" class="hit-num" data-hit="$hit_num">$hit_num 
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="$id.$i.txt.out"
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="PrimerGroup.$id.$i.txt"
                                                 data-targetsize="$size">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
@@ -308,7 +308,7 @@ END
                 last if ($primer_output_rank==$retain);
                 $primer_output_rank++;
             }
-            if ($detail==1) {
+            if ($detail) {
                 print {$out_fh} <<"END";
             </ul>
 END
@@ -316,7 +316,7 @@ END
         
         }
         
-        if ($detail==0) {
+        if (!$detail) {
             print {$out_fh} "###\n";
         }
         else {
@@ -328,7 +328,7 @@ END
         }
     }
     
-    if ($detail==1) {
+    if ($detail) {
             print {$out_fh} <<"END";
 </div>
 END

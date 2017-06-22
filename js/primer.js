@@ -13,7 +13,7 @@ $(function () {
     var originalValFor = new Object;
     $.get('script/db.php', function(data){
         $('[name="select-template"]').append(data);
-        $('[name="select-database[]"]').append(data);
+        $('[name="select-database"]').append(data);
         $('[name="select-template"]').append('<optgroup label="Custom"><option value="custom">Custom Template Sequences...</option></optgroup>');
         
         // get all the default values
@@ -28,7 +28,7 @@ $(function () {
             saveInterval: 1000,
         });
         $('[name="select-template"]').selectpicker('refresh'); 
-        $('[name="select-database[]"]').selectpicker('refresh');
+        $('[name="select-database"]').selectpicker('refresh');
         
         // Highlight Changed Field
         for (var i=0; i<inputs.length; i++) {
@@ -85,7 +85,7 @@ $(function () {
     // modify reset button to satisfy selector
     $(':reset').click(function(){
         $('[name="select-template"]').selectpicker('val', '');
-        $('[name="select-database[]"]').selectpicker('val', ''); 
+        $('[name="select-database"]').selectpicker('val', ''); 
     });
     
     // change App type when user change it
@@ -330,13 +330,13 @@ $(function () {
         }
     });
 
-    // Showing MFEPrimer result in modal dynamically by Ajax 
+    // Showing Specificity result in modal dynamically by Ajax 
     $('#specificity-check-modal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget); // Button that triggered the modal
         var fileName = button.data('whatever');
         var modal = $(this);
         var target_band_size = button.data('targetsize');
-        $.get('script/modal_MFEPrimer_result.php', {file: fileName}, function(data) {
+        $.get('script/modal_specificity_result.php', {file: fileName}, function(data) {
             var result_data = JSON.parse(data);
             modal.find('.modal-body .fa-spinner').addClass('hidden');
             modal.find('.modal-body pre').html(result_data.file);
@@ -369,25 +369,25 @@ $(function () {
     })
     
     // When running, showing a progress bar
-    var timer = $.timer(function(){
-        $.get('script/modal_progress.php', function(data) {
-            var progress_data = JSON.parse(data); // total, finished, percent
-            if (progress_data.total>0) {
-                $('#running-modal .modal-body h4').html(progress_data.total+' Primers generated');
-                $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' Primers finished');
-                if (progress_data.percent>=100) {
-                    timer.stop();
-                    $('.progress-bar').removeClass('active').html('Completed');
-                }                    
-            }
-        });
-    });
-    $('#running-modal').on('shown.bs.modal', function(){
-        timer.set({ time : 1000, autostart : true });
-    });
-    $('#running-modal').on('hidden.bs.modal', function(){
-        timer.stop();
-    });
+    // var timer = $.timer(function(){
+        // $.get('script/modal_progress.php', function(data) {
+            // var progress_data = JSON.parse(data); // total, finished, percent
+            // if (progress_data.total>0) {
+                // $('#running-modal .modal-body h4').html(progress_data.total+' Primers generated');
+                // $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' Primers finished');
+                // if (progress_data.percent>=100) {
+                    // timer.stop();
+                    // $('.progress-bar').removeClass('active').html('Completed');
+                // }                    
+            // }
+        // });
+    // });
+    // $('#running-modal').on('shown.bs.modal', function(){
+        // timer.set({ time : 1000, autostart : true });
+    // });
+    // $('#running-modal').on('hidden.bs.modal', function(){
+        // timer.stop();
+    // });
     
     // Download primers from Web UI
     // Check whether user input is good
@@ -454,6 +454,9 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
+    // $('#test').load('primer.final.result.html', function(){
+        // GenerateGraph($('#site-2'));
+    // });
 });
 
 
