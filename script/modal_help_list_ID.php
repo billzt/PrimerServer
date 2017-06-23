@@ -4,6 +4,8 @@ session_start();
 $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
+$config = parse_ini_file("../config.ini");
+$database_dir = $config['database'];
 
 function download_file($file_url,$new_basename=''){
     if(!isset($file_url)||trim($file_url)==''){ // trim: remove blanks surround string
@@ -28,7 +30,7 @@ function download_file($file_url,$new_basename=''){
 }
 
 $id = $_GET['file'];
-$file = "../db/$id.fai";
+$file = "$database_dir/$id.fai";
 
 exec("cut -f 1,2 $file >$working_dir/ID.txt");
 download_file("$working_dir/ID.txt");

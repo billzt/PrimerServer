@@ -3,6 +3,7 @@
 $config = parse_ini_file("../config.ini", true);
 
 $groups = preg_grep('/^Database\./', array_keys($config));
+$database_dir = $config['Path']['database'];
 
 if ($groups) {
     foreach ($groups as $group) {
@@ -15,7 +16,7 @@ if ($groups) {
         foreach (array_keys($config[$group]) as $value) {
             $name = $config[$group][$value];
             
-            $file = "../db/$value.fai";
+            $file = "$database_dir/$value.fai";
             
             // sub text (ID format)
             $id_array = array();
@@ -33,7 +34,7 @@ if ($groups) {
     }
 }
 else {
-    foreach (glob("../db/*.fai") as $file) {
+    foreach (glob("$database_dir/*.fai") as $file) {
         // option name and value
         $value = basename($file, '.fai');
         $name = $value;
