@@ -306,6 +306,9 @@ $(function () {
                 else {
                     $('#download-primer').addClass('hidden');
                 }
+                
+                // remove primer amplicon links if no hits were found
+                $('[data-hit=0]').children('[data-toggle="modal"]').addClass('hidden');
             }
         }; 
         
@@ -460,9 +463,7 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
-    // $('#test').load('primer.final.result.html', function(){
-        // GenerateGraph($('#site-2'));
-    // });
+    //$('#test').load('primer.final.result.html');
 });
 
 
