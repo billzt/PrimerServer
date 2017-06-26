@@ -463,7 +463,7 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
-    //$('#test').load('primer.final.result.html');
+    //$('#test').load('specificity.check.result.html');
 });
 
 

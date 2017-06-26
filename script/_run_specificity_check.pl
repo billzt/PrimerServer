@@ -496,6 +496,7 @@ if (!$detail) {
     print {$out_fh} "#Site_ID\tPrimer_Rank\tPossible_Amplicon_Number\tPrimer_Seqs\n";
 }
 my %hit_num_for_primer;
+my %hit_regions_for_primer;
 for my $i (0..$#run_array) {
     my $hit_num = 0;
     my ($id, $rank) = @{$run_array[$i]};
@@ -535,6 +536,7 @@ for my $i (0..$#run_array) {
                 my ($next_target_start, $next_target_end) = $target_next_region=~/\:(\d+)-(\d+)$/;
                 print {$out} "Template: $target_id\n";
                 print {$out} "Template Region: $target_start-$next_target_end\n";
+                push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
                 print {$out} "Primer Left: $query ($query_seq)\n";
                 print {$out} "Primer Right: $next_query ($next_query_seq)\n";
                 print {$out} "Product Size: ", $next_target_end-$target_start+1, " bp\n";
@@ -636,8 +638,8 @@ END
                                 <table class="table table-borderless">
                                     <thead>
                                         <tr>
-                                            <th></th>
-                                            <th>Sequence (5' -&gt; 3')</th>
+                                            <th class="col-sm-2"></th>
+                                            <th class="col-sm-4">Sequence (5' -&gt; 3')</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -647,20 +649,44 @@ END
                 my $output_seq_id = $j+1;
                 print {$out_fh} <<"END";
                                         <tr>
-                                            <th>Seq. $output_seq_id</th>
-                                            <td><span class="monospace-style">$primer_seqs[$j]</span></td>
+                                            <th class="col-sm-2">Seq. $output_seq_id</th>
+                                            <td class="col-sm-4"><span class="monospace-style">$primer_seqs[$j]</span></td>
                                         </tr>
 END
             }
                 
             print {$out_fh} <<"END";
                                         <tr>
-                                            <th>Possible Amplicons Number</th>
-                                            <td class="hit-num" data-hit="$hit_num">$hit_num 
+                                            <th class="col-sm-2">Possible Amplicons Number</th>
+                                            <td class="hit-num col-sm-4" data-hit="$hit_num">$hit_num 
                                                 <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="PrimerGroup.$id.$i.txt">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
                                             </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="col-sm-2">Possible Amplicons Regions</th>
+                                            <td class="col-sm-4"><ul class="list-group"> 
+END
+            if ($hit_num>0) {
+                my @hit_regions = @{ $hit_regions_for_primer{$id}{$i} };
+                for my $j (0..$#hit_regions) {
+                    my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
+                    my $size = $next_target_end-$target_start+1;
+                    if ($hit_num==1) {
+                        print {$out_fh} "<li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    }
+                    else {
+                        print {$out_fh} "<li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    }
+                    if ($j==4) {
+                        print {$out_fh} "<li class='list-group-item'>...</li>";
+                        last;
+                    }
+                }            
+            }
+            print {$out_fh} <<"END";
+                                            </ul></td>
                                         </tr>
                                     </tbody>
                                 </table>
