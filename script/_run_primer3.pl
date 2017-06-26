@@ -10,7 +10,7 @@ my $usage = <<"END_USAGE";
 usage: $0 --input=<user input file> --db=<template.fa> [Option]
 Required:
 --input     a tab-delimited text file listing primer choosing regions, one per line: 
-            template_ID target_start    target_length   product_size_min    product_size_max
+            template_ID target_start    target_length   [product_size_min]    [product_size_max]
 --db        
 Optional:
 --region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
@@ -18,6 +18,8 @@ Optional:
 --primer3bin
 --primer3setting
 --outputdir
+--product_size_min
+--product_size_max
 --help      Print this help and exit
 END_USAGE
 
@@ -29,6 +31,8 @@ my $primer3setting = "";
 my $db;
 my $dir = "PrimerServerOutput";
 my $region_type = "SEQUENCE_TARGET";
+my $product_size_min = 100;
+my $product_size_max = 1000;
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -38,6 +42,8 @@ GetOptions(
     'primer3setting=s'=>\$primer3setting,
     'outputdir=s'   =>  \$dir,
     'region_type=s' =>  \$region_type,
+    'product_size_min=i'    =>  \$product_size_min,
+    'product_size_max=i'    =>  \$product_size_max,
 );
 
 if ($help or !$input or !$db) {
@@ -75,11 +81,14 @@ while (<$input_fh>) {
     chomp;
     next if (/^#/);
     my @data = split;
-    if (@data!=5) {
-        die "Not 5 columns in line $_. Perhaps there is some input error\n";
-    }
     my ($chr, $target_start, $target_length, $size_min, $size_max) = split;
     $target_start =~ s/,//g;
+    if (!$size_min) {
+        $size_min = $product_size_min;
+    }
+    if (!$size_max) {
+        $size_max = $product_size_max;
+    }
     my $retrieve_start = $target_start-$size_max>0 ? $target_start-$size_max : 1; # Such retrieve region is enough for all the three region types
     my $retrieve_end = $target_start+$target_length+$size_max;
     print {$tmp_out_fh} "$chr:$retrieve_start-$retrieve_end\n";

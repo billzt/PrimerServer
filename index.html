@@ -57,7 +57,7 @@
                             <div class="row">
                                 <div class="col-sm-10">
                                     <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8" 
-                                    placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength] [MinProductSize] [MaxProductSize]" 
+                                    placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength]" 
                                     name="template-regions"></textarea>
                                 </div>
                                 <div class="col-sm-2">
@@ -69,6 +69,18 @@
                                     </div>
                                     <div class="radio">
                                         <label><input type="radio" name="region_type" value="FORCE_END"  />Force 3' End</label>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Min</span>
+                                        <input type="text" name="product_size_min" value="100"
+                                        class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
+                                        <span class="input-group-addon">bp</span>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Max</span>
+                                        <input type="text" name="product_size_max" value="1000"
+                                        class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
+                                        <span class="input-group-addon">bp</span>
                                     </div>
                                 </div>
                             </div>
@@ -301,7 +313,7 @@
                                 <label class="col-sm-3 control-label">Min. Identity (%):</label>
                                 <div class="col-sm-2">
                                     <input type="text" name="blast_identity" value="60" 
-                                    class="form-control save-input validate[required, custom[number], min[0]]" />
+                                    class="form-control save-input validate[required, custom[number], min[0], max[100]]" />
                                 </div>
                                 <label class="col-sm-3 control-label">Max. HSPs:</label>
                                 <div class="col-sm-2">
@@ -441,14 +453,14 @@
               </div>
               <div class="modal-body">
                 <h4 class="page-header">Design Primers &amp; Check</h4>
-                <p>Format: One site per line, space delimited <code>TemplateID TargetPos TargetLength MinProductSize MaxProductSize</code></p>
+                <p>Format: One site per line, space delimited <code>TemplateID TargetPos TargetLength</code></p>
                 <p>Example:</p>
                 <pre>
-D05	1006384	25	100	300
-D05	1180338	18	100	300
-D05	1008251	19	100	300
-D05	1009127	29	100	300
-D05	1063718	26	100	300
+D05	1006384	25
+D05	1180338	18
+D05	1008251	19
+D05	1009127	29
+D05	1063718	26
                 </pre>
                 <div class="panel panel-default">
                     <div class="panel-heading">

@@ -74,3 +74,17 @@ if ($_POST['retain']>$_POST['PRIMER_NUM_RETURN']) {
     reportmsg($msg);
     exit(0);
 }
+
+if ($_POST['size_start']>$_POST['size_stop']) {
+    $msg = "Error: The Lower limit of the checking amplicon size range (<strong>$_POST[size_start]</strong>) is larger 
+    than the upper limit (<strong>$_POST[size_stop]</strong>).";
+    reportmsg($msg);
+    exit(0);
+}
+
+if ($_POST['product_size_min']>$_POST['product_size_max']) {
+    $msg = "Error: The Lower limit of the designed amplicon size range (<strong>$_POST[product_size_min]</strong>) is larger 
+    than the upper limit (<strong>$_POST[product_size_max]</strong>).";
+    reportmsg($msg);
+    exit(0);
+}

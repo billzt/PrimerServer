@@ -22,7 +22,13 @@ Optional Parameters: Primer Design
     --primer3bin STR    Your primer3_core path: /path/to/primer3_core
                         Default: [primer3_core] (Assume in your system PATH)
     --primer3setting STR
-                        A Primer3 setting file. Default: [] (Using all the default parameters in Primer3)
+                        A Primer3 setting file. [STRONGLY RECOMMEND!]
+                        Default: [] (Using all the default parameters in Primer3)
+    --product_size_min INT
+                        Lower limit of designed product sizes in bp. Default: [100]
+    --product_size_max INT
+                        Upper limit of designed product sizes in bp. Default: [5000]
+                        
 
 Optional Parameters: Primer Specificity Check
     --blastn STR        Your blastn (NCBI BLAST+) path: /path/to/blastn
@@ -79,6 +85,8 @@ my $input;
 my $samtools = "samtools";
 my $primer3bin = "primer3_core";
 my $primer3setting = "";
+my $product_size_min = 100;
+my $product_size_max = 1000;
 my $template;
 my $dir = "PrimerServerOutput";
 my $checkingdb;
@@ -109,6 +117,8 @@ GetOptions(
     'samtools=s'    =>  \$samtools,
     'primer3bin=s'  =>  \$primer3bin,
     'primer3setting=s'=>\$primer3setting,
+    'product_size_min=i'    =>  \$product_size_min,
+    'product_size_max=i'    =>  \$product_size_max,
     'checkingdb=s'    =>  \$checkingdb,
     'checking_size_start=i' => \$size_start,
     'checking_size_stop=i' => \$size_stop,
@@ -178,7 +188,7 @@ if (!-e($template)) {
 
 ####### Run primer3, generate [primer3output.txt] and [primer3output.simple.table.txt] #########
 my $cmd = "perl $perl_dir/_run_primer3.pl --input=$input --db=$template --region_type=$region_type "
-            ."--primer3bin=$primer3bin --samtools=$samtools --outputdir=$dir ";
+            ."--primer3bin=$primer3bin --samtools=$samtools --outputdir=$dir --product_size_min=$product_size_min --product_size_max=$product_size_max ";
 if ($primer3setting) {
     $cmd .= "--primer3setting=$primer3setting";
 }
