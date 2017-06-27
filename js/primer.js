@@ -149,6 +149,8 @@ $(function () {
         var svg = d3.select(el.find('.PrimerFigure')[0])
                     .append('svg')
                     .attr('width', '100%');
+        svg.append('style').text('.axis path,.axis line{fill: none;stroke: blue;stroke-width: 2px;shape-rendering: crispEdges;} '
+            +'.axis text{font-size:11px;} .primerLabel{font-size:11px;} .primerUniqueLabel{font-size:11px;font-weight:bold;}');
         
         // primers regions
         var primers = el.find('.list-group-item');
@@ -264,11 +266,12 @@ $(function () {
         // Pan and Zoom
         if ($('.PrimerFigure svg').length>0) {
             var zoomObj = svgPanZoom('.PrimerFigure svg');
-            if ($('.PrimerFigureControl').length==0) {
-                $('.PrimerFigure').before('<div class="PrimerFigureControl btn-group">'
-                    +'<button type="button" class="btn btn-primary zoom-in" title="Zoom in" data-toggle="tooltip"><i class="fa fa-search-plus"></i></button>'
-                    +'<button type="button" class="btn btn-warning zoom-out" title="Zoom out" data-toggle="tooltip"><i class="fa fa-search-minus"></i></button>'
-                    +'<button type="button" class="btn btn-success zoom-reset" title="Reset" data-toggle="tooltip"><i class="fa fa-refresh"></i></button>'
+            if (el.find('.PrimerFigureControl').length==0) {
+                el.find('.PrimerFigure').before('<div class="PrimerFigureControl btn-group">'
+                    +'<button type="button" class="btn btn-default zoom-in" title="Zoom in" data-toggle="tooltip"><i class="fa fa-search-plus"></i></button>'
+                    +'<button type="button" class="btn btn-default zoom-out" title="Zoom out" data-toggle="tooltip"><i class="fa fa-search-minus"></i></button>'
+                    +'<button type="button" class="btn btn-default zoom-reset" title="Reset" data-toggle="tooltip"><i class="fa fa-refresh"></i></button>'
+                    +'<button type="button" class="btn btn-default svg-download" title="Download SVG" data-toggle="tooltip"><i class="fa fa-download"></i></button>'
                     +'</div>');                
             }
             $('[data-toggle="tooltip"]').tooltip({html: true});
@@ -285,6 +288,14 @@ $(function () {
             });
             $('.zoom-reset').click(function(){
                 zoomObj.resetZoom().resetPan();
+            });
+            $('.svg-download').click(function(){
+                console.log('Click');
+                var download_text = '<svg width="100%" xmlns="http://www.w3.org/2000/svg" '
+                +'xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"> '
+                + $('.PrimerFigure svg').html() + '</svg>';
+                var blob = new Blob([download_text], {type: "text/svg;charset=utf-8"});
+                saveAs(blob, "primer.svg"); 
             });
         }
     }
@@ -313,6 +324,7 @@ $(function () {
                 });
                 $('#primers-result').find('.collapse').on('hidden.bs.collapse', function (e) {
                     $(this).find('.PrimerFigure').html('');
+                    $(this).find('.PrimerFigureControl').remove();
                 });                    
             }
 
@@ -485,9 +497,16 @@ $(function () {
     });
     
 
-    $('#test').load('primer.final.result.html',function(){
-        GenerateGraph($('#site-1'));
-    });
+    // $('#test').load('primer.final.result.html',function(){
+        // GenerateGraph($('#site-1'));
+        // $('#test').find('.collapse').on('shown.bs.collapse', function (e) {
+            // GenerateGraph($(this));
+        // });
+        // $('#test').find('.collapse').on('hidden.bs.collapse', function (e) {
+            // $(this).find('.PrimerFigure').html('');
+            // $(this).find('.PrimerFigureControl').remove();
+        // });                    
+    // });
 });
 
 
