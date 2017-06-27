@@ -282,40 +282,45 @@ $(function () {
         }, 1000);
     };
     function AjaxSubmit() {
-        var options = { 
-            target: '#result',   // target element(s) to be updated with server response 
-            url: 'script/primer.php',
-            success: function () {
-                $('#running-modal').modal('hide');
-                ScrollToResult();
-                // call Complex functions if we are in design & check mode
-                if ($('[name="app-type"]').val()=='design') {
-                    GenerateGraph($('#site-1'));
-                    $('#primers-result').find('.collapse').on('shown.bs.collapse', function (e) {
-                        GenerateGraph($(this));
-                    });
-                    $('#primers-result').find('.collapse').on('hidden.bs.collapse', function (e) {
-                        $(this).find('.PrimerFigure').html('');
-                    });                    
-                }
-
-                // show download area
-                if ($('#primers-result').length>0) {
-                    $('#download-primer').removeClass('hidden');
-                }
-                else {
-                    $('#download-primer').addClass('hidden');
-                }
-                
-                // remove primer amplicon links if no hits were found
-                $('[data-hit=0]').children('[data-toggle="modal"]').addClass('hidden');
-            }
-        }; 
-        
         $('#running-modal .modal-body h4').html('<span class="fa fa-spinner fa-spin fa-4x"></span>');
         $('#running-modal .progress-bar').css('width', '0%').html('');
         $('#running-modal').modal('show');
-        $('#form-primer').ajaxSubmit(options);
+        var currentAjax = $.post('script/primer.php', $('#form-primer').serialize(), function(data){
+            $('#result').html(data);
+            $('#running-modal').modal('hide');
+            ScrollToResult();
+            // call Complex functions if we are in design & check mode
+            if ($('[name="app-type"]').val()=='design') {
+                GenerateGraph($('#site-1'));
+                $('#primers-result').find('.collapse').on('shown.bs.collapse', function (e) {
+                    GenerateGraph($(this));
+                });
+                $('#primers-result').find('.collapse').on('hidden.bs.collapse', function (e) {
+                    $(this).find('.PrimerFigure').html('');
+                });                    
+            }
+
+            // show download area
+            if ($('#primers-result').length>0) {
+                $('#download-primer').removeClass('hidden');
+            }
+            else {
+                $('#download-primer').addClass('hidden');
+            }
+            
+            // remove primer amplicon links if no hits were found
+            $('[data-hit=0]').children('[data-toggle="modal"]').addClass('hidden');
+        });
+        
+        // Allow users to stop their running
+        $('#stop').click(function(){
+            if (currentAjax) {
+                currentAjax.abort();
+            }
+            $.get('script/modal_stop.php', function(){
+                $('#running-modal').modal('hide');
+            });
+        });
     };
     $('#form-primer').validationEngine('attach', {
         autoHidePrompt: true,
@@ -463,6 +468,7 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
+
     //$('#test').load('specificity.check.result.html');
 });
 

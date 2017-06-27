@@ -137,7 +137,9 @@ END;
                ."--conc_dNTPs=$_POST[conc_dNTPs] "
                ."--outputdir=$working_dir "
                ."--num_cpu=$cpu "
-               ."--output_detail ";
+               ."--output_detail "
+               ."--product_size_min=$_POST[product_size_min] "
+               ."--product_size_max=$_POST[product_size_max] ";
     if ($_POST['use_3_end']==1) {
         $command .= "--use_3end";
     }
