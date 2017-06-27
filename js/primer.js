@@ -264,13 +264,29 @@ $(function () {
         // Pan and Zoom
         if ($('.PrimerFigure svg').length>0) {
             var zoomObj = svgPanZoom('.PrimerFigure svg');
+            if ($('.PrimerFigureControl').length==0) {
+                $('.PrimerFigure').before('<div class="PrimerFigureControl btn-group">'
+                    +'<button type="button" class="btn btn-primary zoom-in" title="Zoom in" data-toggle="tooltip"><i class="fa fa-search-plus"></i></button>'
+                    +'<button type="button" class="btn btn-warning zoom-out" title="Zoom out" data-toggle="tooltip"><i class="fa fa-search-minus"></i></button>'
+                    +'<button type="button" class="btn btn-success zoom-reset" title="Reset" data-toggle="tooltip"><i class="fa fa-refresh"></i></button>'
+                    +'</div>');                
+            }
+            $('[data-toggle="tooltip"]').tooltip({html: true});
             $(window).resize(function(){
                 zoomObj.resize();
                 zoomObj.fit();
                 zoomObj.center();
-            });            
+            });
+            $('.zoom-in').click(function(){
+                zoomObj.zoomIn();
+            });
+            $('.zoom-out').click(function(){
+                zoomObj.zoomOut();
+            });
+            $('.zoom-reset').click(function(){
+                zoomObj.resetZoom().resetPan();
+            });
         }
-        
     }
     
     /***************** Complex functions finished  ***********************************************************/
@@ -469,7 +485,9 @@ $(function () {
     });
     
 
-    //$('#test').load('specificity.check.result.html');
+    $('#test').load('primer.final.result.html',function(){
+        GenerateGraph($('#site-1'));
+    });
 });
 
 
