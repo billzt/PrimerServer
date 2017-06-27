@@ -5,8 +5,11 @@ $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
 
-$all_primer_count = count(glob("$working_dir/tmp.MFEPrimer/*.txt"));
-$finished_primer_count = count(glob("$working_dir/tmp.MFEPrimer/*.txt.out"));
+exec("grep -c '>' $working_dir/tmp.specificity.check/primer.query.fa", $i);
+exec("cut -f 1 $working_dir/tmp.specificity.check/primer.query.fa.out | uniq | wc -l", $j);
+
+$all_primer_count = $i[0];
+$finished_primer_count = $j[0];
 
 if ($all_primer_count==0) {
     echo json_encode(array(

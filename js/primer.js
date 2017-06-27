@@ -383,25 +383,25 @@ $(function () {
     })
     
     // When running, showing a progress bar
-    // var timer = $.timer(function(){
-        // $.get('script/modal_progress.php', function(data) {
-            // var progress_data = JSON.parse(data); // total, finished, percent
-            // if (progress_data.total>0) {
-                // $('#running-modal .modal-body h4').html(progress_data.total+' Primers generated');
-                // $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' Primers finished');
-                // if (progress_data.percent>=100) {
-                    // timer.stop();
-                    // $('.progress-bar').removeClass('active').html('Completed');
-                // }                    
-            // }
-        // });
-    // });
-    // $('#running-modal').on('shown.bs.modal', function(){
-        // timer.set({ time : 1000, autostart : true });
-    // });
-    // $('#running-modal').on('hidden.bs.modal', function(){
-        // timer.stop();
-    // });
+    var timer = $.timer(function(){
+        $.get('script/modal_progress.php', function(data) {
+            var progress_data = JSON.parse(data); // total, finished, percent
+            if (progress_data.total>0) {
+                $('#running-modal .modal-body h4').html(progress_data.total+' primer sequences generated. Waiting for BLAST');
+                $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' primer sequences finished');
+                if (progress_data.percent>=100) {
+                    timer.stop();
+                    $('.progress-bar').removeClass('active').html('Completed. Waiting for generating results...');
+                }                    
+            }
+        });
+    });
+    $('#running-modal').on('shown.bs.modal', function(){
+        timer.set({ time : 1000, autostart : true });
+    });
+    $('#running-modal').on('hidden.bs.modal', function(){
+        timer.stop();
+    });
     
     // Download primers from Web UI
     // Check whether user input is good
