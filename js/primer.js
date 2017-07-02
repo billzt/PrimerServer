@@ -1,5 +1,177 @@
-$(function () {
+/***************** Complex functions to display Figure after showing Panel, used after the server return results */
+function getMaxOfArray(numArray) {
+    return Math.max.apply(null, numArray);
+}
+function getMinOfArray(numArray) {
+    return Math.min.apply(null, numArray);
+}
+function GenerateGraph(el) {
+    // empty the element
+    el.find('.PrimerFigure').html('');
     
+    // svg
+    var svg = d3.select(el.find('.PrimerFigure')[0])
+                .append('svg')
+                .attr('width', '100%');
+    svg.append('style').text('.axis path,.axis line{fill: none;stroke: blue;stroke-width: 2px;shape-rendering: crispEdges;} '
+        +'.axis text{font-size:11px;} .primerLabel{font-size:11px;} .primerUniqueLabel{font-size:11px;font-weight:bold;}');
+    
+    // primers regions
+    var primers = el.find('.list-group-item');
+    var primers2region = new Object;
+    var primers2hit = new Object;
+    var allPoses = new Array;
+    for (var i=0; i<primers.length; i++) {
+        var id = $(primers[i]).find('.list-group-item-heading').attr('id');
+        var primer_left = $(primers[i]).find('.primer-left-region');
+        var primer_right = $(primers[i]).find('.primer-right-region');
+        var region_1 = $(primer_left[0]).html().split('-');
+        var region_2 = $(primer_right[0]).html().split('-');
+        primers2region[id] = [region_1, region_2];
+        Array.prototype.push.apply(allPoses, region_1);
+        Array.prototype.push.apply(allPoses, region_2);
+        var hitNum = $(primers[i]).find('.hit-num').data('hit');
+        primers2hit[id] = hitNum;
+    }
+    
+    // axis
+    var axisStart;
+    var axisEnd;
+    var targetPos = el.prev().find('.site-detail').data('pos');
+    var targetLen = el.prev().find('.site-detail').data('length');
+    if ($('[name="region_type"]:checked').val()=='SEQUENCE_INCLUDED_REGION') {
+        axisStart = targetPos-Math.round(targetLen/5)>0 ? targetPos-Math.round(targetLen/5) : 1;
+        axisEnd = targetPos+targetLen+Math.round(targetLen/5);
+    }
+    else if ($('[name="region_type"]:checked').val()=='SEQUENCE_TARGET' || 
+    $('[name="region_type"]:checked').val()=='FORCE_END') {
+        axisStart = getMinOfArray(allPoses);
+        axisEnd = getMaxOfArray(allPoses);
+    }
+    var axisScale = d3.scaleLinear().domain([axisStart, axisEnd]).range([0, 1000]);
+    var axis = d3.axisTop().scale(axisScale).ticks(10);
+    svg.append('g').attr('class', 'axis').call(axis); // axis: translate(x,y) is no longer needed as PanZoom can do it
+    
+    // Text
+    var template = el.prev().find('.site-detail').data('seq');
+    svg.append('text').attr('x','0').attr('y','-30').text('Template '+template).attr('font-size', '120%');
+    
+    // target region
+    var rectHight = 60;
+    svg.append('rect').attr('x', axisScale(targetPos))  
+       .attr('y', -rectHight/2)  // axis:y-rect:height/2
+       .attr('width', axisScale(targetPos+targetLen)-axisScale(targetPos)).attr('height', rectHight)
+       .attr("fill", "none").attr('stroke', 'red').attr('stroke-width', '3');
+    
+    // Primer Group
+    var colorScale = d3.scaleLinear().domain([1, 100]).range([0, 32]);
+    function AddPrimer(LprimerStart, LprimerEnd, RprimerStart, RprimerEnd, i, h, id) {
+        var primerGroup = svg.append('a').attr('xlink:href','#'+id).attr('class', 'primerGroup')
+                        .attr('title', 'Primer '+i).append('g');
+        var baseY = rectHight+30*(i-1);
+        var lineFunction = d3.line()
+            .x(function(d) { return Math.round(axisScale(d.x)); })
+            .y(function(d) { return d.y; });
+        var color = 'rgb('+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+')';
+        
+        // Left Primer
+        var Llength = LprimerEnd-LprimerStart+1;
+        
+        var LlineData = [ { "x": LprimerStart, "y": baseY-5},  { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY-5},
+                         { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY-10}, {"x": LprimerEnd, "y": baseY},
+                         { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY+10}, {"x": LprimerStart+Math.round(Llength/3*2), "y": baseY+5},
+                         { "x": LprimerStart, "y": baseY+5},  { "x": LprimerStart, "y": baseY-5}];
+        
+        primerGroup.append('path').attr('d', lineFunction(LlineData)).attr("fill", color).attr('stroke', color);
+        
+        
+        // Right Primer
+        var Rlength = RprimerEnd-RprimerStart+1;
+        
+        var RlineData = [ {"x": RprimerStart, "y": baseY}, {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY-10},
+                          {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY-5}, {"x": RprimerEnd, "y": baseY-5},
+                          {"x": RprimerEnd, "y": baseY+5}, {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY+5},
+                          {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY+10}, {"x": RprimerStart, "y": baseY}];
+        primerGroup.append('path').attr('d', lineFunction(RlineData)).attr("fill", color).attr('stroke', color);
+        
+        // Center Line
+        var LineData = [{"x": LprimerEnd, "y": baseY}, {"x": RprimerStart, "y": baseY}];
+        primerGroup.append('path').attr('d', lineFunction(LineData)).attr("fill", color).attr('stroke', color);
+        
+        // Text
+        var primerLabel = h==1 ? '[Primer'+i+'] '+h+' Amplicon' : '[Primer'+i+'] '+h+' Amplicons';
+        if (h==1) {
+            primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
+            .attr("y", baseY+5).attr('class', 'primerUniqueLabel').attr('fill', 'red').text(primerLabel);
+        }
+        else {
+            primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
+            .attr("y", baseY+5).attr('class', 'primerLabel').text(primerLabel);
+        }
+    }
+
+    var primerRank = 1;
+    for ( id in primers2region) {
+        var LprimerStart=primers2region[id][0][0];
+        var LprimerEnd=primers2region[id][0][1];
+        var RprimerStart=primers2region[id][1][0];
+        var RprimerEnd=primers2region[id][1][1];
+        var h = primers2hit[id];
+        AddPrimer(LprimerStart*1, LprimerEnd*1, RprimerStart*1, RprimerEnd*1, primerRank*1, h*1, id);
+        primerRank++;
+        //break;
+    }
+    
+    // extend svg height if there are too many primers
+    if (primerRank>3) {
+        svg.attr('height', (primerRank-3)*30+150);
+    }
+    
+    // Pan and Zoom
+    if ($('.PrimerFigure svg').length>0) {
+        var zoomObj = svgPanZoom('.PrimerFigure svg');
+        if (el.find('.PrimerFigureControl').length==0) {
+            el.find('.PrimerFigure').before('<div class="PrimerFigureControl btn-group">'
+                +'<button type="button" class="btn btn-default zoom-in" title="Zoom in" data-toggle="tooltip"><i class="fa fa-search-plus"></i></button>'
+                +'<button type="button" class="btn btn-default zoom-out" title="Zoom out" data-toggle="tooltip"><i class="fa fa-search-minus"></i></button>'
+                +'<button type="button" class="btn btn-default zoom-reset" title="Reset" data-toggle="tooltip"><i class="fa fa-refresh"></i></button>'
+                +'<button type="button" class="btn btn-default svg-download" title="Download SVG" data-toggle="tooltip"><i class="fa fa-download"></i></button>'
+                +'</div>');                
+        }
+        $('[data-toggle="tooltip"]').tooltip({html: true});
+        $(window).resize(function(){
+            zoomObj.resize();
+            zoomObj.fit();
+            zoomObj.center();
+        });
+        $('.zoom-in').click(function(){
+            zoomObj.zoomIn();
+        });
+        $('.zoom-out').click(function(){
+            zoomObj.zoomOut();
+        });
+        $('.zoom-reset').click(function(){
+            zoomObj.resetZoom().resetPan();
+        });
+        $('.svg-download').click(function(){
+            var download_text = '<svg width="100%" xmlns="http://www.w3.org/2000/svg" '
+            +'xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"> '
+            + $('.PrimerFigure svg').html() + '</svg>';
+            var blob = new Blob([download_text], {type: "text/svg;charset=utf-8"});
+            saveAs(blob, "primer.svg"); 
+        });
+    }
+}
+
+/***************** Complex functions finished  ***********************************************************/
+
+// function for save results
+function toURL(value, row) {
+    return '<a target="_blank" href="temp/'+row.url+'">'+value+'</a>';
+}
+
+
+$(function () {
     // Tooltip for bootstrap
     $('[data-toggle="tooltip"]').tooltip({html: true});
     $('[data-toggle="popover"]').popover({html: true});
@@ -92,6 +264,28 @@ $(function () {
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var type = $(e.target).attr('href').replace('#', '');
         $("[name='app-type']").val(type);
+        if (type=='saved') {
+            $('#parameter-panel').addClass('hidden');
+            $(':submit').addClass('hidden');
+            $(':reset').addClass('hidden');
+            $('#result').addClass('hidden');
+            $('#footer-button').addClass('hidden');
+        }
+        else {
+            var app_type_title_save = ' ';
+            switch(type) {
+                case 'design': app_type_title_save = 'Design Primers';break;
+                case 'check': app_type_title_save = 'Check Primers';break;
+            }
+            $('#save-webpage input').val(app_type_title_save);
+            $('#parameter-panel').removeClass('hidden');
+            $(':submit').removeClass('hidden');
+            $(':reset').removeClass('hidden');
+            $('#result').removeClass('hidden');
+            if ($('#result').html()!='') {
+                $('#footer-button').removeClass('hidden');
+            }
+        }
     });
     
     // change panel collapse state when user change it
@@ -134,173 +328,7 @@ $(function () {
         }
     });
     
-    /***************** Complex functions to display Figure after showing Panel, used after the server return results */
-    function getMaxOfArray(numArray) {
-        return Math.max.apply(null, numArray);
-    }
-    function getMinOfArray(numArray) {
-        return Math.min.apply(null, numArray);
-    }
-    function GenerateGraph(el) {
-        // empty the element
-        el.find('.PrimerFigure').html('');
-        
-        // svg
-        var svg = d3.select(el.find('.PrimerFigure')[0])
-                    .append('svg')
-                    .attr('width', '100%');
-        svg.append('style').text('.axis path,.axis line{fill: none;stroke: blue;stroke-width: 2px;shape-rendering: crispEdges;} '
-            +'.axis text{font-size:11px;} .primerLabel{font-size:11px;} .primerUniqueLabel{font-size:11px;font-weight:bold;}');
-        
-        // primers regions
-        var primers = el.find('.list-group-item');
-        var primers2region = new Object;
-        var primers2hit = new Object;
-        var allPoses = new Array;
-        for (var i=0; i<primers.length; i++) {
-            var id = $(primers[i]).find('.list-group-item-heading').attr('id');
-            var primer_left = $(primers[i]).find('.primer-left-region');
-            var primer_right = $(primers[i]).find('.primer-right-region');
-            var region_1 = $(primer_left[0]).html().split('-');
-            var region_2 = $(primer_right[0]).html().split('-');
-            primers2region[id] = [region_1, region_2];
-            Array.prototype.push.apply(allPoses, region_1);
-            Array.prototype.push.apply(allPoses, region_2);
-            var hitNum = $(primers[i]).find('.hit-num').data('hit');
-            primers2hit[id] = hitNum;
-        }
-        
-        // axis
-        var axisStart;
-        var axisEnd;
-        var targetPos = el.prev().find('.site-detail').data('pos');
-        var targetLen = el.prev().find('.site-detail').data('length');
-        if ($('[name="region_type"]:checked').val()=='SEQUENCE_INCLUDED_REGION') {
-            axisStart = targetPos-Math.round(targetLen/5)>0 ? targetPos-Math.round(targetLen/5) : 1;
-            axisEnd = targetPos+targetLen+Math.round(targetLen/5);
-        }
-        else if ($('[name="region_type"]:checked').val()=='SEQUENCE_TARGET' || 
-        $('[name="region_type"]:checked').val()=='FORCE_END') {
-            axisStart = getMinOfArray(allPoses);
-            axisEnd = getMaxOfArray(allPoses);
-        }
-        var axisScale = d3.scaleLinear().domain([axisStart, axisEnd]).range([0, 1000]);
-        var axis = d3.axisTop().scale(axisScale).ticks(10);
-        svg.append('g').attr('class', 'axis').call(axis); // axis: translate(x,y) is no longer needed as PanZoom can do it
-        
-        // Text
-        var template = el.prev().find('.site-detail').data('seq');
-        svg.append('text').attr('x','0').attr('y','-30').text('Template '+template).attr('font-size', '120%');
-        
-        // target region
-        var rectHight = 60;
-        svg.append('rect').attr('x', axisScale(targetPos))  
-           .attr('y', -rectHight/2)  // axis:y-rect:height/2
-           .attr('width', axisScale(targetPos+targetLen)-axisScale(targetPos)).attr('height', rectHight)
-           .attr("fill", "none").attr('stroke', 'red').attr('stroke-width', '3');
-        
-        // Primer Group
-        var colorScale = d3.scaleLinear().domain([1, 100]).range([0, 32]);
-        function AddPrimer(LprimerStart, LprimerEnd, RprimerStart, RprimerEnd, i, h, id) {
-            var primerGroup = svg.append('a').attr('xlink:href','#'+id).attr('class', 'primerGroup')
-                            .attr('title', 'Primer '+i).append('g');
-            var baseY = rectHight+30*(i-1);
-            var lineFunction = d3.line()
-                .x(function(d) { return Math.round(axisScale(d.x)); })
-                .y(function(d) { return d.y; });
-            var color = 'rgb('+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+','+Math.round(colorScale(h)*8)+')';
-            
-            // Left Primer
-            var Llength = LprimerEnd-LprimerStart+1;
-            
-            var LlineData = [ { "x": LprimerStart, "y": baseY-5},  { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY-5},
-                             { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY-10}, {"x": LprimerEnd, "y": baseY},
-                             { "x": LprimerStart+Math.round(Llength/3*2), "y": baseY+10}, {"x": LprimerStart+Math.round(Llength/3*2), "y": baseY+5},
-                             { "x": LprimerStart, "y": baseY+5},  { "x": LprimerStart, "y": baseY-5}];
-            
-            primerGroup.append('path').attr('d', lineFunction(LlineData)).attr("fill", color).attr('stroke', color);
-            
-            
-            // Right Primer
-            var Rlength = RprimerEnd-RprimerStart+1;
-            
-            var RlineData = [ {"x": RprimerStart, "y": baseY}, {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY-10},
-                              {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY-5}, {"x": RprimerEnd, "y": baseY-5},
-                              {"x": RprimerEnd, "y": baseY+5}, {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY+5},
-                              {"x": RprimerStart+Math.round(Rlength/3*1), "y": baseY+10}, {"x": RprimerStart, "y": baseY}];
-            primerGroup.append('path').attr('d', lineFunction(RlineData)).attr("fill", color).attr('stroke', color);
-            
-            // Center Line
-            var LineData = [{"x": LprimerEnd, "y": baseY}, {"x": RprimerStart, "y": baseY}];
-            primerGroup.append('path').attr('d', lineFunction(LineData)).attr("fill", color).attr('stroke', color);
-            
-            // Text
-            var primerLabel = h==1 ? '[Primer'+i+'] '+h+' Amplicon' : '[Primer'+i+'] '+h+' Amplicons';
-            if (h==1) {
-                primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
-                .attr("y", baseY+5).attr('class', 'primerUniqueLabel').attr('fill', 'red').text(primerLabel);
-            }
-            else {
-                primerGroup.append('text').attr("x", axisScale(LprimerStart)-120)
-                .attr("y", baseY+5).attr('class', 'primerLabel').text(primerLabel);
-            }
-        }
 
-        var primerRank = 1;
-        for ( id in primers2region) {
-            var LprimerStart=primers2region[id][0][0];
-            var LprimerEnd=primers2region[id][0][1];
-            var RprimerStart=primers2region[id][1][0];
-            var RprimerEnd=primers2region[id][1][1];
-            var h = primers2hit[id];
-            AddPrimer(LprimerStart*1, LprimerEnd*1, RprimerStart*1, RprimerEnd*1, primerRank*1, h*1, id);
-            primerRank++;
-            //break;
-        }
-        
-        // extend svg height if there are too many primers
-        if (primerRank>3) {
-            svg.attr('height', (primerRank-3)*30+150);
-        }
-        
-        // Pan and Zoom
-        if ($('.PrimerFigure svg').length>0) {
-            var zoomObj = svgPanZoom('.PrimerFigure svg');
-            if (el.find('.PrimerFigureControl').length==0) {
-                el.find('.PrimerFigure').before('<div class="PrimerFigureControl btn-group">'
-                    +'<button type="button" class="btn btn-default zoom-in" title="Zoom in" data-toggle="tooltip"><i class="fa fa-search-plus"></i></button>'
-                    +'<button type="button" class="btn btn-default zoom-out" title="Zoom out" data-toggle="tooltip"><i class="fa fa-search-minus"></i></button>'
-                    +'<button type="button" class="btn btn-default zoom-reset" title="Reset" data-toggle="tooltip"><i class="fa fa-refresh"></i></button>'
-                    +'<button type="button" class="btn btn-default svg-download" title="Download SVG" data-toggle="tooltip"><i class="fa fa-download"></i></button>'
-                    +'</div>');                
-            }
-            $('[data-toggle="tooltip"]').tooltip({html: true});
-            $(window).resize(function(){
-                zoomObj.resize();
-                zoomObj.fit();
-                zoomObj.center();
-            });
-            $('.zoom-in').click(function(){
-                zoomObj.zoomIn();
-            });
-            $('.zoom-out').click(function(){
-                zoomObj.zoomOut();
-            });
-            $('.zoom-reset').click(function(){
-                zoomObj.resetZoom().resetPan();
-            });
-            $('.svg-download').click(function(){
-                console.log('Click');
-                var download_text = '<svg width="100%" xmlns="http://www.w3.org/2000/svg" '
-                +'xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"> '
-                + $('.PrimerFigure svg').html() + '</svg>';
-                var blob = new Blob([download_text], {type: "text/svg;charset=utf-8"});
-                saveAs(blob, "primer.svg"); 
-            });
-        }
-    }
-    
-    /***************** Complex functions finished  ***********************************************************/
 
     // form validation & submit
     function ScrollToResult() {
@@ -330,10 +358,10 @@ $(function () {
 
             // show download area
             if ($('#primers-result').length>0) {
-                $('#download-primer').removeClass('hidden');
+                $('#footer-button').removeClass('hidden');
             }
             else {
-                $('#download-primer').addClass('hidden');
+                $('#footer-button').addClass('hidden');
             }
             
             // remove primer amplicon links if no hits were found
@@ -496,17 +524,77 @@ $(function () {
         saveAs(blob, "primer.list.txt"); 
     });
     
-
-    // $('#test').load('primer.final.result.html',function(){
-        // GenerateGraph($('#site-1'));
-        // $('#test').find('.collapse').on('shown.bs.collapse', function (e) {
-            // GenerateGraph($(this));
-        // });
-        // $('#test').find('.collapse').on('hidden.bs.collapse', function (e) {
-            // $(this).find('.PrimerFigure').html('');
-            // $(this).find('.PrimerFigureControl').remove();
-        // });                    
-    // });
+    // Save webpage
+    // render table from localStorage
+    var rows = [];
+    var storage = window.localStorage;
+    var storage_key_pattern = new RegExp('^PrimerServer');
+    for (var i=0; i<storage.length; i++) {
+        var storage_key = storage.key(i);
+        if (storage_key_pattern.test(storage_key)) {
+            var storage_key_array = storage_key.split('.');
+            rows.push({
+                time: storage_key_array[1].replace(/-/g,'/')+' '+storage_key_array[2].replace(/-/g,':'),
+                title: localStorage.getItem(storage_key),
+                url: storage_key,
+            });
+        }
+    }
+    $('#saved_table').bootstrapTable({data:rows});
+    $.get('script/current_time.php', function(data){
+        $('#saved .alert-info').html(data);
+    });
+    
+    // control selection
+    var selections = [];
+    $('#saved_toolbar button').prop('disabled', true);
+    $('#saved_table').on('check.bs.table check-all.bs.table uncheck.bs.table uncheck-all.bs.table', function (e, rows) {
+        selections = $('#saved_table').bootstrapTable('getAllSelections');
+        if (selections.length>0) {
+            $('#saved_toolbar button').prop('disabled', false);
+        }
+        else {
+            $('#saved_toolbar button').prop('disabled', true);
+        }
+    });
+    
+    // remove items
+    $('#saved_toolbar button').click(function(){
+        var remove_rows = $.map($('#saved_table').bootstrapTable('getSelections'), function (row) {
+            return row.url;
+        });
+        $('#saved_table').bootstrapTable('remove', {
+            field: 'url',
+            values: remove_rows
+        });
+        for (var i=0; i<remove_rows.length; i++) {
+            localStorage.removeItem(remove_rows[i]);
+        }
+        $.get('script/remove_webpage.php', {urls:remove_rows.join(' ')}, function(data){
+            1;
+        });
+    });
+    
+    // store results
+    $('#save-webpage button').click(function(){
+        var app_type = $("[name='app-type']").val();
+        var region_type = $('[name="region_type"]:checked').val();
+        var save_title = $('#save-webpage input').val();
+        $.get('script/save_webpage.php', {type1:app_type, type2:region_type}, function(data){
+            localStorage.setItem(data, save_title); // data: PrimerServer.$date.$time.$session_id.html
+            $('#save-result-modal').modal('show');
+            var storage_key_array = data.split('.');
+            $('#saved_table').bootstrapTable('prepend', [{
+                time: storage_key_array[1].replace(/-/g,'/')+' '+storage_key_array[2].replace(/-/g,':'),
+                title: save_title,
+                url: data,
+            }]);
+        });
+    });
+    $('#save-result-modal-button').click(function(){
+        $('#save-result-modal').modal('hide');
+        $('a[href="#saved"]').tab('show');
+    });
 });
 
 

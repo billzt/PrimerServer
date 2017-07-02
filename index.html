@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <title> Primer </title>
+        <title> PrimerServer </title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">   <!-- For IE -->
         <meta name="renderer" content="webkit">   <!-- For some Chinese web browser -->
@@ -15,6 +15,8 @@
         <link rel="stylesheet" href="css/bootstrap.min.css" >
         <!-- Bootstrap-Select plugin CSS -->
         <link rel="stylesheet" href="css/bootstrap-select.min.css" >
+        <!-- Bootstrap Table plugin CSS -->
+        <link rel="stylesheet" href="css/bootstrap-table.min.css"  >
         
         <!-- font-awesome CSS -->
         <link rel="stylesheet" href="css/font-awesome.min.css">
@@ -30,15 +32,18 @@
     <body>
     
         <div class="container" role="main">
-            <h1>PCR Primers Batch Design &amp; Specificity Check</h1>
+            <h1>PrimerServer: PCR Primers Batch Design &amp; Specificity Check</h1>
             <form class="form-horizontal" method="post" enctype="multipart/form-data" id="form-primer">
                 <input type="hidden" name="app-type" value="design" class="save-input" />
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active">
-                        <a href="#design" role="tab" data-toggle="tab">Design &amp; Check</a>
+                        <a href="#design" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-edit"></span> Design &amp; Check</a>
                     </li>
                     <li role="presentation">
-                        <a href="#check" role="tab" data-toggle="tab">Check Only</a>
+                        <a href="#check" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-search"></span> Check Only</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#saved" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-star"></span> Recent Saved Results</a>
                     </li>
                 </ul>
                 <div class="tab-content">
@@ -241,8 +246,30 @@
                             name="check-primers"></textarea>
                         </fieldset>
                     </div>
+                    <div role="tabpanel" class="tab-pane fade" id="saved">
+                        <h2>Recent Saved Results</h2>
+                        <div class="alert alert-info" role="alert"></div>
+                        <div id="saved_toolbar">
+                            <button class="btn btn-danger" type="button" disabled>Delete</button>
+                        </div>
+                        <table class="table table-no-bordered bootstrap-table-responsive"
+                        data-toolbar="#saved_toolbar" id="saved_table"
+                        data-search="true" data-escape="false" data-show-export="false" 
+                        data-pagination="true" data-page-list="[10,20,50]" data-side-pagination="client" data-maintain-selected="true"
+                        data-sort-name="time" data-sort-order="desc"
+                        >
+                            <thead>
+                                <tr>
+                                    <th data-field="state" data-checkbox="true"></th>
+                                    <th data-field="time" data-sortable="true" data-formatter="toURL">Time</th>
+                                    <th data-field="title" data-formatter="toURL">Title</th>
+                                    <th data-field="url" data-visible="false">URL</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
-                <div class="panel panel-default">
+                <div class="panel panel-default" id="parameter-panel">
                     <div class="panel-heading">
                         <h2 class="panel-title">
                             Setting Specificity Checking Parameters
@@ -379,9 +406,9 @@
                 <div id="test"></div>
             </div>
             
-            <div class="row hidden" id="download-primer">
+            <div class="row hidden" id="footer-button">
                 <div class="col-sm-6">
-                    <div class="input-group">
+                    <div class="input-group" id="download-primer">
                       <span class="input-group-addon">Download Primers with hits &le;</span>
                       <input type="number" class="form-control" value=1 />
                       <span class="input-group-btn">
@@ -389,6 +416,17 @@
                             <span class="glyphicon glyphicon-download"></span>
                         </button>
                       </span>
+                    </div>
+                </div>
+                <div class="col-sm-6" id="save-webpage">
+                    <div class="input-group">
+                        <span class="input-group-addon">Save this result:</span>
+                        <input type="text" class="form-control" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-success" type="button">
+                                <span class="glyphicon glyphicon-star"></span>
+                            </button>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -444,6 +482,24 @@
               </div>
             </div>
           </div>
+        </div>
+        
+        <!-- Modal for saving results -->
+        <div class="modal fade" id="save-result-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Saving Succeed!</h4>
+                  </div>
+                  <div class="modal-body">
+                    <button type="button" class="btn btn-success" id="save-result-modal-button">See your saved results</button>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+            </div>
         </div>
         
         <!-- Modal for help information -->
@@ -513,6 +569,8 @@ D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
         <script src="js/bootstrap.min.js"></script>
         <!-- Bootstrap Select JS -->
         <script src="js/bootstrap-select.min.js"></script>
+        <!-- Bootstrap Table JS -->
+        <script src="js/bootstrap-table.min.js"></script>
         <!-- jQuery Validation -->
         <script src="js/jquery.validationEngine.min.js"></script>
         <script src="js/jquery.validationEngine-en.js"></script>
