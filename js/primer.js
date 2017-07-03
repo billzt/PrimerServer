@@ -187,6 +187,7 @@ $(function () {
         $('[name="select-template"]').append(data);
         $('[name="select-database"]').append(data);
         $('[name="select-template"]').append('<optgroup label="Custom"><option value="custom">Custom Template Sequences...</option></optgroup>');
+        $('[name="select-database"]').append('<optgroup label="Custom"><option value="custom">Custom Database Sequences...</option></optgroup>');
         
         // get all the default values
         var inputs = $(':text.save-input');
@@ -333,8 +334,15 @@ $(function () {
             $('[name="custom-template-sequences"]').parent().addClass('hidden');
         }
     });
+    $('[name="select-database"]').on('changed.bs.select refreshed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+        if (event.target.value=='custom') {
+            $('[name="custom-db-sequences"]').parent().removeClass('hidden');
+        }
+        else {
+            $('[name="custom-db-sequences"]').parent().addClass('hidden');
+        }
+    });
     
-
 
     // form validation & submit
     function ScrollToResult() {

@@ -23,10 +23,31 @@ $config = parse_ini_file("../config.ini");
 $path_samtools = $config['samtools'];
 $path_primer3 = $config['primer3'];
 $path_blastn = $config['blastn'];
+$path_makeblastdb = $config['makeblastdb'];
 $limit_site = $config['limitSite'];
 $limit_primer = $config['limitPrimer'];
 $cpu = $config['useCPU'];
 $database_dir = $config['database'];
+
+// making custom database if user select a custom database
+$db = $config['database']."/".$_POST['select-database'];
+if ($_POST['select-database']=='custom') {
+    $db = "../temp/customdb";
+    file_put_contents("../temp/customdb", $_POST['custom-db-sequences']);
+    // check whether file custom is a DNA FASTA format file
+    exec("$path_samtools faidx ../temp/customdb");
+    if (!file_exists("../temp/customdb.fai")) {  // index FASTA is not OK
+?>
+<div class="alert alert-danger" role="alert">
+    Error: Building index of your input database FASTA failed! Either your input sequences are not in FASTA
+    format or there are some error in this web setting.
+</div>
+
+<?php
+        exit(0);
+    }
+    exec("$path_makeblastdb -dbtype nucl -in $db");
+}
 
 // design & check Primers
 if ($type=='design') {
@@ -75,7 +96,7 @@ END;
         if (!file_exists("$database_dir/custom.fai")) {  // index FASTA is not OK
 ?>
 <div class="alert alert-danger" role="alert">
-    Error: Building index of your input FASTA failed! Either your input sequences are not in FASTA
+    Error: Building index of your input template FASTA failed! Either your input sequences are not in FASTA
     format or there are some error in this web setting.
 </div>
 
@@ -112,7 +133,6 @@ END;
     
     // Run Pipeline: Design and Check
     // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    $db = $config['database']."/".$_POST['select-database'];
     $command = "perl pipeline_design_check.pl "
                ."--input=$working_dir/perl_input_region.tmp "
                ."--template=$database_dir/$template_tax "
@@ -178,7 +198,6 @@ else {
     
     // db
     // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    $db = "$database_dir/".$_POST['select-database'];
     $command = "perl _run_specificity_check.pl "
                ."--input=$working_dir/check.only.tmp "
                ."--db='$db' "

@@ -395,6 +395,11 @@
                         data-size="10" data-live-search="true" title="Select your databases">
                         </select>
                     </div>
+                    <fieldset class="hidden">
+                        <legend>Input Custom Database Sequences</legend>
+                        <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8" 
+                        placeholder="Input your database sequences in FASTA format..." name="custom-db-sequences"></textarea>
+                    </fieldset>
                 </div>
                 <input type="submit" value="Submit" class="btn btn-primary" /> 
                 <input type="reset"  value="Reset" class="btn btn-default" />
