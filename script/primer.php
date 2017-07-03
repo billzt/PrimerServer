@@ -68,6 +68,7 @@ END;
     // template species
     $template_tax = $_POST['select-template'];
     if ($template_tax=='custom') {
+        $database_dir = "../temp";
         file_put_contents("$database_dir/custom", $_POST['custom-template-sequences']);
         // check whether file custom is a DNA FASTA format file
         exec("$path_samtools faidx $database_dir/custom");
@@ -111,7 +112,7 @@ END;
     
     // Run Pipeline: Design and Check
     // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
-    $db = "$database_dir/".$_POST['select-database'];
+    $db = $config['database']."/".$_POST['select-database'];
     $command = "perl pipeline_design_check.pl "
                ."--input=$working_dir/perl_input_region.tmp "
                ."--template=$database_dir/$template_tax "

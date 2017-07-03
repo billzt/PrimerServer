@@ -237,6 +237,12 @@ $(function () {
         // App type: design OR check
         // when the document is ready, show the last App type select by users
         $('a[href="#'+$("[name='app-type']").val()+'"]').tab('show');
+        var app_type_title_save = ' ';
+        switch($("[name='app-type']").val()) {
+            case 'design': app_type_title_save = 'Design Primers';break;
+            case 'check': app_type_title_save = 'Check Primers';break;
+        }
+        $('#save-webpage input').val(app_type_title_save);
         
         // Paramter panel collapse
         if ($("[name='parameter-design']").val()=='hide') {
