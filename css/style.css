@@ -31,10 +31,6 @@ legend {
     border: none;
 }
 
-textarea {
-    background-color: #bfffdf !important;
-}
-
 /* SVG axis (Has been intergrated in primer.js)
 .axis path,
 .axis line{

@@ -17,7 +17,7 @@ function GenerateGraph(el) {
         +'.axis text{font-size:11px;} .primerLabel{font-size:11px;} .primerUniqueLabel{font-size:11px;font-weight:bold;}');
     
     // primers regions
-    var primers = el.find('.list-group-item');
+    var primers = el.find('.list-group-item-primer');
     var primers2region = new Object;
     var primers2hit = new Object;
     var allPoses = new Array;
@@ -609,6 +609,7 @@ $(function () {
         $('#save-result-modal').modal('hide');
         $('a[href="#saved"]').tab('show');
     });
+    
 });
 
 

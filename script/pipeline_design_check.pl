@@ -27,7 +27,7 @@ Optional Parameters: Primer Design
     --product_size_min INT
                         Lower limit of designed product sizes in bp. Default: [100]
     --product_size_max INT
-                        Upper limit of designed product sizes in bp. Default: [5000]
+                        Upper limit of designed product sizes in bp. Default: [1000]
                         
 
 Optional Parameters: Primer Specificity Check
@@ -71,7 +71,6 @@ Optional Parameters: Experimental Setting
                         
 Optional Parameters: Output
     --outputdir STR     The output directory. Default: [./PrimerServerOutput]
-    --output_detail     If turned on, produce HTML results. Default: [OFF]
     --debug             If turned on, print additional debug information. Default: [OFF]
     
 Optional Parameters: System Configuration
@@ -207,7 +206,7 @@ system $cmd;
 
 ####### Retrieve Results, generate [primer.final.result.txt] ##########
 $cmd = "perl $perl_dir/_run_final_selection.pl --primer3result=$dir/primer3output.txt --region_type=$region_type "
-              ."--specificity=$dir/specificity.check.result.txt --retain=$retain "
+              ."--specificity=$dir/specificity.check.result.txt --retain=$retain --amplicon=$dir/specificity.check.result.amplicon "
               ."--outputdir=$dir";
 if ($detail) {
     $cmd .= " --detail";

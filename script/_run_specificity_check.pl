@@ -17,7 +17,6 @@ Optional:
 --size_start
 --size_stop
 --outputdir
---detail
 --use_3end
 --samtools
 --blastn
@@ -497,6 +496,7 @@ if (!$detail) {
 }
 my %hit_num_for_primer;
 my %hit_regions_for_primer;
+open $tmp_out_fh, ">", "$dir/specificity.check.result.amplicon";
 for my $i (0..$#run_array) {
     my $hit_num = 0;
     my ($id, $rank) = @{$run_array[$i]};
@@ -537,6 +537,7 @@ for my $i (0..$#run_array) {
                 print {$out} "Template: $target_id\n";
                 print {$out} "Template Region: $target_start-$next_target_end\n";
                 push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
+                print {$tmp_out_fh} "$id\t$rank\t$target_id\t$target_start\t$next_target_end\n";    # For design and check use only
                 print {$out} "Primer Left: $query ($query_seq)\n";
                 print {$out} "Primer Right: $next_query ($next_query_seq)\n";
                 print {$out} "Product Size: ", $next_target_end-$target_start+1, " bp\n";
@@ -558,7 +559,7 @@ for my $i (0..$#run_array) {
     $hit_num_for_primer{$id}{$rank} = $hit_num;
     print {$out_fh} "$id\t$rank\t$hit_num\t@seqs\n" if (!$detail);
 }
-
+close $tmp_out_fh;
 system "rm -rf $dir/tmp.specificity.check";
 
 ####### Print HTML  #########

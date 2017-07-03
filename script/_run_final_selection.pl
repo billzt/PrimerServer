@@ -14,8 +14,8 @@ Required:
 Optional:
 --region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
 --outputdir
---detail
 --retain
+--amplicon
 --help      Print this help and exit
 END_USAGE
 
@@ -24,6 +24,7 @@ my $primer3result;
 my $specificity;
 my $detail;
 my $retain = 10;
+my $amplicon;
 my $dir = ".";
 my $region_type = "SEQUENCE_TARGET";
 
@@ -35,6 +36,7 @@ GetOptions(
     'detail'      =>  \$detail,
     'retain=i'      =>  \$retain,
     'region_type=s' =>  \$region_type,
+    'amplicon=s'    =>  \$amplicon,
 );
 
 if ($help or !$primer3result or !$specificity) {
@@ -49,6 +51,16 @@ while (<$in_fh>) {
     next if (/^#/);
     my ($id, $rank, $num) = split;
     $hit_num_for_primer{$id}{$rank} = $num;
+}
+close $in_fh;
+
+my %hit_regions_for_primer;
+open $in_fh, "<", $amplicon;
+while (<$in_fh>) {
+    chomp;
+    next if (/^#/);
+    my ($id, $rank, $target_id, $target_start, $next_target_end) = split;
+    push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
 }
 close $in_fh;
 
@@ -229,12 +241,12 @@ END
                 else {
                     if ($hit_num==1) {
                         print {$out_fh} <<"END";
-                    <li class="list-group-item list-group-item-success">
+                    <li class="list-group-item list-group-item-primer list-group-item-success">
 END
                     }
                     else {
                         print {$out_fh} <<"END";
-                    <li class="list-group-item">                    
+                    <li class="list-group-item list-group-item-primer">                    
 END
                     }
                     print {$out_fh} <<"END";
@@ -283,7 +295,7 @@ END
                                         </tr>
                                         <tr>
                                             <th>Product Size</th>
-                                            <td colspan="9">$size</td>
+                                            <td colspan="9">$size bp</td>
                                         </tr>
                                         <tr>
                                             <th>Penalty</th>
@@ -298,6 +310,30 @@ END
                                                 </a>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th class="col-sm-2">Possible Amplicons Regions</th>
+                                            <td class="col-sm-4"><ul class="list-group"> 
+END
+            if ($hit_num>0) {
+                my @hit_regions = @{ $hit_regions_for_primer{$id}{$i} };
+                for my $j (0..$#hit_regions) {
+                    my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
+                    my $size = $next_target_end-$target_start+1;
+                    if ($hit_num==1) {
+                        print {$out_fh} "<li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    }
+                    else {
+                        print {$out_fh} "<li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    }
+                    if ($j==4) {
+                        print {$out_fh} "<li class='list-group-item'>...</li>";
+                        last;
+                    }
+                }            
+            }
+            print {$out_fh} <<"END";
+                                            </ul></td>
+                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
