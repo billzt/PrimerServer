@@ -110,7 +110,15 @@ open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/primer.query.fa";
 while (<$in_fh>) {
     chomp;
     next if (/^#/);
-    my ($id, $rank, @seqs) = split;
+    my @data = split;
+    my ($id, $rank, @seqs);
+    if ($data[1]=~/\d+/) {  # user have defined ranks
+        ($id, $rank, @seqs) = @data;
+    }
+    else {
+        $rank = 0;
+        ($id, @seqs) = @data;
+    }
     for my $i (0..$#seqs) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
         $primer2group{"$id.$rank.Primer$i"} = "$id.$rank";
@@ -624,12 +632,12 @@ END
             my $hit_num = $hit_num_for_primer{$id}{$i};
             if ($hit_num==1) {
                 print {$out_fh} <<"END";
-                    <li class="list-group-item list-group-item-success">
+                    <li class="list-group-item list-group-item-primer list-group-item-success">
 END
             }
             else {
                 print {$out_fh} <<"END";
-                    <li class="list-group-item">                    
+                    <li class="list-group-item list-group-item-primer">                    
 END
             }        
             print {$out_fh} <<"END";

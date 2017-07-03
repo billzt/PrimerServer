@@ -492,7 +492,7 @@ $(function () {
         var sites = $('#primers-result .panel');
         for (var i=0; i<sites.length; i++) {
             var site_id = $(sites[i]).find('.panel-heading').find('small');
-            var primers = $(sites[i]).find('.panel-body').find('.list-group-item');
+            var primers = $(sites[i]).find('.panel-body').find('.list-group-item-primer');
             for (var j=0; j<primers.length; j++) {
                 // deside whether to print this ID or not
                 var hit_num = $(primers[j]).find('.hit-num').data('hit');
