@@ -146,10 +146,10 @@ while (<$in_fh>) {
     my ($query, $qs, $qe, $target, $ts, $te, $strand) = split;
     my $group = $primer2group{$query};
     if ($strand eq 'plus') {
-        $blastdata{$group}{$target}{$ts} = [$te, $strand, $query, $qs, $qe];
+        push @{$blastdata{$group}{$target}{$ts}}, [$te, $strand, $query, $qs, $qe]; # Usually there is only one region here
     }
     else {
-        $blastdata{$group}{$target}{$te} = [$ts, $strand, $query, $qs, $qe];
+        push @{$blastdata{$group}{$target}{$te}}, [$ts, $strand, $query, $qs, $qe]; # Usually there is only one region here
     }
 }
 close $in_fh;
@@ -159,15 +159,21 @@ for my $group (keys %blastdata) {
         my @target_starts = sort {$a<=>$b} keys %{ $blastdata{$group}{$target} };
         for my $i (0..$#target_starts-1) {
             my $ts = $target_starts[$i];
-            my ($te, $strand, $query, $qs, $qe) = @{$blastdata{$group}{$target}{$ts}};
-            for my $j ($i+1..$#target_starts) {
-                my $next_ts = $target_starts[$j];
-                my ($next_te, $next_strand, $next_query, $next_qs, $next_qe) = @{$blastdata{$group}{$target}{$next_ts}};
-                my $size = $next_te-$ts+1;
-                next if ($size<$size_start);
-                last if ($size>$size_stop);
-                if ($strand eq 'plus' && $next_strand eq 'minus') {
-                    print {$out_fh} "$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
+            my @regions = @{$blastdata{$group}{$target}{$ts}};
+            for my $region (@regions) {     # Usually there is only one region here
+                my ($te, $strand, $query, $qs, $qe) = @{$region};
+                for my $j ($i+1..$#target_starts) {
+                    my $next_ts = $target_starts[$j];
+                    my @next_regions = @{$blastdata{$group}{$target}{$next_ts}};
+                    for my $next_region (@next_regions) {   # Usually there is only one region here
+                        my ($next_te, $next_strand, $next_query, $next_qs, $next_qe) = @{$next_region};
+                        my $size = $next_te-$ts+1;
+                        next if ($size<$size_start);
+                        last if ($size>$size_stop);
+                        if ($strand eq 'plus' && $next_strand eq 'minus') {
+                            print {$out_fh} "$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
+                        }
+                    }
                 }
             }
         }
