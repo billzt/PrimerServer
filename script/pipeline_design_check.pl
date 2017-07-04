@@ -189,7 +189,7 @@ if (!-e($template)) {
 my $cmd = "perl $perl_dir/_run_primer3.pl --input=$input --db=$template --region_type=$region_type "
             ."--primer3bin=$primer3bin --samtools=$samtools --outputdir=$dir --product_size_min=$product_size_min --product_size_max=$product_size_max ";
 if ($primer3setting) {
-    $cmd .= "--primer3setting=$primer3setting";
+    $cmd .= " --primer3setting=$primer3setting";
 }
 system $cmd;
 

@@ -529,6 +529,8 @@ for my $i (0..$#run_array) {
                 my $next_query_seq = $query_seq{$next_query};
                 my $target_seq = $target_seq{$target_region};
                 my $next_target_seq = revcom($target_seq{$target_next_region});
+                next if (length($query_seq) != length($target_seq));
+                next if (length($next_query_seq) != length($next_target_seq));
                 my $Tm_1 = NN_Tm($query_seq, com($target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
                 my $Tm_2 = NN_Tm($next_query_seq, com($next_target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
                 next if ($Tm_1<$min_Tm_own-$min_Tm_diff or $Tm_2<$min_Tm_own-$min_Tm_diff);

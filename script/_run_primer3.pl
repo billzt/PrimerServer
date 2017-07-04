@@ -80,8 +80,18 @@ open my $tmp_out_fh, ">", "$dir/region.list.tmp";
 while (<$input_fh>) {
     chomp;
     next if (/^#/);
-    my @data = split;
     my ($chr, $target_start, $target_length, $size_min, $size_max) = split;
+    if (!$target_start && !$target_length) {    # If user only gives an ID, then use the whole template. (qRT-PCR)
+        $target_start = 1;
+        $target_length = `awk '\$1=="$chr"' $db.fai | cut -f 2`;
+        chomp($target_length);
+    }
+    elsif ($target_start && !$target_length) {  # If user only gives an ID and a position, then set the target length as 1. (such as SNP)
+        $target_length = 1;
+    }
+    if ($target_length>100000) {
+        die "Error: The target region length in template is too long: $chr: $target_length bp\n";
+    }
     $target_start =~ s/,//g;
     if (!$size_min) {
         $size_min = $product_size_min;
