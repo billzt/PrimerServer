@@ -32,11 +32,11 @@ $database_dir = $config['database'];
 // making custom database if user select a custom database
 $db = $config['database']."/".$_POST['select-database'];
 if ($_POST['select-database']=='custom') {
-    $db = "../temp/customdb";
-    file_put_contents("../temp/customdb", $_POST['custom-db-sequences']);
+    $db = "$working_dir/customdb";
+    file_put_contents($db, $_POST['custom-db-sequences']);
     // check whether file custom is a DNA FASTA format file
-    exec("$path_samtools faidx ../temp/customdb");
-    if (!file_exists("../temp/customdb.fai")) {  // index FASTA is not OK
+    exec("$path_samtools faidx $db");
+    if (!file_exists("$db.fai")) {  // index FASTA is not OK
 ?>
 <div class="alert alert-danger" role="alert">
     Error: Building index of your input database FASTA failed! Either your input sequences are not in FASTA
@@ -89,7 +89,7 @@ END;
     // template species
     $template_tax = $_POST['select-template'];
     if ($template_tax=='custom') {
-        $database_dir = "../temp";
+        $database_dir = $working_dir;
         file_put_contents("$database_dir/custom", $_POST['custom-template-sequences']);
         // check whether file custom is a DNA FASTA format file
         exec("$path_samtools faidx $database_dir/custom");
