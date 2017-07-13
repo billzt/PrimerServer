@@ -82,7 +82,7 @@ my %data_for_primer;
 END
     }
     else {
-        print {$out_fh} "### Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\tTarget_Amplicon_Size\tPrimer_Pair_Penalty_Score\tPossible_Amplicon_Number\n";
+        print {$out_fh} "### Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\tTarget_Amplicon_Size\tPrimer_Pair_Penalty_Score\tPossible_Amplicon_Number\tPrimer_Rank_in_Primer3_output\n";
     }
     
     my $site_num = 0;
@@ -236,7 +236,7 @@ END
                 
                 my $hit_num = $hit_num_for_primer{$id}{$i};
                 if (!$detail) {
-                    print {$out_fh} "$id\t$primer_output_rank\t$seq_F\t$seq_R\t$size\t$penalty_pair\t$hit_num\n";
+                    print {$out_fh} "$id\t$primer_output_rank\t$seq_F\t$seq_R\t$size\t$penalty_pair\t$hit_num\t$i\n";
                 }
                 else {
                     if ($hit_num==1) {
