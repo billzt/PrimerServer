@@ -49,6 +49,7 @@ my $size_start = 70;
 my $size_stop = 1000;
 my $detail;
 my $use_3end;
+my $report_last_5bp_in_3end;
 my $cpu = 1;
 my $samtools = "samtools";
 my $blastn = "blastn";
@@ -67,6 +68,7 @@ GetOptions(
     'size_stop=i'   =>  \$size_stop,
     'detail'        =>  \$detail,
     'use_3end'      =>  \$use_3end,
+    'report_last_5bp_in_3end'   =>  \$report_last_5bp_in_3end,
     'num_cpu=i'     =>  \$cpu,
     'conc_primer=f' =>  \$primer_conc,
     'conc_Na=f'     =>  \$Na,
@@ -451,6 +453,17 @@ sub draw {
     printf {$fh} "%-${name_len}s %${num_len}d %s %-${num_len}d\n", "Template", $ts, $str2, $te;
 }
 
+sub compare {
+    my ($str1, $str2) = @_;
+    my @str1 = split //, $str1;
+    my @str2 = split //, $str2;
+    my $num = 0;
+    for my $i (0..$#str1) {
+        $num++ if ($str1[$i] ne $str2[$i]);
+    }
+    return $num;
+}
+
 ###############  Conduct end filling for BLAST alignments  ###############
 my %query_seq;
 {
@@ -511,6 +524,7 @@ if (!$detail) {
 my %hit_num_for_primer;
 my %hit_regions_for_primer;
 open $tmp_out_fh, ">", "$dir/specificity.check.result.amplicon";
+print {$tmp_out_fh} "#id\trank\ttarget_id\ttarget_start\tnext_target_end\tleft_end3\tright_end3\tdiff_left_end3\tdiff_right_end3\n";
 for my $i (0..$#run_array) {
     my $hit_num = 0;
     my ($id, $rank) = @{$run_array[$i]};
@@ -537,23 +551,38 @@ for my $i (0..$#run_array) {
                 my $next_target_seq = revcom($target_seq{$target_next_region});
                 next if (length($query_seq) != length($target_seq));
                 next if (length($next_query_seq) != length($next_target_seq));
+                
+                # calculate Tm
                 my $Tm_1 = NN_Tm($query_seq, com($target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
                 my $Tm_2 = NN_Tm($next_query_seq, com($next_target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
                 next if ($Tm_1<$min_Tm_own-$min_Tm_diff or $Tm_2<$min_Tm_own-$min_Tm_diff);
                 
+                # calculate 3end
                 my $end1 = substr($query_seq, -1) eq substr($target_seq, -1) ? 'No' : 'Yes';
                 my $end2 = substr($next_query_seq, -1) eq substr($next_target_seq, -1) ? 'No' : 'Yes';
                 next if ($use_3end && ($end1 eq 'Yes' or $end2 eq 'Yes'));
-                $hit_num++;
+                
+                
+                # calculate differences in the last 5bp in 3end
+                my ($diff_end1, $diff_end2);
+                if ($report_last_5bp_in_3end) {
+                    $diff_end1 = compare(substr($query_seq, -5), substr($target_seq, -5));
+                    $diff_end2 = compare(substr($next_query_seq, -5), substr($next_target_seq, -5));
+                }
                 
                 # Generate Output
+                $hit_num++;
                 print {$out} "############ Amplicon $hit_num ###########\n";
                 my ($target_id, $target_start, $target_end) = $target_region=~/^(.*?)\:(\d+)-(\d+)$/;
                 my ($next_target_start, $next_target_end) = $target_next_region=~/\:(\d+)-(\d+)$/;
                 print {$out} "Template: $target_id\n";
                 print {$out} "Template Region: $target_start-$next_target_end\n";
                 push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
-                print {$tmp_out_fh} "$id\t$rank\t$target_id\t$target_start\t$next_target_end\n";    # For design and check use only
+                print {$tmp_out_fh} "$id\t$rank\t$target_id\t$target_start\t$next_target_end\t$end1\t$end2";    # For design and check use only
+                if ($report_last_5bp_in_3end) {
+                    print {$tmp_out_fh} "\t$diff_end1\t$diff_end2";
+                }
+                print {$tmp_out_fh} "\n";
                 print {$out} "Primer Left: $query ($query_seq)\n";
                 print {$out} "Primer Right: $next_query ($next_query_seq)\n";
                 print {$out} "Product Size: ", $next_target_end-$target_start+1, " bp\n";

@@ -109,6 +109,7 @@ my $retain = 10;
 my $cpu = 1;
 my $region_type = "SEQUENCE_TARGET";
 my $debug;
+my $report_last_5bp_in_3end;
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -133,6 +134,7 @@ GetOptions(
     'blast_identity=f' => \$blast_identity,
     'blast_max_hsps=i' => \$blast_max_hsps,
     'debug' =>  \$debug,
+    'report_last_5bp_in_3end'   =>  \$report_last_5bp_in_3end,
     'conc_primer=f' =>  \$primer_conc,
     'conc_Na=f'     =>  \$Na,
     'conc_K=f'      =>  \$K,
@@ -201,6 +203,9 @@ $cmd = "perl $perl_dir/_run_specificity_check.pl --input=$dir/primer3output.simp
             ." --conc_primer=$primer_conc --conc_Na=$Na --conc_K=$K --conc_Tris=$Tris --conc_Mg=$Mg --conc_dNTPs=$dNTPs";
 if ($use_3end) {
     $cmd .= " --use_3end";
+}
+if ($report_last_5bp_in_3end) {
+    $cmd .= " --report_last_5bp_in_3end";
 }
 system $cmd;
 
