@@ -193,9 +193,15 @@ my $cmd = "perl $perl_dir/_run_primer3.pl --input=$input --db=$template --region
 if ($primer3setting) {
     $cmd .= " --primer3setting=$primer3setting";
 }
+if ($debug) {
+    print "Begin Designing Primers...\n";
+}
 my $status = system $cmd;
 if ($status!=0) {
     exit(1);
+}
+if ($debug) {
+    print "Finish Designing Primers\n";
 }
 
 ####### Run Specificity Check, generate [specificity.check.result.txt] ##########
@@ -210,10 +216,15 @@ if ($use_3end) {
 if ($report_last_5bp_in_3end) {
     $cmd .= " --report_last_5bp_in_3end";
 }
-system $cmd;
+if ($debug) {
+    print "Begin Checking Primer Specificity...\n";
+}
 $status = system $cmd;
 if ($status!=0) {
     exit(1);
+}
+if ($debug) {
+    print "Finish Checking Primer Specificity...\n";
 }
 
 

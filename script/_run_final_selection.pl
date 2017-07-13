@@ -168,7 +168,6 @@ END
             my ($PRIMER_LEFT_EXPLAIN) = /PRIMER_LEFT_EXPLAIN=(.*)/;
             my ($PRIMER_RIGHT_EXPLAIN) = /PRIMER_RIGHT_EXPLAIN=(.*)/;
             my ($PRIMER_PAIR_EXPLAIN) = /PRIMER_PAIR_EXPLAIN=(.*)/;
-            my ($error) = /PRIMER_ERROR=(.*)/;
             if (!$detail) {
                 print {$out_fh} "$id\tNo_Primer\t$PRIMER_LEFT_EXPLAIN\t$PRIMER_RIGHT_EXPLAIN\t$PRIMER_PAIR_EXPLAIN\n";
             }
@@ -180,8 +179,6 @@ END
                     <p>Left primer: $PRIMER_LEFT_EXPLAIN</p>
                     <p>Right primer: $PRIMER_RIGHT_EXPLAIN</p>
                     <p>Pair: $PRIMER_PAIR_EXPLAIN</p>
-                    <p>Error: $error</p>
-                    <b>If you did not see any explainations here, then it is probably that you give wrong sequence IDs</b>
                 </div>
             </div>
 END
