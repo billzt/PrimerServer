@@ -30,7 +30,7 @@ if ($show_info==1) {
     <li>CPU info<?php echo $cpu_info[0] ?></li>
     <li>Memory Total: <?php echo $mem_total_result ?> kB</li>
     <li>Memory Free: <?php echo $mem_free_result ?> kB</li>
-    <li>Current Session: <?php echo $session_id ?> kB</li>
+    <li>Current Session: <?php echo $session_id ?></li>
 <?php
 }
     

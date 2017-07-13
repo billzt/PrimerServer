@@ -164,7 +164,18 @@ END;
     if ($_POST['use_3_end']==1) {
         $command .= "--use_3end";
     }
-    exec($command);
+    exec("$command 2>$working_dir/pipeline.log");
+    if (filesize("$working_dir/pipeline.log")>0) {
+        $msg = file_get_contents("$working_dir/pipeline.log");
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <p>Warning: Error when running the pipeline.</p> 
+    <p><?php echo $msg ?></p>
+</div>
+<?php
+        exit(0);
+    }
     
     echo file_get_contents("$working_dir/primer.final.result.html");
 }
@@ -222,7 +233,18 @@ else {
     if ($_POST['use_3_end']==1) {
         $command .= "--use_3end";
     }
-    exec($command);
+    exec("$command 2>$working_dir/pipeline.log");
+    if (filesize("$working_dir/pipeline.log")>0) {
+        $msg = file_get_contents("$working_dir/pipeline.log");
+?>
+<div class="alert alert-danger alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <p>Warning: Error when running the pipeline.</p> 
+    <p><?php echo $msg ?></p>
+</div>
+<?php
+        exit(0);
+    }
     
     echo file_get_contents("$working_dir/specificity.check.result.html");
 }

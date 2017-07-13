@@ -193,7 +193,10 @@ my $cmd = "perl $perl_dir/_run_primer3.pl --input=$input --db=$template --region
 if ($primer3setting) {
     $cmd .= " --primer3setting=$primer3setting";
 }
-system $cmd;
+my $status = system $cmd;
+if ($status!=0) {
+    exit(1);
+}
 
 ####### Run Specificity Check, generate [specificity.check.result.txt] ##########
 $cmd = "perl $perl_dir/_run_specificity_check.pl --input=$dir/primer3output.simple.table.txt --num_cpu=$cpu "
@@ -208,6 +211,11 @@ if ($report_last_5bp_in_3end) {
     $cmd .= " --report_last_5bp_in_3end";
 }
 system $cmd;
+$status = system $cmd;
+if ($status!=0) {
+    exit(1);
+}
+
 
 ####### Retrieve Results, generate [primer.final.result.txt] ##########
 $cmd = "perl $perl_dir/_run_final_selection.pl --primer3result=$dir/primer3output.txt --region_type=$region_type "
@@ -217,5 +225,9 @@ if ($detail) {
     $cmd .= " --detail";
 }
 system $cmd;
+$status = system $cmd;
+if ($status!=0) {
+    exit(1);
+}
 
 

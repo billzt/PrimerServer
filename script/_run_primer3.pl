@@ -89,7 +89,7 @@ while (<$input_fh>) {
     elsif ($target_start && !$target_length) {  # If user only gives an ID and a position, then set the target length as 1. (such as SNP)
         $target_length = 1;
     }
-    if ($target_length>100000) {
+    if ($target_length>1000000) {
         die "Error: The target region length in template is too long: $chr: $target_length bp\n";
     }
     $target_start =~ s/,//g;
@@ -183,6 +183,10 @@ else {
     while (<$tmp_in_fh>) {
         chomp;
         my ($id) = /SEQUENCE_ID=(\S+)/;
+        my ($error) = /PRIMER_ERROR=(.*)/;
+        if ($error) {       # There must be some error in primer design
+            die "Error happend in primer design: $error\n";
+        }
         my ($primer_num) = /PRIMER_PAIR_NUM_RETURNED=(\S+)/;
         if ($primer_num==0) {
             1;
