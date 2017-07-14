@@ -10,6 +10,10 @@ if (!file_exists($working_dir)) {
     mkdir($working_dir);
 }
 
+// write user's IP
+file_put_contents("$working_dir/user.txt", $_SERVER['REMOTE_ADDR']);
+
+
 // App type
 $type = $_POST['app-type'];
 switch($type) {
