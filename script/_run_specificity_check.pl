@@ -6,6 +6,8 @@ use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
 use List::Util qw/max min/;
+use threads;
+use threads::shared;
 
 my $usage = <<"END_USAGE";
 usage: $0 --input=<user input table> --db=<db> [Option]
@@ -81,7 +83,7 @@ GetOptions(
     'blast_e_value=f' =>  \$blast_e_value,
     'blast_word_size=i' => \$blast_word_size,
     'blast_identity=f' => \$blast_identity,
-    'blast_max_hsps=i' => \$blast_max_hsps
+    'blast_max_hsps=i' => \$blast_max_hsps,
 );
 
 if ($help or !$input or !$db) {
@@ -107,7 +109,8 @@ mkdir "$dir/result.specificity.check" if (!-e "$dir/result.specificity.check"); 
 my %primer_seq_for;
 my @ids;    # Only used to keep order of site id;
 my @run_array;
-my %primer2group; 
+my %primer2group;
+my $num_primer_seq = 0;
 open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/primer.query.fa";
 while (<$in_fh>) {
     chomp;
@@ -124,6 +127,7 @@ while (<$in_fh>) {
     for my $i (0..$#seqs) {
         print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
         $primer2group{"$id.$rank.Primer$i"} = "$id.$rank";
+        $num_primer_seq++;
     }
     push @ids, $id if(!($id~~@ids));
     $primer_seq_for{$id}{$rank} = [@seqs];
@@ -134,27 +138,50 @@ close $tmp_out_fh;
 
 
 ####### Run BLAST #########
-my $blastcmd = "$blastn -task blastn-short -query $dir/tmp.specificity.check/primer.query.fa -db $db -evalue $blast_e_value "
-                ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
-                ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
-                ." -out $dir/tmp.specificity.check/primer.query.fa.out -num_threads $cpu";
-system $blastcmd;
-
-####### Filter BLAST Results by Prodct Sizes #########
-my %blastdata;
-open $in_fh, "<", "$dir/tmp.specificity.check/primer.query.fa.out";
-while (<$in_fh>) {
-    chomp;
-    my ($query, $qs, $qe, $target, $ts, $te, $strand) = split;
-    my $group = $primer2group{$query};
-    if ($strand eq 'plus') {
-        push @{$blastdata{$group}{$target}{$ts}}, [$te, $strand, $query, $qs, $qe]; # Usually there is only one region here
-    }
-    else {
-        push @{$blastdata{$group}{$target}{$te}}, [$ts, $strand, $query, $qs, $qe]; # Usually there is only one region here
-    }
+my $blast_run_num = min($cpu, $num_primer_seq);
+my $blast_query_split = int($num_primer_seq*2/$blast_run_num)+1;
+if ($blast_query_split%2==1) {
+    $blast_query_split+=1;  # Must be an even number
 }
-close $in_fh;
+system "split -l $blast_query_split -d $dir/tmp.specificity.check/primer.query.fa $dir/tmp.specificity.check/primer.query.fa.split.";
+$cpu = $cpu/$blast_run_num<1 ? 1 : int($cpu/$blast_run_num);
+
+sub runblast {
+    my $query_file = shift;
+    my $blastcmd = "$blastn -task blastn-short -query $query_file -db $db -evalue $blast_e_value "
+                    ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
+                    ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
+                    ." -out $query_file.out -num_threads $cpu";
+    system $blastcmd;
+}
+my @threads;
+for my $query_file (glob "$dir/tmp.specificity.check/primer.query.fa.split.*") {
+    my $thread = threads->create(\&runblast, $query_file);
+    push @threads, $thread;
+}
+for my $thread (@threads) {
+    $thread->join();
+}
+
+
+####### Filter BLAST Results by Product Sizes #########
+my %blastdata;
+for my $file (glob "$dir/tmp.specificity.check/primer.query.fa.split.*.out") {
+    open my $in_fh, "<", $file;
+    while (<$in_fh>) {
+        chomp;
+        my ($query, $qs, $qe, $target, $ts, $te, $strand) = split;
+        my $group = $primer2group{$query};
+        if ($strand eq 'plus') {
+            push @{$blastdata{$group}{$target}{$ts}}, [$te, $strand, $query, $qs, $qe]; # Usually there is only one region here
+        }
+        else {
+            push @{$blastdata{$group}{$target}{$te}}, [$ts, $strand, $query, $qs, $qe]; # Usually there is only one region here
+        }
+    }
+    close $in_fh;
+}
+
 open $out_fh, ">", "$dir/tmp.specificity.check/primer.query.fa.out.filterlength";
 for my $group (keys %blastdata) {
     for my $target (keys %{$blastdata{$group}}) {
