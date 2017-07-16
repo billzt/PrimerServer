@@ -99,7 +99,7 @@ if (system("which $blastn >/dev/null 2>&1")!=0 && system("$blastn >/dev/null 2>&
     die "Can not find Blastn\n";
 }
 
-####### Generate  input files  #########
+####### Generate  input files (split)  #########
 open my $in_fh, "<", $input;
 my $out_fh;
 mkdir "$dir" if (!-e $dir);
@@ -110,11 +110,12 @@ my %primer_seq_for;
 my @ids;    # Only used to keep order of site id;
 my @run_array;
 my %primer2group;
-my $num_primer_seq = 0;
-open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/primer.query.fa";
+my $num_primer_group = 0;
+my %query_seq;
 while (<$in_fh>) {
     chomp;
     next if (/^#/);
+    $num_primer_group++;
     my @data = split;
     my ($id, $rank, @seqs);
     if ($data[1]=~/\d+/) {  # user have defined ranks
@@ -124,50 +125,41 @@ while (<$in_fh>) {
         $rank = 0;
         ($id, @seqs) = @data;
     }
-    for my $i (0..$#seqs) {
-        print {$tmp_out_fh} ">$id.$rank.Primer$i\n$seqs[$i]\n";
-        $primer2group{"$id.$rank.Primer$i"} = "$id.$rank";
-        $num_primer_seq++;
-    }
     push @ids, $id if(!($id~~@ids));
     $primer_seq_for{$id}{$rank} = [@seqs];
     push @run_array, [$id, $rank];
 }
 close $in_fh;
-close $tmp_out_fh;
 
+my $split_num = min($cpu, $num_primer_group);
+for my $split (0..$split_num-1) {
+    open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/primer.query.$split.fa";
+    for my $i (0..$#run_array) {
+        next unless ($i%$split_num==$split);
+        my ($id, $primer_rank) = @{ $run_array[$i] };
+        my @seqs = @{ $primer_seq_for{$id}{$primer_rank} };
+        for my $j (0..$#seqs) {
+            print {$tmp_out_fh} ">$id.$primer_rank.Primer$j\n$seqs[$j]\n";
+            $primer2group{"$id.$primer_rank.Primer$j"} = "$id.$primer_rank";
+            $query_seq{"$id.$primer_rank.Primer$j"} = uc($seqs[$j]);
+        }
+    }
+    close $tmp_out_fh;
+}
 
 ####### Run BLAST #########
-my $blast_run_num = min($cpu, $num_primer_seq);
-my $blast_query_split = int($num_primer_seq*2/$blast_run_num)+1;
-if ($blast_query_split%2==1) {
-    $blast_query_split+=1;  # Must be an even number
-}
-system "split -l $blast_query_split -d $dir/tmp.specificity.check/primer.query.fa $dir/tmp.specificity.check/primer.query.fa.split.";
-$cpu = $cpu/$blast_run_num<1 ? 1 : int($cpu/$blast_run_num);
+my $run_cpu = $cpu/$split_num<1 ? 1 : int($cpu/$split_num);
 
 sub runblast {
     my $query_file = shift;
     my $blastcmd = "$blastn -task blastn-short -query $query_file -db $db -evalue $blast_e_value "
                     ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
                     ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
-                    ." -out $query_file.out -num_threads $cpu";
+                    ." -out $query_file.out -num_threads $run_cpu";
     system $blastcmd;
-}
-my @threads;
-for my $query_file (glob "$dir/tmp.specificity.check/primer.query.fa.split.*") {
-    my $thread = threads->create(\&runblast, $query_file);
-    push @threads, $thread;
-}
-for my $thread (@threads) {
-    $thread->join();
-}
-
-
-####### Filter BLAST Results by Product Sizes #########
-my %blastdata;
-for my $file (glob "$dir/tmp.specificity.check/primer.query.fa.split.*.out") {
-    open my $in_fh, "<", $file;
+    ####### Filter BLAST Results by Product Sizes #########
+    my %blastdata;
+    open my $in_fh, "<", "$query_file.out";
     while (<$in_fh>) {
         chomp;
         my ($query, $qs, $qe, $target, $ts, $te, $strand) = split;
@@ -180,36 +172,43 @@ for my $file (glob "$dir/tmp.specificity.check/primer.query.fa.split.*.out") {
         }
     }
     close $in_fh;
-}
-
-open $out_fh, ">", "$dir/tmp.specificity.check/primer.query.fa.out.filterlength";
-for my $group (keys %blastdata) {
-    for my $target (keys %{$blastdata{$group}}) {
-        my @target_starts = sort {$a<=>$b} keys %{ $blastdata{$group}{$target} };
-        for my $i (0..$#target_starts-1) {
-            my $ts = $target_starts[$i];
-            my @regions = @{$blastdata{$group}{$target}{$ts}};
-            for my $region (@regions) {     # Usually there is only one region here
-                my ($te, $strand, $query, $qs, $qe) = @{$region};
-                for my $j ($i+1..$#target_starts) {
-                    my $next_ts = $target_starts[$j];
-                    my @next_regions = @{$blastdata{$group}{$target}{$next_ts}};
-                    for my $next_region (@next_regions) {   # Usually there is only one region here
-                        my ($next_te, $next_strand, $next_query, $next_qs, $next_qe) = @{$next_region};
-                        my $size = $next_te-$ts+1;
-                        next if ($size<$size_start);
-                        last if ($size>$size_stop);
-                        if ($strand eq 'plus' && $next_strand eq 'minus') {
-                            print {$out_fh} "$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
+    open my $out_fh, ">", "$query_file.out.filterlength";
+    for my $group (keys %blastdata) {
+        for my $target (keys %{$blastdata{$group}}) {
+            my @target_starts = sort {$a<=>$b} keys %{ $blastdata{$group}{$target} };
+            for my $i (0..$#target_starts-1) {
+                my $ts = $target_starts[$i];
+                my @regions = @{$blastdata{$group}{$target}{$ts}};
+                for my $region (@regions) {     # Usually there is only one region here
+                    my ($te, $strand, $query, $qs, $qe) = @{$region};
+                    for my $j ($i+1..$#target_starts) {
+                        my $next_ts = $target_starts[$j];
+                        my @next_regions = @{$blastdata{$group}{$target}{$next_ts}};
+                        for my $next_region (@next_regions) {   # Usually there is only one region here
+                            my ($next_te, $next_strand, $next_query, $next_qs, $next_qe) = @{$next_region};
+                            my $size = $next_te-$ts+1;
+                            next if ($size<$size_start);
+                            last if ($size>$size_stop);
+                            if ($strand eq 'plus' && $next_strand eq 'minus') {
+                                print {$out_fh} "$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
+                            }
                         }
                     }
                 }
             }
         }
     }
+    close $out_fh;
+}
+my @threads;
+for my $query_file (glob "$dir/tmp.specificity.check/*.fa") {
+    my $thread = threads->create(\&runblast, $query_file);
+    push @threads, $thread;
+}
+for my $thread (@threads) {
+    $thread->join();
 }
 
-close $out_fh;
 
 ####### Run Tm and 3'end mismatch check  #########
 ############################################################
@@ -492,34 +491,25 @@ sub compare {
 }
 
 ###############  Conduct end filling for BLAST alignments  ###############
-my %query_seq;
-{
-    local $/ = ">";
-    open my $fh, "<", "$dir/tmp.specificity.check/primer.query.fa";
-    while (<$fh>) {
-        chomp;
-        next unless ($_);
-        my ($id, @seqs) = split;
-        my $seq = join '', @seqs;
-        $query_seq{$id} = uc($seq);
-    }
-}
 my %retrieve_region_data;
-open $tmp_out_fh, ">", "$dir/tmp.specificity.check/retrieve.region.tmp";
-open $in_fh, "<", "$dir/tmp.specificity.check/primer.query.fa.out.filterlength";
-while (<$in_fh>) {
-    chomp;
-    my ($target, $ts, $te, $next_ts, $next_te, $size, $query, $qs, $qe, $next_query, $next_qs, $next_qe) = split;
-    my $select_ts = $ts-$qs+1;
-    my $select_te = $te+length($query_seq{$query})-$qe;     # $query: $id.$rank.Primer$i
-    my $select_next_ts = $next_ts-length($query_seq{$next_query})+$next_qe;
-    my $select_next_te = $next_te+$next_qs-1;
-    next if ($select_ts<0 or $select_next_ts<0);    # This means failed to end filling
-    print {$tmp_out_fh} "$target:$select_ts-$select_te\n$target:$select_next_ts-$select_next_te\n";
-    push @{$retrieve_region_data{$query}}, ["$target:$select_ts-$select_te", "$target:$select_next_ts-$select_next_te", $next_query];
+open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/retrieve.region.tmp";
+for my $file (glob "$dir/tmp.specificity.check/*.filterlength") {
+    open my $in_fh, "<", $file;
+    while (<$in_fh>) {
+        chomp;
+        my ($target, $ts, $te, $next_ts, $next_te, $size, $query, $qs, $qe, $next_query, $next_qs, $next_qe) = split;
+        my $select_ts = $ts-$qs+1;
+        my $select_te = $te+length($query_seq{$query})-$qe;     # $query: $id.$rank.Primer$i
+        my $select_next_ts = $next_ts-length($query_seq{$next_query})+$next_qe;
+        my $select_next_te = $next_te+$next_qs-1;
+        next if ($select_ts<0 or $select_next_ts<0);    # This means failed to end filling
+        print {$tmp_out_fh} "$target:$select_ts-$select_te\n$target:$select_next_ts-$select_next_te\n";
+        push @{$retrieve_region_data{$query}}, ["$target:$select_ts-$select_te", "$target:$select_next_ts-$select_next_te", $next_query];
+    }
+    close $in_fh;
 }
 close $tmp_out_fh;
-close $in_fh;
+
 system "sort $dir/tmp.specificity.check/retrieve.region.tmp | uniq >$dir/tmp.specificity.check/retrieve.region.uniq.tmp";
 system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";
 

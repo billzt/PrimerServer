@@ -5,8 +5,8 @@ $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
 
-exec("grep -c '>' $working_dir/tmp.specificity.check/primer.query.fa", $i);
-exec("cut -f 1 $working_dir/tmp.specificity.check/primer.query.fa.out | uniq | wc -l", $j);
+exec("grep '>' $working_dir/tmp.specificity.check/*.fa | wc -l", $i);
+exec("cut -f 1 $working_dir/tmp.specificity.check/*.out | uniq | wc -l", $j);
 
 if (count($i)==0 or count($j)==0) {
     echo json_encode(array(
