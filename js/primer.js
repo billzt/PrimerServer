@@ -167,7 +167,7 @@ function GenerateGraph(el) {
 
 // function for save results
 function toURL(value, row) {
-    return '<a target="_blank" href="temp/'+row.url+'">'+value+'</a>';
+    return '<a target="_blank" href="save/'+row.url+'">'+value+'</a>';
 }
 
 

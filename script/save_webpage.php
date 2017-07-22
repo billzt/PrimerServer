@@ -130,6 +130,6 @@ $html .= <<<END
 </html>
 END;
 
-file_put_contents("../temp/PrimerServer.$date.$time.$session_id.html", $html);
+file_put_contents("../save/PrimerServer.$date.$time.$session_id.html", $html);
 
 echo "PrimerServer.$date.$time.$session_id.html";
