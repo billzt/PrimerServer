@@ -474,42 +474,51 @@ $(function () {
     });
     
     // Download primers from Web UI
-    // Check whether user input is good
-    $('#download-primer input').blur(function(){
-        var max_hit = $(this).val();
-        if (parseInt(max_hit,10)==max_hit) {
-            $('#download-primer button').prop('disabled', false);
-        }
-        else {
-            $('#download-primer button').prop('disabled', true);
-        }
-    });
-    $('#download-primer button').click(function(){
+    $('#download-primer button.btn-primary').click(function(){
         // Get User Input
-        var max_hit = $('#download-primer input').val();
-        
-        var download_text = "#Site_ID\tPrimer_Rank\tPenalty_Score\tTarget_Product_Size\tPossible_Hit_Num\tPrimer_Seq\n";
+        var download_hit = $(':radio[name="download_hit"]:checked').val();   // 1: only download unique primers or 0
+        var download_site = $(':radio[name="download_site"]:checked').val(); // 1: only download best primer per site or 0
+
+        var download_text = "#Site_ID\tPrimer_Rank\tPenalty_Score\tTarget_Product_Size\tPossible_Hit_Num\tPrimer_Seq\r\n";
         var sites = $('#primers-result .panel');
         for (var i=0; i<sites.length; i++) {
             var site_id = $(sites[i]).find('.panel-heading').find('small');
             var primers = $(sites[i]).find('.panel-body').find('.list-group-item-primer');
+            if (primers.length==0) {    // No primer for this site, only appear in design & check
+                download_text += site_id.data('seq')+'-'+site_id.data('pos')+'-'+site_id.data('length')+"\tNo_Primer\r\n";
+                continue;
+            }
+            if ($(sites[i]).find('.list-group-item-success').length==0 && download_hit==1) {    // No unique primers for this site
+                if (site_id.data('seq')) {  // design & check
+                    download_text += site_id.data('seq')+'-'+site_id.data('pos')+'-'+site_id.data('length')+"\t";
+                }
+                else {  // check only
+                    download_text += site_id.html() + "\t";
+                }
+                download_text += "No_Unique_Primers\r\n";
+                continue;
+            }
             for (var j=0; j<primers.length; j++) {
-                // deside whether to print this ID or not
+                // deside whether to print this primer or not
                 var hit_num = $(primers[j]).find('.hit-num').data('hit');
-                if (hit_num>max_hit) {
+                if (hit_num>1 && download_hit==1) {
+                    continue;
+                }
+                var primer_id = $(primers[j]).find('.list-group-item-heading').html();
+                if (primer_id!='Primer 1' && download_site==1) {
                     continue;
                 }
                 
                 // print site ID
-                if (site_id.data('seq')) {
+                if (site_id.data('seq')) {  // design & check
                     download_text += site_id.data('seq')+'-'+site_id.data('pos')+'-'+site_id.data('length')+"\t";
                 }
-                else {
+                else {  // check only
                     download_text += site_id.html() + "\t";
                 }
-                
+
                 // print primers
-                var primer_id = $(primers[j]).find('.list-group-item-heading').html();
+
                 var primer_seqs = $(primers[j]).find('.list-group-item-text').find('.monospace-style');
                 var penalty = $(primers[j]).find('.penalty');
                 var product_size = $(primers[j]).find('a[href="javascript:void(0)"]').data('targetsize');
@@ -531,7 +540,7 @@ $(function () {
                 for (var k=0; k<primer_seqs.length; k++) {
                     download_text += $(primer_seqs[k]).html() + "\t";
                 }
-                download_text += "\n";
+                download_text += "\r\n";
             }
         }
         var blob = new Blob([download_text], {type: "text/plain;charset=utf-8"});

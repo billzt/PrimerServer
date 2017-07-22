@@ -416,18 +416,41 @@
             </div>
             
             <div class="row hidden" id="footer-button">
-                <div class="col-sm-6">
+                <div class="col-sm-3">
                     <div class="input-group" id="download-primer">
-                      <span class="input-group-addon">Download Primers with hits &le;</span>
-                      <input type="number" class="form-control" value=1 />
-                      <span class="input-group-btn">
+                      <div class="input-group-btn dropup">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" >
+                            Download Primers <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>    
+                                <div class="radio">
+                                    <label><input type="radio" name="download_hit" value=1 checked />Primer: Unique Hit</label>
+                                </div>
+                            </li>
+                            <li>    
+                                <div class="radio">
+                                    <label><input type="radio" name="download_hit" value=0 />Primer: all Hits</label>
+                                </div>
+                            </li>
+                            <li>    
+                                <div class="radio">
+                                    <label><input type="radio" name="download_site" value=1 checked />Best Primer per Site</label>
+                                </div>
+                            </li>
+                            <li>    
+                                <div class="radio">
+                                    <label><input type="radio" name="download_site" value=0 />All Primers per Site</label>
+                                </div>
+                            </li>
+                        </ul>
                         <button class="btn btn-primary" type="button">
                             <span class="glyphicon glyphicon-download"></span>
                         </button>
-                      </span>
+                      </div>
                     </div>
                 </div>
-                <div class="col-sm-6" id="save-webpage">
+                <div class="col-sm-9" id="save-webpage">
                     <div class="input-group">
                         <span class="input-group-addon">Save this result:</span>
                         <input type="text" class="form-control" title="Input your title here" data-toggle="tooltip" />
@@ -528,8 +551,7 @@ D05	1006384	25
 D05	1180338	18
 D05	1008251	19
 D05	1009127	29
-D05	1063718	26
-                </pre>
+D05	1063718	26</pre>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">Acceptable Template IDs</h4>
@@ -550,8 +572,7 @@ D05-53199470-7	0	AGTGTAGGCAGTGAAAGATCCT	AGTTAACTCTCAAGCCTAGGGG
 D05-53199470-7	1	AGGCAGTGAAAGATCCTAATTCT	TGTGCTCCCTCAATCCAATGT
 D05-53199470-7	2	TGTAGGCAGTGAAAGATCCTAAT	TGCTCCCTCAATCCAATGTAGT
 D03-37527300-20	1	CACACACACAAGCAAGCCTG	TGCTCCTCAATCGATTCAGGT
-D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT
-                </pre>
+D03-37527300-20	2	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT</pre>
                 
               </div>
               <div class="modal-footer">
