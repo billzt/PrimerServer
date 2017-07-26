@@ -54,7 +54,7 @@ Optional Parameters: Primer Specificity Check
     --min_Tm_diff FLOAT 
                         The mininum melting temperature (in ℃) suggested to produce off-target amplicon.
                         Recommend to be at least 10℃ lower than PRIMER_MIN_TM in primer3 settings.
-                        Default: [10]
+                        Default: [20]
     --use_3end          If turned on, primer pairs having at least one mismatch at the 3' end
                         position with templates would not be considered to produce off-target amplicon, even if
                         their melting temperatures are higher than [min_Tm]. Turn on this would find more
@@ -102,7 +102,7 @@ my $K           = 50;     #mM
 my $Tris        = 10;     #mM
 my $Mg          = 1.5;    #mM  
 my $dNTPs       = 0.2; #mM 
-my $min_Tm_diff = 10;
+my $min_Tm_diff = 20;
 my $detail;
 my $use_3end;
 my $retain = 10;
