@@ -33,6 +33,7 @@ Optional:
 --conc_Mg
 --conc_dNTPs
 --min_Tm_diff
+--debug
 --help      Print this help and exit
 END_USAGE
 
@@ -59,6 +60,7 @@ my $blast_e_value = 30000;
 my $blast_word_size = 7;
 my $blast_identity = 60;
 my $blast_max_hsps = 500;
+my $debug;
 
 GetOptions(
     'help'          =>  \$help,
@@ -84,6 +86,7 @@ GetOptions(
     'blast_word_size=i' => \$blast_word_size,
     'blast_identity=f' => \$blast_identity,
     'blast_max_hsps=i' => \$blast_max_hsps,
+    'debug' =>  \$debug,
 );
 
 if ($help or !$input or !$db) {
@@ -130,6 +133,13 @@ while (<$in_fh>) {
     push @run_array, [$id, $rank];
 }
 close $in_fh;
+if (!@ids) {    # No Primer for all sites, Only exists when designing priemrs
+    open my $fh, ">", "$dir/specificity.check.result.txt";
+    close $fh;
+    open $fh, ">", "$dir/specificity.check.result.amplicon";
+    close $fh;
+    exit(0);
+}
 
 my $split_num = min($cpu, $num_primer_group);
 for my $split (0..$split_num-1) {
@@ -622,7 +632,10 @@ for my $i (0..$#run_array) {
     print {$out_fh} "$id\t$rank\t$hit_num\t@seqs\n" if (!$detail);
 }
 close $tmp_out_fh;
-system "rm -rf $dir/tmp.specificity.check";
+
+if (!$debug) {
+    system "rm -rf $dir/tmp.specificity.check";
+}
 
 ####### Print HTML  #########
 if ($detail) {

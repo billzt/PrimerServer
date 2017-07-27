@@ -60,38 +60,44 @@
                             <div class="input-group">
                                 <span class="input-group-addon">Species</span>
                                 <select class="form-control selectpicker show-tick save-input validate[required]" name="select-template" 
-                                data-size="10" data-live-search="true" title="Select your template species (allow 1)">
+                                data-size="10" data-live-search="true" title="Select your template species">
                                 </select>
                             </div>
                             <div class="row">
-                                <div class="col-sm-10">
-                                    <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8"
+                                <div class="col-md-9">
+                                    <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="12"
                                     style="background-color: #bfffdf"
-                                    placeholder="Input your regions, one per line, blank delimited: [TemplateID] [TargetPos] [TargetLength]" 
+                                    placeholder="Input your regions, one per line, blank delimited: TemplateID TargetPos TargetLength" 
                                     name="template-regions"></textarea>
                                 </div>
-                                <div class="col-sm-2">
-                                    <div class="radio">
-                                        <label><input type="radio" name="region_type" value="SEQUENCE_TARGET" checked />Target Region</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label><input type="radio" name="region_type" value="SEQUENCE_INCLUDED_REGION"  />Include Region</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label><input type="radio" name="region_type" value="FORCE_END"  />Force 3' End</label>
-                                    </div>
-                                    <div class="input-group">
-                                        <span class="input-group-addon">Min</span>
-                                        <input type="text" name="product_size_min" value="100"
-                                        class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
-                                        <span class="input-group-addon">bp</span>
-                                    </div>
-                                    <div class="input-group">
-                                        <span class="input-group-addon">Max</span>
-                                        <input type="text" name="product_size_max" value="1000"
-                                        class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
-                                        <span class="input-group-addon">bp</span>
-                                    </div>
+                                <div class="col-md-3">
+                                    <fieldset>
+                                        <legend>Region Type</legend>
+                                        <div class="radio">
+                                            <label><input type="radio" name="region_type" value="SEQUENCE_TARGET" checked />Target Region</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label><input type="radio" name="region_type" value="SEQUENCE_INCLUDED_REGION"  />Include Region</label>
+                                        </div>
+                                        <div class="radio">
+                                            <label><input type="radio" name="region_type" value="FORCE_END"  />Force 3' End</label>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend>Product Size</legend>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Min</span>
+                                            <input type="text" name="product_size_min" value="100"
+                                            class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
+                                            <span class="input-group-addon">bp</span>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Max</span>
+                                            <input type="text" name="product_size_max" value="1000"
+                                            class="form-control save-input validate[required, custom[integer], min[30], max[50000]]" />
+                                            <span class="input-group-addon">bp</span>
+                                        </div>
+                                    </fieldset>
                                 </div>
                             </div>
                         </fieldset>
@@ -249,7 +255,7 @@
                             </legend>
                             <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="8"
                             style="background-color: #ffdfbf"
-                            placeholder="Input your primer groups, one per line, space delimited: SiteID PrimerRank Seq1 Seq2 ..." 
+                            placeholder="Input your primer groups, one per line, space delimited: SiteID [PrimerRank] Seq1 Seq2 ..." 
                             name="check-primers"></textarea>
                         </fieldset>
                     </div>

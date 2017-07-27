@@ -195,6 +195,7 @@ if ($primer3setting) {
 }
 if ($debug) {
     print "Begin Designing Primers...\n";
+    $cmd .= " --debug";
 }
 my $status = system $cmd;
 if ($status!=0) {
@@ -218,6 +219,7 @@ if ($report_last_5bp_in_3end) {
 }
 if ($debug) {
     print "Begin Checking Primer Specificity...\n";
+    $cmd .= " --debug";
 }
 $status = system $cmd;
 if ($status!=0) {

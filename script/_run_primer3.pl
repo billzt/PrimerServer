@@ -20,6 +20,7 @@ Optional:
 --outputdir
 --product_size_min
 --product_size_max
+--debug
 --help      Print this help and exit
 END_USAGE
 
@@ -33,6 +34,7 @@ my $dir = "PrimerServerOutput";
 my $region_type = "SEQUENCE_TARGET";
 my $product_size_min = 100;
 my $product_size_max = 1000;
+my $debug;
 GetOptions(
     'help'          =>  \$help,
     'input=s'       =>  \$input,
@@ -44,6 +46,7 @@ GetOptions(
     'region_type=s' =>  \$region_type,
     'product_size_min=i'    =>  \$product_size_min,
     'product_size_max=i'    =>  \$product_size_max,
+    'debug' =>  \$debug,
 );
 
 if ($help or !$input or !$db) {
@@ -204,4 +207,6 @@ else {
 }
 
 ####### Remove tmp files #########
-system "rm -f $dir/*.tmp";
+if (!$debug) {
+    system "rm -f $dir/*.tmp";
+}
