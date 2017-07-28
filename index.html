@@ -100,12 +100,13 @@
                                     </fieldset>
                                 </div>
                             </div>
-                        </fieldset>
-                        <fieldset class="hidden">
-                            <legend>Input Custom Template Sequences</legend>
-                            <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
-                            style="background-color: #bfdfff"
-                            placeholder="Input your template sequences in FASTA format..." name="custom-template-sequences"></textarea>
+                        
+                            <fieldset class="hidden">
+                                <legend>Input Custom Template Sequences</legend>
+                                <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
+                                style="background-color: #bfdfff"
+                                placeholder="Input your template sequences in FASTA format..." name="custom-template-sequences"></textarea>
+                            </fieldset>
                         </fieldset>
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -404,8 +405,8 @@
                     </div>
                     <div class="input-group">
                         <span class="input-group-addon">Checking Databases</span>
-                        <select class="form-control save-input selectpicker show-tick validate[required]" name="select-database" 
-                        data-size="10" data-live-search="true" title="Select your databases">
+                        <select class="form-control save-input selectpicker show-tick validate[required]" name="select-database[]" 
+                        data-size="10" data-live-search="true" multiple data-selected-text-format="count > 2" >
                         </select>
                     </div>
                     <fieldset class="hidden">
@@ -508,7 +509,7 @@
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h4 class="modal-title">Running...</h4>
+                <h4 class="modal-title">Running <span class="fa fa-spinner fa-spin"></span></h4>
               </div>
               <div class="modal-body">
                 <h4><span class="fa fa-spinner fa-spin fa-4x"></span></h4>
@@ -557,11 +558,10 @@
                 <p>Format: One site per line, space delimited <code>TemplateID TargetPos TargetLength</code></p>
                 <p>Example:</p>
                 <pre>
-D05	1006384	25
-D05	1180338	18
-D05	1008251	19
-D05	1009127	29
-D05	1063718	26</pre>
+A01	1735482	37
+A01	937504	26
+A01	2087190	30
+A01	298864	21</pre>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">Acceptable Template IDs</h4>

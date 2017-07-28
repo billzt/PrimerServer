@@ -33,14 +33,15 @@ $limit_primer = $config['limitPrimer'];
 $cpu = $config['useCPU'];
 $database_dir = $config['database'];
 
-// making custom database if user select a custom database
-$db = $config['database']."/".$_POST['select-database'];
-if ($_POST['select-database']=='custom') {
-    $db = "$working_dir/customdb";
-    file_put_contents($db, $_POST['custom-db-sequences']);
-    // check whether file custom is a DNA FASTA format file
-    exec("$path_samtools faidx $db");
-    if (!file_exists("$db.fai")) {  // index FASTA is not OK
+// databases
+$selected_dbs = '';
+foreach ( $_POST['select-database'] as $i ) {
+    if ($i=='custom') { // making custom database if user select a custom database
+        $db = "$working_dir/customdb";
+        file_put_contents($db, $_POST['custom-db-sequences']);
+        // check whether file custom is a DNA FASTA format file
+        exec("$path_samtools faidx $db");
+        if (!file_exists("$db.fai")) {  // index FASTA is not OK
 ?>
 <div class="alert alert-danger" role="alert">
     Error: Building index of your input database FASTA failed! Either your input sequences are not in FASTA
@@ -48,10 +49,16 @@ if ($_POST['select-database']=='custom') {
 </div>
 
 <?php
-        exit(0);
+            exit(0);
+        }
+        exec("$path_makeblastdb -dbtype nucl -in $db");
+        $selected_dbs .= "$db ";
     }
-    exec("$path_makeblastdb -dbtype nucl -in $db");
+    else {
+        $selected_dbs .= "$database_dir/$i ";
+    }
 }
+
 
 // design & check Primers
 if ($type=='design') {
@@ -149,7 +156,7 @@ END;
                ."--blast_word_size=$_POST[blast_word_size] "
                ."--blast_identity=$_POST[blast_identity] "
                ."--blast_max_hsps=$_POST[blast_max_hsps] "
-               ."--checkingdb='$db' "
+               ."--checkingdb='$selected_dbs' "
                ."--checking_size_start=$_POST[size_start] "
                ."--checking_size_stop=$_POST[size_stop] "
                ."--primer_num_retain=$_POST[retain] "
@@ -211,11 +218,10 @@ else {
     $input_primers = implode("\n", $input_primers_array);
     file_put_contents("$working_dir/check.only.tmp", $input_primers);
     
-    // db
-    // $db = implode(' ', array_map(function($i){return "../db/$i" ;}, $_POST['select-database']));
+    // run pipeline
     $command = "perl _run_specificity_check.pl "
                ."--input=$working_dir/check.only.tmp "
-               ."--db='$db' "
+               ."--db='$selected_dbs' "
                ."--samtools=$path_samtools "
                ."--blastn=$path_blastn "
                ."--blast_e_value=$_POST[blast_e_value] "

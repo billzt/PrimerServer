@@ -5,9 +5,10 @@ use strict;
 use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
-use List::Util qw/max min/;
+use List::Util qw/max min sum/;
 use threads;
 use threads::shared;
+use File::Basename qw/basename/;
 
 my $usage = <<"END_USAGE";
 usage: $0 --input=<user input table> --db=<db> [Option]
@@ -133,15 +134,15 @@ while (<$in_fh>) {
     push @run_array, [$id, $rank];
 }
 close $in_fh;
-if (!@ids) {    # No Primer for all sites, Only exists when designing priemrs
+if (!@ids) {    # No Primer for all sites, Only exists when designing primers
     open my $fh, ">", "$dir/specificity.check.result.txt";
     close $fh;
     open $fh, ">", "$dir/specificity.check.result.amplicon";
     close $fh;
     exit(0);
 }
-
-my $split_num = min($cpu, $num_primer_group);
+my @dbs = split /\s+/, $db;
+my $split_num = min(int($cpu/@dbs)+1, $num_primer_group);
 for my $split (0..$split_num-1) {
     open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/primer.query.$split.fa";
     for my $i (0..$#run_array) {
@@ -159,17 +160,18 @@ for my $split (0..$split_num-1) {
 
 ####### Run BLAST #########
 my $run_cpu = $cpu/$split_num<1 ? 1 : int($cpu/$split_num);
-
 sub runblast {
     my $query_file = shift;
-    my $blastcmd = "$blastn -task blastn-short -query $query_file -db $db -evalue $blast_e_value "
+    my $db_file = shift;
+    my $db_name = shift;
+    my $blastcmd = "$blastn -task blastn-short -query $query_file -db $db_file -evalue $blast_e_value "
                     ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
                     ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
-                    ." -out $query_file.out -num_threads $run_cpu";
+                    ." -out $query_file.$db_name.out -num_threads $run_cpu";
     system $blastcmd;
     ####### Filter BLAST Results by Product Sizes #########
     my %blastdata;
-    open my $in_fh, "<", "$query_file.out";
+    open my $in_fh, "<", "$query_file.$db_name.out";
     while (<$in_fh>) {
         chomp;
         my ($query, $qs, $qe, $target, $ts, $te, $strand) = split;
@@ -182,7 +184,7 @@ sub runblast {
         }
     }
     close $in_fh;
-    open my $out_fh, ">", "$query_file.out.filterlength";
+    open my $out_fh, ">", "$query_file.$db_name.out.filterlength";
     for my $group (keys %blastdata) {
         for my $target (keys %{$blastdata{$group}}) {
             my @target_starts = sort {$a<=>$b} keys %{ $blastdata{$group}{$target} };
@@ -200,7 +202,7 @@ sub runblast {
                             next if ($size<$size_start);
                             last if ($size>$size_stop);
                             if ($strand eq 'plus' && $next_strand eq 'minus') {
-                                print {$out_fh} "$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
+                                print {$out_fh} "$db_name\t$target\t$ts\t$te\t$next_ts\t$next_te\t$size\t$query\t$qs\t$qe\t$next_query\t$next_qs\t$next_qe\n";
                             }
                         }
                     }
@@ -212,8 +214,11 @@ sub runblast {
 }
 my @threads;
 for my $query_file (glob "$dir/tmp.specificity.check/*.fa") {
-    my $thread = threads->create(\&runblast, $query_file);
-    push @threads, $thread;
+    for my $db_file (@dbs) {
+        my $db_name = basename $db_file;
+        my $thread = threads->create(\&runblast, $query_file, $db_file, $db_name);
+        push @threads, $thread;        
+    }
 }
 for my $thread (@threads) {
     $thread->join();
@@ -502,39 +507,41 @@ sub compare {
 
 ###############  Conduct end filling for BLAST alignments  ###############
 my %retrieve_region_data;
-open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/retrieve.region.tmp";
-for my $file (glob "$dir/tmp.specificity.check/*.filterlength") {
-    open my $in_fh, "<", $file;
-    while (<$in_fh>) {
-        chomp;
-        my ($target, $ts, $te, $next_ts, $next_te, $size, $query, $qs, $qe, $next_query, $next_qs, $next_qe) = split;
-        my $select_ts = $ts-$qs+1;
-        my $select_te = $te+length($query_seq{$query})-$qe;     # $query: $id.$rank.Primer$i
-        my $select_next_ts = $next_ts-length($query_seq{$next_query})+$next_qe;
-        my $select_next_te = $next_te+$next_qs-1;
-        next if ($select_ts<0 or $select_next_ts<0);    # This means failed to end filling
-        print {$tmp_out_fh} "$target:$select_ts-$select_te\n$target:$select_next_ts-$select_next_te\n";
-        push @{$retrieve_region_data{$query}}, ["$target:$select_ts-$select_te", "$target:$select_next_ts-$select_next_te", $next_query];
-    }
-    close $in_fh;
-}
-close $tmp_out_fh;
-
-system "sort $dir/tmp.specificity.check/retrieve.region.tmp | uniq >$dir/tmp.specificity.check/retrieve.region.uniq.tmp";
-system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";
-
 my %target_seq;
-{
-    local $/ = ">";
-    open my $fh, "<", "$dir/tmp.specificity.check/retrieve.region.tmp.fa";
-    while (<$fh>) {
-        chomp;
-        next unless ($_);
-        my ($id, @seqs) = split;
-        my $seq = join '', @seqs;
-        $target_seq{$id} = uc($seq);
+for my $each_db (@dbs) {
+    my $db_name = basename $each_db;
+    open my $tmp_out_fh, ">", "$dir/tmp.specificity.check/retrieve.region.tmp";
+    for my $file (glob "$dir/tmp.specificity.check/*.$db_name.out.filterlength") {
+        open my $in_fh, "<", $file;
+        while (<$in_fh>) {
+            chomp;
+            my (undef, $target, $ts, $te, $next_ts, $next_te, $size, $query, $qs, $qe, $next_query, $next_qs, $next_qe) = split;
+            my $select_ts = $ts-$qs+1;
+            my $select_te = $te+length($query_seq{$query})-$qe;     # $query: $id.$rank.Primer$i
+            my $select_next_ts = $next_ts-length($query_seq{$next_query})+$next_qe;
+            my $select_next_te = $next_te+$next_qs-1;
+            next if ($select_ts<0 or $select_next_ts<0);    # This means failed to end filling
+            print {$tmp_out_fh} "$target:$select_ts-$select_te\n$target:$select_next_ts-$select_next_te\n";
+            push @{$retrieve_region_data{$db_name}{$query}}, ["$target:$select_ts-$select_te", "$target:$select_next_ts-$select_next_te", $next_query, ];
+        }
+        close $in_fh;
     }
-    close $fh;
+    close $tmp_out_fh;
+
+    system "sort $dir/tmp.specificity.check/retrieve.region.tmp | uniq >$dir/tmp.specificity.check/retrieve.region.uniq.tmp";
+    system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $each_db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";    
+    {
+        local $/ = ">";
+        open my $fh, "<", "$dir/tmp.specificity.check/retrieve.region.tmp.fa";
+        while (<$fh>) {
+            chomp;
+            next unless ($_);
+            my ($id, @seqs) = split;
+            my $seq = join '', @seqs;
+            $target_seq{$db_name}{$id} = uc($seq);
+        }
+        close $fh;
+    }
 }
 
 ###############  Calculate Tm and 3' end mismatch  ###############
@@ -546,91 +553,99 @@ else {
 }
 
 if (!$detail) {
-    print {$out_fh} "#Site_ID\tPrimer_Rank\tPossible_Amplicon_Number\tPrimer_Seqs\n";
+    print {$out_fh} "#Site_ID\tPrimer_Rank\tDatabase\tPossible_Amplicon_Number\tPrimer_Seqs\n";
 }
 my %hit_num_for_primer;
 my %hit_regions_for_primer;
-open $tmp_out_fh, ">", "$dir/specificity.check.result.amplicon";
-print {$tmp_out_fh} "#id\trank\ttarget_id\ttarget_start\tnext_target_end\tleft_end3\tright_end3\tdiff_left_end3\tdiff_right_end3\n";
-for my $i (0..$#run_array) {
-    my $hit_num = 0;
-    my ($id, $rank) = @{$run_array[$i]};
-    open my $out, ">", "$dir/result.specificity.check/PrimerGroup.$id.$rank.txt";
-    my @seqs = @{$primer_seq_for{$id}{$rank}};
-    
-    # calculate primers' own Tm (minimum)
-    my $min_Tm_own = min( map{NN_Tm($_, com($_), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1)}@seqs );
-    print {$out} "Primer Group:\n";
-    for my $j (0..$#seqs) {
-        print {$out} $j+1, ":\t$seqs[$j]", "\n";
-    }
-    print {$out} "Minimum Melting Temperature (°C) for this group: $min_Tm_own\n\n";
-    
-    for my $j (0..$#seqs) { # BLAST query ID: $id.$rank.Primer$j
-        my $query = "$id.$rank.Primer$j";
-        if ($retrieve_region_data{$query}) {
-            my @regions = @{$retrieve_region_data{$query}};
-            for my $data_region (@regions) {
-                my ($target_region, $target_next_region, $next_query) = @{$data_region};
-                my $query_seq = $query_seq{$query};
-                my $next_query_seq = $query_seq{$next_query};
-                my $target_seq = $target_seq{$target_region};
-                my $next_target_seq = revcom($target_seq{$target_next_region});
-                next if (length($query_seq) != length($target_seq));
-                next if (length($next_query_seq) != length($next_target_seq));
-                
-                # calculate Tm
-                my $Tm_1 = NN_Tm($query_seq, com($target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
-                my $Tm_2 = NN_Tm($next_query_seq, com($next_target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
-                next if ($Tm_1<$min_Tm_own-$min_Tm_diff or $Tm_2<$min_Tm_own-$min_Tm_diff);
-                
-                # calculate 3end
-                my $end1 = substr($query_seq, -1) eq substr($target_seq, -1) ? 'No' : 'Yes';
-                my $end2 = substr($next_query_seq, -1) eq substr($next_target_seq, -1) ? 'No' : 'Yes';
-                next if ($use_3end && ($end1 eq 'Yes' or $end2 eq 'Yes'));
-                
-                
-                # calculate differences in the last 5bp in 3end
-                my ($diff_end1, $diff_end2);
-                if ($report_last_5bp_in_3end) {
-                    $diff_end1 = compare(substr($query_seq, -5), substr($target_seq, -5));
-                    $diff_end2 = compare(substr($next_query_seq, -5), substr($next_target_seq, -5));
+my %success_site;       # Judge whether this site has unique primers in at least one of the databases
+open my $tmp_out_fh, ">", "$dir/specificity.check.result.amplicon";
+print {$tmp_out_fh} "#ID\tRank\tDatabase\tTarget_ID\tTarget_start\tNext_target_end\tLeft_end3\tRight_end3\tDiff_left_end3\tDiff_right_end3\n";
+for my $each_db (map {basename($_)} @dbs) {
+    for my $i (0..$#run_array) {
+        my $hit_num = 0;
+        my ($id, $rank) = @{$run_array[$i]};
+        open my $out, ">", "$dir/result.specificity.check/PrimerGroup.$each_db.$id.$rank.txt";
+        my @seqs = @{$primer_seq_for{$id}{$rank}};
+        
+        # calculate primers' own Tm (minimum)
+        my $min_Tm_own = min( map{NN_Tm($_, com($_), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1)}@seqs );
+        print {$out} "Primer Group:\n";
+        for my $j (0..$#seqs) {
+            print {$out} $j+1, ":\t$seqs[$j]", "\n";
+        }
+        print {$out} "Minimum Melting Temperature (°C) for this group: $min_Tm_own\n";
+        print {$out} "Database: $each_db\n\n";
+        
+        for my $j (0..$#seqs) { # BLAST query ID: $id.$rank.Primer$j
+            my $query = "$id.$rank.Primer$j";
+            if ($retrieve_region_data{$each_db}{$query}) {
+                my @regions = @{$retrieve_region_data{$each_db}{$query}};
+                for my $data_region (@regions) {
+                    my ($target_region, $target_next_region, $next_query) = @{$data_region};
+                    my $query_seq = $query_seq{$query};
+                    my $next_query_seq = $query_seq{$next_query};
+                    my $target_seq = $target_seq{$each_db}{$target_region};
+                    my $next_target_seq = revcom($target_seq{$each_db}{$target_next_region});
+                    next if (length($query_seq) != length($target_seq));
+                    next if (length($next_query_seq) != length($next_target_seq));
+                    
+                    # calculate Tm
+                    my $Tm_1 = NN_Tm($query_seq, com($target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
+                    my $Tm_2 = NN_Tm($next_query_seq, com($next_target_seq), $primer_conc, $Na, $K, $Tris, $Mg, $dNTPs, 1);
+                    next if ($Tm_1<$min_Tm_own-$min_Tm_diff or $Tm_2<$min_Tm_own-$min_Tm_diff);
+                    
+                    # calculate 3end
+                    my $end1 = substr($query_seq, -1) eq substr($target_seq, -1) ? 'No' : 'Yes';
+                    my $end2 = substr($next_query_seq, -1) eq substr($next_target_seq, -1) ? 'No' : 'Yes';
+                    next if ($use_3end && ($end1 eq 'Yes' or $end2 eq 'Yes'));
+                    
+                    
+                    # calculate differences in the last 5bp in 3end
+                    my ($diff_end1, $diff_end2);
+                    if ($report_last_5bp_in_3end) {
+                        $diff_end1 = compare(substr($query_seq, -5), substr($target_seq, -5));
+                        $diff_end2 = compare(substr($next_query_seq, -5), substr($next_target_seq, -5));
+                    }
+                    
+                    # Generate Output
+                    $hit_num++;
+                    print {$out} "############ Amplicon $hit_num ###########\n";
+                    my ($target_id, $target_start, $target_end) = $target_region=~/^(.*?)\:(\d+)-(\d+)$/;
+                    my ($next_target_start, $next_target_end) = $target_next_region=~/\:(\d+)-(\d+)$/;
+                    print {$out} "Template: $target_id\n";
+                    print {$out} "Template Region: $target_start-$next_target_end\n";
+                    push @{ $hit_regions_for_primer{$id}{$rank}{$each_db} }, [$target_id, $target_start, $next_target_end];
+                    print {$tmp_out_fh} "$id\t$rank\t$each_db\t$target_id\t$target_start\t$next_target_end\t$end1\t$end2";    # For design and check use only
+                    if ($report_last_5bp_in_3end) {
+                        print {$tmp_out_fh} "\t$diff_end1\t$diff_end2";
+                    }
+                    print {$tmp_out_fh} "\n";
+                    print {$out} "Primer Left: $query ($query_seq)\n";
+                    print {$out} "Primer Right: $next_query ($next_query_seq)\n";
+                    print {$out} "Product Size: ", $next_target_end-$target_start+1, " bp\n";
+                    print {$out} "Melting Temperature for Left Primer (°C): $Tm_1\n";
+                    print {$out} "Melting Temperature for Right Primer (°C): $Tm_2\n";
+                    print {$out} "Differ in the 3' End for Left Primer?: $end1\n";
+                    print {$out} "Differ in the 3' End for Right Primer?: $end2\n\n";
+                    
+                    draw($query_seq, $target_seq, $target_start, 1, 'Primer Left', $out);
+                    print {$out} "\n";
+                    
+                    draw($next_query_seq, $next_target_seq, $next_target_end, -1, 'Primer Right', $out);
+                    print {$out} "\n\n\n\n";
                 }
-                
-                # Generate Output
-                $hit_num++;
-                print {$out} "############ Amplicon $hit_num ###########\n";
-                my ($target_id, $target_start, $target_end) = $target_region=~/^(.*?)\:(\d+)-(\d+)$/;
-                my ($next_target_start, $next_target_end) = $target_next_region=~/\:(\d+)-(\d+)$/;
-                print {$out} "Template: $target_id\n";
-                print {$out} "Template Region: $target_start-$next_target_end\n";
-                push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
-                print {$tmp_out_fh} "$id\t$rank\t$target_id\t$target_start\t$next_target_end\t$end1\t$end2";    # For design and check use only
-                if ($report_last_5bp_in_3end) {
-                    print {$tmp_out_fh} "\t$diff_end1\t$diff_end2";
-                }
-                print {$tmp_out_fh} "\n";
-                print {$out} "Primer Left: $query ($query_seq)\n";
-                print {$out} "Primer Right: $next_query ($next_query_seq)\n";
-                print {$out} "Product Size: ", $next_target_end-$target_start+1, " bp\n";
-                print {$out} "Melting Temperature for Left Primer (°C): $Tm_1\n";
-                print {$out} "Melting Temperature for Right Primer (°C): $Tm_2\n";
-                print {$out} "Differ in the 3' End for Left Primer?: $end1\n";
-                print {$out} "Differ in the 3' End for Right Primer?: $end2\n\n";
-                
-                draw($query_seq, $target_seq, $target_start, 1, 'Primer Left', $out);
-                print {$out} "\n";
-                
-                draw($next_query_seq, $next_target_seq, $next_target_end, -1, 'Primer Right', $out);
-                print {$out} "\n\n\n\n";
             }
         }
+        close $out;
+        
+        $hit_num_for_primer{$id}{$rank}{$each_db} = $hit_num;
+        print {$out_fh} "$id\t$rank\t$each_db\t$hit_num\t@seqs\n" if (!$detail);
+        if ($hit_num==1) {
+            $success_site{$id} = 1;
+        }
     }
-    close $out;
-    
-    $hit_num_for_primer{$id}{$rank} = $hit_num;
-    print {$out_fh} "$id\t$rank\t$hit_num\t@seqs\n" if (!$detail);
 }
+
 close $tmp_out_fh;
 
 if (!$debug) {
@@ -638,6 +653,11 @@ if (!$debug) {
 }
 
 ####### Print HTML  #########
+sub average {
+    my @value = @_;
+    return sum(@value)/@value;
+}
+
 if ($detail) {
         print {$out_fh} <<"END";
 <div class="panel-group" id="primers-result" role="tablist">
@@ -666,8 +686,7 @@ END
             </div>
             <div class="col-md-1">
 END
-        my @hit_nums = values(%{$hit_num_for_primer{$id}});
-        if ($hit_num_for_primer{$id} && 1~~@hit_nums ) {
+        if ($hit_num_for_primer{$id} && $success_site{$id} ) {  # This site has unique primers in at least one database
             print {$out_fh} <<"END";
                 <span class="glyphicon glyphicon-ok"></span>
 END
@@ -677,7 +696,7 @@ END
         </div>
     </div>
 END
-        if ($site_num==1) {
+        if ($site_num==1) {     # This is the first site, expand the panel
             print {$out_fh} <<"END";
     <div id="site-$site_num" class="panel-collapse collapse in" role="tabpanel">
         <div class="panel-body">
@@ -693,11 +712,12 @@ END
         print {$out_fh} <<"END";
             <ul class="list-group">
 END
-        my @ranks = sort { $hit_num_for_primer{$id}{$a}<=>$hit_num_for_primer{$id}{$b} or $a<=>$b } keys %{$hit_num_for_primer{$id}};
+        # sort primers: first by hit numbers (average on all databases), then by primer3 score
+        my @ranks = sort { average(values(%{$hit_num_for_primer{$id}{$a}}))<=>average(values(%{$hit_num_for_primer{$id}{$b}})) or $a<=>$b } keys %{$hit_num_for_primer{$id}};
         my $primer_output_rank = 1;
         for my $i (@ranks) {
-            my $hit_num = $hit_num_for_primer{$id}{$i};
-            if ($hit_num==1) {
+            my @hit_nums = values(%{$hit_num_for_primer{$id}{$i}});
+            if (1~~@hit_nums) {  # This primer has unique hit in at least one of the databases
                 print {$out_fh} <<"END";
                     <li class="list-group-item list-group-item-primer list-group-item-success">
 END
@@ -712,59 +732,86 @@ END
                         <div class="list-group-item-text">
                             <div class="table-responsive">
                                 <table class="table table-borderless">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-sm-2"></th>
-                                            <th class="col-sm-4">Sequence (5' -&gt; 3')</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                    <tr>
+                                        <th class="col-sm-2"></th>
+                                        <th>Sequence (5' -&gt; 3')</th>
+                                    </tr>
 END
             my @primer_seqs = @{$primer_seq_for{$id}{$i}};
             for my $j (0..$#primer_seqs) {
                 my $output_seq_id = $j+1;
                 print {$out_fh} <<"END";
-                                        <tr>
-                                            <th class="col-sm-2">Seq. $output_seq_id</th>
-                                            <td class="col-sm-4"><span class="monospace-style">$primer_seqs[$j]</span></td>
-                                        </tr>
+                                    <tr>
+                                        <th class="col-sm-2">Seq. $output_seq_id</th>
+                                        <td><span class="monospace-style">$primer_seqs[$j]</span></td>
+                                    </tr>
 END
             }
                 
             print {$out_fh} <<"END";
-                                        <tr>
-                                            <th class="col-sm-2">Possible Amplicons Number</th>
-                                            <td class="hit-num col-sm-4" data-hit="$hit_num">$hit_num 
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="PrimerGroup.$id.$i.txt">
+                                 </table>
+                                 <table class="table table-bordered">
+                                    <tr>
+                                        <th class="col-sm-2" rowspan=3 >Possible Amplicons</th>
+END
+            my @databases = keys %{ $hit_num_for_primer{$id}{$i} };
+            for my $database (@databases) {
+                print {$out_fh} <<"END";
+                                        <th>Database: $database</th>
+END
+            }
+            print {$out_fh} <<"END";
+                                    </tr>
+                                    <tr>
+END
+            for my $database (@databases) {
+                my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
+                print {$out_fh} <<"END";
+                                            <td class="hit-num" data-hit="$hit_num">Amplicon Number: $hit_num 
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" 
+                                                    data-whatever="PrimerGroup.$database.$id.$i.txt">
                                                     <span class="glyphicon glyphicon-hand-right"></span>
                                                 </a>
                                             </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="col-sm-2">Possible Amplicons Regions</th>
-                                            <td class="col-sm-4"><ul class="list-group"> 
 END
-            if ($hit_num>0) {
-                my @hit_regions = @{ $hit_regions_for_primer{$id}{$i} };
-                for my $j (0..$#hit_regions) {
-                    my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
-                    my $size = $next_target_end-$target_start+1;
-                    if ($hit_num==1) {
-                        print {$out_fh} "<li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>";
-                    }
-                    else {
-                        print {$out_fh} "<li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>";
-                    }
-                    if ($j==4) {
-                        print {$out_fh} "<li class='list-group-item'>...</li>";
-                        last;
-                    }
-                }            
             }
             print {$out_fh} <<"END";
+                                     </tr>
+                                     <tr>
+END
+            for my $database (@databases) {
+                print {$out_fh} <<"END";
+                                            <td><ul class="list-group"> 
+END
+                my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
+                if ($hit_num>0) {
+                    my @hit_regions = @{ $hit_regions_for_primer{$id}{$i}{$database} };
+                    for my $j (0..$#hit_regions) {
+                        my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
+                        my $size = $next_target_end-$target_start+1;
+                        if (1~~@hit_nums) {
+                            print {$out_fh} <<"END";
+                                                <li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>
+END
+                        }
+                        else {
+                            print {$out_fh} <<"END";
+                                                <li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>
+END
+                        }
+                        if ($j==2) {
+                            print {$out_fh} "<li class='list-group-item'>...</li>";
+                            last;
+                        }
+                    }            
+                }
+                print {$out_fh} <<"END";
                                             </ul></td>
-                                        </tr>
-                                    </tbody>
+END
+            }
+            print {$out_fh} <<"END";
+                                            
+                                     </tr>
                                 </table>
                             </div>
                         </div>

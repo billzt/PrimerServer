@@ -5,6 +5,7 @@ use strict;
 use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
+use List::Util qw/sum/;
 
 my $usage = <<"END_USAGE";
 usage: $0 --primer3result=<primer3 result> --specificity=<specificity result> [Option]
@@ -45,12 +46,16 @@ if ($help or !$primer3result or !$specificity) {
 }
 
 my %hit_num_for_primer;
+my %success_site;       # Judge whether this site has unique primers in at least one of the databases
 open my $in_fh, "<", $specificity;
 while (<$in_fh>) {
     chomp;
     next if (/^#/);
-    my ($id, $rank, $num) = split;
-    $hit_num_for_primer{$id}{$rank} = $num;
+    my ($id, $rank, $each_db, $num) = split;
+    $hit_num_for_primer{$id}{$rank}{$each_db} = $num;
+    if ($num==1) {
+        $success_site{$id} = 1;
+    }
 }
 close $in_fh;
 
@@ -59,10 +64,15 @@ open $in_fh, "<", $amplicon;
 while (<$in_fh>) {
     chomp;
     next if (/^#/);
-    my ($id, $rank, $target_id, $target_start, $next_target_end) = split;
-    push @{ $hit_regions_for_primer{$id}{$rank} }, [$target_id, $target_start, $next_target_end];
+    my ($id, $rank, $each_db, $target_id, $target_start, $next_target_end) = split;
+    push @{ $hit_regions_for_primer{$id}{$rank}{$each_db} }, [$target_id, $target_start, $next_target_end];
 }
 close $in_fh;
+
+sub average {
+    my @value = @_;
+    return sum(@value)/@value;
+}
 
 my %data_for_primer;
 {
@@ -82,7 +92,7 @@ my %data_for_primer;
 END
     }
     else {
-        print {$out_fh} "### Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\tTarget_Amplicon_Size\tPrimer_Pair_Penalty_Score\tPossible_Amplicon_Number\tPrimer_Rank_in_Primer3_output\n";
+        print {$out_fh} "### Site_ID\tPrimer_Rank\tPrimer_Seq_Left\tPrimer_Seq_Right\tTarget_Amplicon_Size\tPrimer_Pair_Penalty_Score\tDatabase\tPossible_Amplicon_Number\tPrimer_Rank_in_Primer3_output\n";
     }
     
     my $site_num = 0;
@@ -139,8 +149,7 @@ END
             </div>
             <div class="col-md-1">
 END
-            my @hit_nums = values(%{$hit_num_for_primer{$id}});
-            if ($hit_num_for_primer{$id} && 1~~@hit_nums ) {
+            if ($hit_num_for_primer{$id} && $success_site{$id} ) {  # This site has unique primers in at least one database
                 print {$out_fh} <<"END";
                 <span class="glyphicon glyphicon-ok"></span>
 END
@@ -151,7 +160,7 @@ END
         </div>
     </div>
 END
-            if ($site_num==1) {
+            if ($site_num==1) { # This is the first site, expand the panel
                 print {$out_fh} <<"END";
     <div id="site-$site_num" class="panel-collapse collapse in" role="tabpanel">
         <div class="panel-body">
@@ -191,7 +200,8 @@ END
             <ul class="list-group">
 END
             }
-            my @ranks = sort { $hit_num_for_primer{$id}{$a}<=>$hit_num_for_primer{$id}{$b} or $a<=>$b } keys %{$hit_num_for_primer{$id}};
+            # sort primers: first by hit numbers (average on all databases), then by primer3 score
+            my @ranks = sort { average(values(%{$hit_num_for_primer{$id}{$a}}))<=>average(values(%{$hit_num_for_primer{$id}{$b}})) or $a<=>$b } keys %{$hit_num_for_primer{$id}};
             my $primer_output_rank = 1;
             for my $i (@ranks) {
                 my ($seq_F) = /PRIMER_LEFT_ $i _SEQUENCE=(\S+)/x;
@@ -231,12 +241,16 @@ END
                 
                 my ($penalty_pair) = /PRIMER_PAIR_ $i _PENALTY=(\S+)/x; $penalty_pair=sprintf("%.1f", $penalty_pair);
                 
-                my $hit_num = $hit_num_for_primer{$id}{$i};
+                my @databases = keys %{ $hit_num_for_primer{$id}{$i} };
                 if (!$detail) {
-                    print {$out_fh} "$id\t$primer_output_rank\t$seq_F\t$seq_R\t$size\t$penalty_pair\t$hit_num\t$i\n";
+                    for my $database (@databases) {
+                        my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
+                        print {$out_fh} "$id\t$primer_output_rank\t$seq_F\t$seq_R\t$size\t$penalty_pair\t$database\t$hit_num\t$i\n";
+                    }
                 }
                 else {
-                    if ($hit_num==1) {
+                    my @hit_nums = values(%{$hit_num_for_primer{$id}{$i}});
+                    if (1~~@hit_nums) { # This primer has unique hit in at least one of the databases
                         print {$out_fh} <<"END";
                     <li class="list-group-item list-group-item-primer list-group-item-success">
 END
@@ -251,87 +265,112 @@ END
                         <div class="list-group-item-text">
                             <div class="table-responsive">
                                 <table class="table table-borderless">
-                                    <thead>
-                                        <tr>
-                                            <th></th>
-                                            <th>Sequence (5' -&gt; 3')</th>
-                                            <th>Length</th>
-                                            <th>Position</th>
-                                            <th>Tm(&deg;C)</th>
-                                            <th>GC(%)</th>
-                                            <th>Self Compl.</th>
-                                            <th>3' Self Compl.</th>
-                                            <th>Hairpin</th>
-                                            <th>3' End Stability</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th>Left Primer</th>
-                                            <td><span class="monospace-style">$seq_F</span></td>
-                                            <td>$len_F</td>
-                                            <td class="primer-left-region">$start_F-$end_F</td>
-                                            <td>$Tm_F</td>
-                                            <td>$GC_F</td>
-                                            <td>$self_any_F</td>
-                                            <td>$self_end_F</td>
-                                            <td>$hairpin_F</td>
-                                            <td>$end_stable_F</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Right Primer</th>
-                                            <td><span class="monospace-style">$seq_R</span></td>
-                                            <td>$len_R</td>
-                                            <td class="primer-right-region">$start_R-$end_R</td>
-                                            <td>$Tm_R</td>
-                                            <td>$GC_R</td>
-                                            <td>$self_any_R</td>
-                                            <td>$self_end_R</td>
-                                            <td>$hairpin_R</td>
-                                            <td>$end_stable_R</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Product Size</th>
-                                            <td colspan="9">$size bp</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Penalty</th>
-                                            <td colspan="9" class="penalty">$penalty_pair</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Possible Amplicons Number</th>
-                                            <td colspan="9" class="hit-num" data-hit="$hit_num">$hit_num 
-                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" data-whatever="PrimerGroup.$id.$i.txt"
-                                                data-targetsize="$size">
-                                                    <span class="glyphicon glyphicon-hand-right"></span>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th class="col-sm-2">Possible Amplicons Regions</th>
-                                            <td class="col-sm-4"><ul class="list-group"> 
+                                    <tr>
+                                        <th></th>
+                                        <th>Sequence (5' -&gt; 3')</th>
+                                        <th>Length</th>
+                                        <th>Position</th>
+                                        <th>Tm(&deg;C)</th>
+                                        <th>GC(%)</th>
+                                        <th>Self Compl.</th>
+                                        <th>3' Self Compl.</th>
+                                        <th>Hairpin</th>
+                                        <th>3' End Stability</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Left Primer</th>
+                                        <td><span class="monospace-style">$seq_F</span></td>
+                                        <td>$len_F</td>
+                                        <td class="primer-left-region">$start_F-$end_F</td>
+                                        <td>$Tm_F</td>
+                                        <td>$GC_F</td>
+                                        <td>$self_any_F</td>
+                                        <td>$self_end_F</td>
+                                        <td>$hairpin_F</td>
+                                        <td>$end_stable_F</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Right Primer</th>
+                                        <td><span class="monospace-style">$seq_R</span></td>
+                                        <td>$len_R</td>
+                                        <td class="primer-right-region">$start_R-$end_R</td>
+                                        <td>$Tm_R</td>
+                                        <td>$GC_R</td>
+                                        <td>$self_any_R</td>
+                                        <td>$self_end_R</td>
+                                        <td>$hairpin_R</td>
+                                        <td>$end_stable_R</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Product Size</th>
+                                        <td colspan="9">$size bp</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Penalty</th>
+                                        <td colspan="9" class="penalty">$penalty_pair</td>
+                                    </tr>
+                                 </table>
+                                 <table class="table table-bordered">
+                                    <tr>
+                                        <th class="col-sm-2" rowspan=3 >Possible Amplicons</th>
 END
-            if ($hit_num>0) {
-                my @hit_regions = @{ $hit_regions_for_primer{$id}{$i} };
-                for my $j (0..$#hit_regions) {
-                    my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
-                    my $size = $next_target_end-$target_start+1;
-                    if ($hit_num==1) {
-                        print {$out_fh} "<li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    
+                    for my $database (@databases) {
+                        print {$out_fh} <<"END";
+                                        <th>Database: $database</th>
+END
                     }
-                    else {
-                        print {$out_fh} "<li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>";
+                    print {$out_fh} <<"END";
+                                    </tr>
+                                    <tr>
+END
+                    for my $database (@databases) {
+                        my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
+                        print {$out_fh} <<"END";
+                                        <td class="hit-num" data-hit="$hit_num">Amplicon Number: $hit_num 
+                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#specificity-check-modal" 
+                                            data-whatever="PrimerGroup.$database.$id.$i.txt" data-targetsize="$size">
+                                                <span class="glyphicon glyphicon-hand-right"></span>
+                                            </a>
+                                        </td>
+END
                     }
-                    if ($j==4) {
-                        print {$out_fh} "<li class='list-group-item'>...</li>";
-                        last;
-                    }
-                }            
-            }
+                    print {$out_fh} <<"END";
+                                    </tr>
+                                    <tr>
+END
+                    for my $database (@databases) {
+                        print {$out_fh} <<"END";
+                                            <td><ul class="list-group"> 
+END
+                        my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
+                        if ($hit_num>0) {
+                            my @hit_regions = @{ $hit_regions_for_primer{$id}{$i}{$database} };
+                            for my $j (0..$#hit_regions) {
+                                my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
+                                my $size = $next_target_end-$target_start+1;
+                                if (1~~@hit_nums) {
+                                    print {$out_fh} <<"END";
+                                                <li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>
+END
+                                }
+                                else {
+                                    print {$out_fh} <<"END";
+                                                <li class='list-group-item'>$target_id:$target_start-$next_target_end, $size bp</li>
+END
+                                }
+                                if ($j==2) {
+                                    print {$out_fh} "<li class='list-group-item'>...</li>";
+                                    last;
+                                }
+                            }
+                        }
             print {$out_fh} <<"END";
                                             </ul></td>
-                                         </tr>
-                                    </tbody>
+END
+                    }
+            print {$out_fh} <<"END";
+                                     </tr>
                                 </table>
                             </div>
                         </div>

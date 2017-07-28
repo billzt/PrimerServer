@@ -183,11 +183,19 @@ $(function () {
     
     // select template: options
     var originalValFor = new Object;
+    $.get('script/parse_config.php', function(data){
+        var config = JSON.parse(data);
+        $('[name="select-database[]"]').selectpicker({
+            title: 'Select your databases (allow multiple, < ' + config.limitDatabase + ') ',
+            maxOptions: config.limitDatabase
+        });
+    });
+    
     $.get('script/db.php', function(data){
         $('[name="select-template"]').append(data);
-        $('[name="select-database"]').append(data);
+        $('[name="select-database[]"]').append(data);
         $('[name="select-template"]').append('<optgroup label="Custom"><option value="custom">Custom Template Sequences...</option></optgroup>');
-        $('[name="select-database"]').append('<optgroup label="Custom"><option value="custom">Custom Database Sequences...</option></optgroup>');
+        $('[name="select-database[]"]').append('<optgroup label="Custom"><option value="custom">Custom Database Sequences...</option></optgroup>');
         
         // get all the default values
         var inputs = $(':text.save-input');
@@ -201,7 +209,7 @@ $(function () {
             saveInterval: 1000,
         });
         $('[name="select-template"]').selectpicker('refresh'); 
-        $('[name="select-database"]').selectpicker('refresh');
+        $('[name="select-database[]"]').selectpicker('refresh');
         
         // Highlight Changed Field
         for (var i=0; i<inputs.length; i++) {
@@ -264,7 +272,7 @@ $(function () {
     // modify reset button to satisfy selector
     $(':reset').click(function(){
         $('[name="select-template"]').selectpicker('val', '');
-        $('[name="select-database"]').selectpicker('val', ''); 
+        $('[name="select-database[]"]').selectpicker('val', ''); 
     });
     
     // change App type when user change it
@@ -326,7 +334,7 @@ $(function () {
     });
 
     // If users select (Or inintially load) custom template, then showing custom template FASTA sequence input textarea
-    $('[name="select-template"]').on('changed.bs.select refreshed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+    $('[name="select-template"]').on('changed.bs.select refreshed.bs.select', function (event) {
         if (event.target.value=='custom') {
             $('[name="custom-template-sequences"]').parent().removeClass('hidden');
         }
@@ -334,8 +342,17 @@ $(function () {
             $('[name="custom-template-sequences"]').parent().addClass('hidden');
         }
     });
-    $('[name="select-database"]').on('changed.bs.select refreshed.bs.select', function (event, clickedIndex, newValue, oldValue) {
-        if (event.target.value=='custom') {
+    var selectedDBNum;
+    $('[name="select-database[]"]').on('changed.bs.select refreshed.bs.select', function (event) {
+        var selectedOptions = event.target.selectedOptions;
+        var hideCustomDB = 1;
+        selectedDBNum = selectedOptions.length;
+        for (var i=0; i<selectedDBNum; i++) {
+            if (selectedOptions[i].value=='custom') {
+                hideCustomDB = 0;
+            }
+        }
+        if (hideCustomDB==0) {
             $('[name="custom-db-sequences"]').parent().removeClass('hidden');
         }
         else {
@@ -454,10 +471,11 @@ $(function () {
     
     // When running, showing a progress bar
     var timer = $.timer(function(){
-        $.get('script/modal_progress.php', function(data) {
+        $.get('script/modal_progress.php', {db_num: selectedDBNum}, function(data) {
             var progress_data = JSON.parse(data); // total, finished, percent
             if (progress_data.total>0) {
-                $('#running-modal .modal-body h4').html(progress_data.total+' primer sequences generated. Waiting for BLAST');
+                $('#running-modal .modal-body h4').html(progress_data.total+' primer sequences generated. <br/>Waiting for BLAST: ' + progress_data.total
+                + ' primers &times; ' + selectedDBNum + ' databases' +' <span class="fa fa-spinner fa-spin"></span>');
                 $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' primer sequences finished');
                 if (progress_data.percent>=100) {
                     timer.stop();
@@ -619,6 +637,7 @@ $(function () {
         $('a[href="#saved"]').tab('show');
     });
     
+    //$('#test').load('primer.final.result.html');
 });
 
 
