@@ -397,6 +397,16 @@ $(function () {
             
             // remove primer amplicon links if no hits were found
             $('[data-hit=0]').children('[data-toggle="modal"]').addClass('hidden');
+            
+            // In the result panels, improve web page move (for save view)
+            $('#primers-result').on('shown.bs.collapse', function () {
+                var offset = $(this).find('.collapse.in').prev('.panel-heading');
+                if(offset) {
+                    $('html,body').animate({
+                        scrollTop: $(offset).offset().top-20
+                    }, 1000); 
+                }
+            });
         });
         
         // Allow users to stop their running
@@ -637,7 +647,16 @@ $(function () {
         $('a[href="#saved"]').tab('show');
     });
     
-    //$('#test').load('primer.final.result.html');
+    // In the result panels, improve web page move (for save view)
+    $('#primers-result').on('shown.bs.collapse', function () {
+        var offset = $(this).find('.collapse.in').prev('.panel-heading');
+        if(offset) {
+            $('html,body').animate({
+                scrollTop: $(offset).offset().top-20
+            }, 1000); 
+        }
+    });
+    
 });
 
 
