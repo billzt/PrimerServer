@@ -481,7 +481,7 @@ $(function () {
     
     // When running, showing a progress bar
     var timer = $.timer(function(){
-        $.get('script/modal_progress.php', {db_num: selectedDBNum}, function(data) {
+        $.get('script/modal_progress.php', function(data) {
             var progress_data = JSON.parse(data); // total, finished, percent
             if (progress_data.total>0) {
                 $('#running-modal .modal-body h4').html(progress_data.total+' primer sequences generated. <br/>Waiting for BLAST: ' + progress_data.total

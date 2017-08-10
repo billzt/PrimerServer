@@ -5,10 +5,8 @@ $session_id = session_id();
 $date = date("Y-m-d");
 $working_dir = "/tmp/Primer-$date-$session_id";
 
-$db_num = $_GET['db_num'];
-
-exec("grep '>' $working_dir/tmp.specificity.check/*.fa | wc -l", $i);
-exec("cut -f 1 $working_dir/tmp.specificity.check/*.out | uniq | wc -l", $j);
+exec("grep '>' $working_dir/tmp.specificity.check/primer.query.*.fa | wc -l", $i);
+exec("cut -f 1 $working_dir/tmp.specificity.check/*.out | uniq | sort | uniq | wc -l", $j);
 
 if (count($i)==0 or count($j)==0) {
     echo json_encode(array(
@@ -19,7 +17,7 @@ if (count($i)==0 or count($j)==0) {
     exit(0);
 }
 
-$all_primer_count = $i[0]*$db_num;
+$all_primer_count = $i[0];
 $finished_primer_count = $j[0];
 
 if ($all_primer_count==0) {
