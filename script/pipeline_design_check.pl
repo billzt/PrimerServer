@@ -48,13 +48,18 @@ Optional Parameters: Primer Specificity Check
     --checking_size_stop INT
                         Upper limit of the checking amplicon size range in bp. Default: [5000]
     --primer_num_retain INT
-                        The max number of primers for each site to return. It must be used together with 
+                        The maximum number of primers for each site to return. It must be used together with 
                         --primer3setting and should not be larger than PRIMER_NUM_RETURN in the setting
                         file. Default: [10]
     --min_Tm_diff FLOAT 
                         The mininum melting temperature (in ℃) suggested to produce off-target amplicon.
                         Recommend to be at least 10℃ lower than PRIMER_MIN_TM in primer3 settings.
                         Default: [20]
+    --max_report_amplicon INT
+                        The maximum number of amplicons for each primer in each database that will be reported.
+                        Increasing this value would generate large result files if the primer has thousands of
+                        amplicon hits. Default: [50]
+    
     --use_3end          If turned on, primer pairs having at least one mismatch at the 3' end
                         position with templates would not be considered to produce off-target amplicon, even if
                         their melting temperatures are higher than [min_Tm]. Turn on this would find more
@@ -103,6 +108,7 @@ my $Tris        = 10;     #mM
 my $Mg          = 1.5;    #mM  
 my $dNTPs       = 0.2; #mM 
 my $min_Tm_diff = 20;
+my $max_report_amplicon = 50;
 my $detail;
 my $use_3end;
 my $retain = 10;
@@ -142,6 +148,7 @@ GetOptions(
     'conc_Mg=f'     =>  \$Mg,
     'conc_dNTPs=f'  =>  \$dNTPs,
     'min_Tm_diff=f' =>  \$min_Tm_diff,
+    'max_report_amplicon=i'   =>  \$max_report_amplicon,
 );
 if (!$checkingdb) {
     $checkingdb = $template;
@@ -209,7 +216,7 @@ if ($debug) {
 $cmd = "perl $perl_dir/_run_specificity_check.pl --input=$dir/primer3output.simple.table.txt --num_cpu=$cpu "
             ." --db='$checkingdb' --samtools=$samtools --outputdir=$dir --size_start=$size_start --size_stop=$size_stop "
             ." --blastn=$blastn --blast_e_value=$blast_e_value --blast_word_size=$blast_word_size "
-            ." --blast_identity=$blast_identity --blast_max_hsps=$blast_max_hsps  --min_Tm_diff=$min_Tm_diff "
+            ." --blast_identity=$blast_identity --blast_max_hsps=$blast_max_hsps  --min_Tm_diff=$min_Tm_diff  --max_report_amplicon=$max_report_amplicon "
             ." --conc_primer=$primer_conc --conc_Na=$Na --conc_K=$K --conc_Tris=$Tris --conc_Mg=$Mg --conc_dNTPs=$dNTPs";
 if ($use_3end) {
     $cmd .= " --use_3end";

@@ -34,6 +34,7 @@ Optional:
 --conc_Mg
 --conc_dNTPs
 --min_Tm_diff
+--max_report_amplicon
 --debug
 --help      Print this help and exit
 END_USAGE
@@ -61,6 +62,7 @@ my $blast_e_value = 30000;
 my $blast_word_size = 7;
 my $blast_identity = 60;
 my $blast_max_hsps = 500;
+my $max_report_amplicon = 50;
 my $debug;
 
 GetOptions(
@@ -82,6 +84,7 @@ GetOptions(
     'conc_Mg=f'     =>  \$Mg,
     'conc_dNTPs=f'  =>  \$dNTPs,
     'min_Tm_diff=f' =>  \$min_Tm_diff,
+    'max_report_amplicon=i'   =>  \$max_report_amplicon,
     'blastn=s'      =>  \$blastn,
     'blast_e_value=f' =>  \$blast_e_value,
     'blast_word_size=i' => \$blast_word_size,
@@ -185,6 +188,7 @@ sub runblast {
     }
     close $in_fh;
     open my $out_fh, ">", "$query_file.$db_name.out.filterlength";
+    print {$out_fh} "#db_name\ttarget\tts\tte\tnext_ts\tnext_te\tsize\tquery\tqs\tqe\tnext_query\tnext_qs\tnext_qe\n";
     for my $group (keys %blastdata) {
         for my $target (keys %{$blastdata{$group}}) {
             my @target_starts = sort {$a<=>$b} keys %{ $blastdata{$group}{$target} };
@@ -515,6 +519,7 @@ for my $each_db (@dbs) {
         open my $in_fh, "<", $file;
         while (<$in_fh>) {
             chomp;
+            next if (/^#/);
             my (undef, $target, $ts, $te, $next_ts, $next_te, $size, $query, $qs, $qe, $next_query, $next_qs, $next_qe) = split;
             my $select_ts = $ts-$qs+1;
             my $select_te = $te+length($query_seq{$query})-$qe;     # $query: $id.$rank.Primer$i
@@ -581,6 +586,8 @@ for my $each_db (map {basename($_)} @dbs) {
             if ($retrieve_region_data{$each_db}{$query}) {
                 my @regions = @{$retrieve_region_data{$each_db}{$query}};
                 for my $data_region (@regions) {
+                    last if ($hit_num>=$max_report_amplicon);
+                    
                     my ($target_region, $target_next_region, $next_query) = @{$data_region};
                     my $query_seq = $query_seq{$query};
                     my $next_query_seq = $query_seq{$next_query};
