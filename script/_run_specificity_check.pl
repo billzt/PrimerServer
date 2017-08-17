@@ -49,7 +49,7 @@ my $Tris        = 10;     #mM
 my $Mg          = 1.5;    #mM  
 my $dNTPs       = 0.2; #mM 
 my $min_Tm_diff = 20;
-my $dir = ".";
+my $dir = "PrimerServerOut";
 my $size_start = 70;
 my $size_stop = 1000;
 my $detail;
