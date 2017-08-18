@@ -6,13 +6,13 @@ use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
 use List::Util qw/sum/;
+use File::Basename qw/basename/;
 
 my $usage = <<"END_USAGE";
 usage: $0 --primer3result=<primer3 result> --specificity=<specificity result> [Option]
-Required:
 --primer3result     
 --specificity 
-Optional:
+--db 
 --region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
 --outputdir
 --retain
@@ -23,6 +23,7 @@ END_USAGE
 my $help;
 my $primer3result;
 my $specificity;
+my $db;
 my $detail;
 my $retain = 10;
 my $amplicon;
@@ -34,6 +35,7 @@ GetOptions(
     'primer3result=s'       =>  \$primer3result,
     'specificity=s'       =>  \$specificity,
     'outputdir=s'   =>  \$dir,
+    'db=s'          =>  \$db,
     'detail'      =>  \$detail,
     'retain=i'      =>  \$retain,
     'region_type=s' =>  \$region_type,
@@ -45,6 +47,9 @@ if ($help or !$primer3result or !$specificity) {
     exit(0);
 }
 
+my @dbs = split /,/, $db;
+my $primary_db = basename $dbs[0];   # This is the primary database used to judge primer specificity
+
 my %hit_num_for_primer;
 my %success_site;       # Judge whether this site has unique primers in at least one of the databases
 open my $in_fh, "<", $specificity;
@@ -53,7 +58,7 @@ while (<$in_fh>) {
     next if (/^#/);
     my ($id, $rank, $each_db, $num) = split;
     $hit_num_for_primer{$id}{$rank}{$each_db} = $num;
-    if ($num==1) {
+    if ($num==1 && $each_db eq $primary_db) {
         $success_site{$id} = 1;
     }
 }
@@ -68,11 +73,6 @@ while (<$in_fh>) {
     push @{ $hit_regions_for_primer{$id}{$rank}{$each_db} }, [$target_id, $target_start, $next_target_end];
 }
 close $in_fh;
-
-sub average {
-    my @value = @_;
-    return sum(@value)/@value;
-}
 
 my %data_for_primer;
 {
@@ -149,7 +149,7 @@ END
             </div>
             <div class="col-md-1">
 END
-            if ($hit_num_for_primer{$id} && $success_site{$id} ) {  # This site has unique primers in at least one database
+            if ($hit_num_for_primer{$id} && $success_site{$id} ) {  # This site has unique primers in the primary database
                 print {$out_fh} <<"END";
                 <span class="glyphicon glyphicon-ok"></span>
 END
@@ -200,8 +200,8 @@ END
             <ul class="list-group">
 END
             }
-            # sort primers: first by hit numbers (average on all databases), then by primer3 score
-            my @ranks = sort { average(values(%{$hit_num_for_primer{$id}{$a}}))<=>average(values(%{$hit_num_for_primer{$id}{$b}})) or $a<=>$b } keys %{$hit_num_for_primer{$id}};
+            # sort primers: first by hit numbers (on primary database), then by primer3 score
+            my @ranks = sort { $hit_num_for_primer{$id}{$a}{$primary_db}<=>$hit_num_for_primer{$id}{$b}{$primary_db} or $a<=>$b } keys %{$hit_num_for_primer{$id}};
             my $primer_output_rank = 1;
             for my $i (@ranks) {
                 my ($seq_F) = /PRIMER_LEFT_ $i _SEQUENCE=(\S+)/x;
@@ -241,7 +241,7 @@ END
                 
                 my ($penalty_pair) = /PRIMER_PAIR_ $i _PENALTY=(\S+)/x; $penalty_pair=sprintf("%.1f", $penalty_pair);
                 
-                my @databases = keys %{ $hit_num_for_primer{$id}{$i} };
+                my @databases = map {basename($_)} @dbs;
                 if (!$detail) {
                     for my $database (@databases) {
                         my $hit_num = $hit_num_for_primer{$id}{$i}{$database};
@@ -249,8 +249,7 @@ END
                     }
                 }
                 else {
-                    my @hit_nums = values(%{$hit_num_for_primer{$id}{$i}});
-                    if (1~~@hit_nums) { # This primer has unique hit in at least one of the databases
+                    if ($hit_num_for_primer{$id}{$i}{$primary_db}==1) { # This primer has unique hit in the primary database
                         print {$out_fh} <<"END";
                     <li class="list-group-item list-group-item-primer list-group-item-success">
 END
@@ -316,9 +315,16 @@ END
 END
                     
                     for my $database (@databases) {
-                        print {$out_fh} <<"END";
+                        if ($database eq $primary_db) {
+                            print {$out_fh} <<"END";
+                                        <th>Database: $database <span class="glyphicon glyphicon-star"></span></th>
+END
+                        }
+                        else {
+                            print {$out_fh} <<"END";
                                         <th>Database: $database</th>
 END
+                        }
                     }
                     print {$out_fh} <<"END";
                                     </tr>
@@ -349,7 +355,7 @@ END
                             for my $j (0..$#hit_regions) {
                                 my ($target_id, $target_start, $next_target_end) = @{$hit_regions[$j]};
                                 my $size = $next_target_end-$target_start+1;
-                                if (1~~@hit_nums) {
+                                if ($hit_num_for_primer{$id}{$i}{$primary_db}==1) {
                                     print {$out_fh} <<"END";
                                                 <li class='list-group-item list-group-item-success'>$target_id:$target_start-$next_target_end, $size bp</li>
 END
@@ -360,7 +366,12 @@ END
 END
                                 }
                                 if ($j==2) {
-                                    print {$out_fh} "<li class='list-group-item'>...</li>";
+                                    if ($hit_num_for_primer{$id}{$i}{$primary_db}==1) {
+                                        print {$out_fh} "<li class='list-group-item list-group-item-success'>...</li>";
+                                    }
+                                    else {
+                                        print {$out_fh} "<li class='list-group-item'>...</li>";
+                                    }
                                     last;
                                 }
                             }

@@ -238,7 +238,7 @@ if ($debug) {
 
 
 ####### Retrieve Results, generate [primer.final.result.txt] ##########
-$cmd = "perl $perl_dir/_run_final_selection.pl --primer3result=$dir/primer3output.txt --region_type=$region_type "
+$cmd = "perl $perl_dir/_run_final_selection.pl --primer3result=$dir/primer3output.txt --region_type=$region_type --db='$checkingdb' "
               ."--specificity=$dir/specificity.check.result.txt --retain=$retain --amplicon=$dir/specificity.check.result.amplicon "
               ."--outputdir=$dir";
 if ($detail) {

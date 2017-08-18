@@ -170,6 +170,23 @@ function toURL(value, row) {
     return '<a target="_blank" href="save/'+row.url+'">'+value+'</a>';
 }
 
+// function to show selected databases
+function dbShow(str) {
+    if (!str) {
+        return '';
+    }
+    var dbs = str.split(',');
+    var display_str = '';
+    for (var i=0; i<dbs.length; i++) {
+        if (i==0) {
+            display_str += '<li class="list-group-item">' + dbs[i] + ' <span class="glyphicon glyphicon-star"></span></li>'
+        }
+        else {
+            display_str += '<li class="list-group-item">' + dbs[i] + '</li>'
+        }
+    }
+    return display_str;
+}
 
 $(function () {
     // Tooltip for bootstrap
@@ -186,7 +203,7 @@ $(function () {
     $.get('script/parse_config.php', function(data){
         var config = JSON.parse(data);
         $('[name="select-database[]"]').selectpicker({
-            title: 'Select your databases (allow multiple, < ' + config.limitDatabase + ') ',
+            title: 'Select your databases (allow multiple, <= ' + config.limitDatabase + ') ',
             maxOptions: config.limitDatabase
         });
     });
@@ -359,6 +376,47 @@ $(function () {
             $('[name="custom-db-sequences"]').parent().addClass('hidden');
         }
     });
+
+    // Show initial selected databases
+    var selected_dbs = localStorage.getItem('primer-selected-databases');
+    $('#show-selected-databases').html(dbShow(selected_dbs));
+    $('[name="selected-databases"]').val(selected_dbs);
+    if (!selected_dbs) {    // inintialize
+        $('[name="select-database[]"]').on('refreshed.bs.select', function (event) {
+            var selectedOptions = event.target.selectedOptions;
+            selected_dbs = '';
+            for (var i=0; i<selectedDBNum; i++) {
+                selected_dbs += selectedOptions[i].value+',';
+            }
+            selected_dbs = selected_dbs.replace(/,$/, '');
+            localStorage.setItem('primer-selected-databases', selected_dbs);
+            $('#show-selected-databases').html(dbShow(selected_dbs));
+            $('[name="selected-databases"]').val(selected_dbs);
+        });
+    }
+    
+    // Change selected databases
+    var vals = [];
+    $('[name="select-database[]"]').change(function (event) {
+        for(var i=0; i <$('[name="select-database[]"] option').length; i++) {
+            if ($($('[name="select-database[]"] option')[i]).prop('selected') ) {
+                if (!vals.includes(i)) {
+                    vals.push(i);
+                }
+            } 
+            else if (vals.includes(i)) {
+                vals.splice(vals.indexOf(i), 1);
+            }
+        }
+        selected_dbs = '';
+        vals.forEach(function(ele) {
+          selected_dbs += $($('[name="select-database[]"] option')[ele]).val() + ',';
+        })
+        selected_dbs = selected_dbs.replace(/,$/, '');
+        $('#show-selected-databases').html(dbShow(selected_dbs));
+        $('[name="selected-databases"]').val(selected_dbs);
+        localStorage.setItem('primer-selected-databases', selected_dbs);
+    });
     
 
     // form validation & submit
@@ -529,7 +587,7 @@ $(function () {
             for (var j=0; j<primers.length; j++) {
                 // deside whether to print this primer or not
                 var hit_num = $(primers[j]).find('.hit-num').data('hit');
-                if (hit_num>1 && download_hit==1) {
+                if (hit_num==0 && download_hit==1) {
                     continue;
                 }
                 var primer_id = $(primers[j]).find('.list-group-item-heading').html();
@@ -656,7 +714,7 @@ $(function () {
             }, 1000); 
         }
     });
-    
+
 });
 
 

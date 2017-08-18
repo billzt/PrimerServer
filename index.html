@@ -57,18 +57,24 @@
                                 <small><span class="glyphicon glyphicon-question-sign help-icon" data-toggle="modal"
                                 data-target="#input-help"></span></small> 
                             </legend>
-                            <div class="input-group">
-                                <span class="input-group-addon">Species</span>
-                                <select class="form-control selectpicker show-tick show-menu-arrow save-input validate[required]" name="select-template" 
-                                data-size="10" data-live-search="true" title="Select your template species">
-                                </select>
-                            </div>
                             <div class="row">
                                 <div class="col-md-9">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Species</span>
+                                        <select class="form-control selectpicker show-tick show-menu-arrow save-input validate[required]" name="select-template" 
+                                        data-size="10" data-live-search="true" title="Select your template species">
+                                        </select>
+                                    </div>
                                     <textarea class="form-control monospace-style validate[required, maxSize[100000]]" rows="12"
                                     style="background-color: #bfffdf"
                                     placeholder="Input your regions, one per line, blank delimited: TemplateID TargetPos TargetLength" 
                                     name="template-regions"></textarea>
+                                    <fieldset class="hidden">
+                                        <legend>Input Custom Template Sequences</legend>
+                                        <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
+                                        style="background-color: #bfdfff"
+                                        placeholder="Input your template sequences in FASTA format..." name="custom-template-sequences"></textarea>
+                                    </fieldset>
                                 </div>
                                 <div class="col-md-3">
                                     <fieldset>
@@ -100,13 +106,6 @@
                                     </fieldset>
                                 </div>
                             </div>
-                        
-                            <fieldset class="hidden">
-                                <legend>Input Custom Template Sequences</legend>
-                                <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
-                                style="background-color: #bfdfff"
-                                placeholder="Input your template sequences in FASTA format..." name="custom-template-sequences"></textarea>
-                            </fieldset>
                         </fieldset>
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -410,18 +409,32 @@
                             </div>
                         </fieldset>
                     </div>
-                    <div class="input-group">
-                        <span class="input-group-addon">Checking Databases</span>
-                        <select class="form-control save-input selectpicker show-tick show-menu-arrow validate[required]" name="select-database[]" 
-                        data-size="10" data-live-search="true" multiple data-selected-text-format="count > 2" >
-                        </select>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <fieldset>
+                                <legend>Select Checking Databases</legend>
+                                <div class="input-group">
+                                    <span class="input-group-addon">Checking Databases</span>
+                                    <select class="form-control save-input selectpicker show-tick show-menu-arrow validate[required]" name="select-database[]" 
+                                    data-size="10" data-live-search="true" multiple data-selected-text-format="count > 1" >
+                                    </select>
+                                </div>
+                            </fieldset>
+                            <fieldset class="hidden">
+                                <legend>Input Custom Database Sequences</legend>
+                                <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
+                                style="background-color: #bfffff"
+                                placeholder="Input your database sequences in FASTA format..." name="custom-db-sequences"></textarea>
+                            </fieldset>
+                        </div>
+                        <div class="col-md-3">
+                            <fieldset>
+                                <legend>Selected Databases</legend>
+                                <ul class="list-group" id="show-selected-databases"></ul>
+                                <input type="hidden" name="selected-databases" value="" />
+                            </fieldset>
+                        </div>
                     </div>
-                    <fieldset class="hidden">
-                        <legend>Input Custom Database Sequences</legend>
-                        <textarea class="form-control monospace-style validate[required, maxSize[1000000]]" rows="8"
-                        style="background-color: #bfffff"
-                        placeholder="Input your database sequences in FASTA format..." name="custom-db-sequences"></textarea>
-                    </fieldset>
                 </div>
                 <input type="submit" value="Submit" class="btn btn-primary" /> 
                 <input type="reset"  value="Reset" class="btn btn-default" />

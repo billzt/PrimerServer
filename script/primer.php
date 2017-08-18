@@ -35,7 +35,7 @@ $database_dir = $config['database'];
 
 // databases
 $selected_dbs = '';
-foreach ( $_POST['select-database'] as $i ) {
+foreach ( explode(',', $_POST['selected-databases']) as $i ) {
     if ($i=='custom') { // making custom database if user select a custom database
         $db = "$working_dir/customdb";
         file_put_contents($db, $_POST['custom-db-sequences']);
@@ -52,10 +52,10 @@ foreach ( $_POST['select-database'] as $i ) {
             exit(0);
         }
         exec("$path_makeblastdb -dbtype nucl -in $db");
-        $selected_dbs .= "$db ";
+        $selected_dbs .= "$db,";
     }
     else {
-        $selected_dbs .= "$database_dir/$i ";
+        $selected_dbs .= "$database_dir/$i,";
     }
 }
 
