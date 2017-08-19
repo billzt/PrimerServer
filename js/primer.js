@@ -714,7 +714,11 @@ $(function () {
             }, 1000); 
         }
     });
-
+    
+    // remove temporary files when use close or refresh the page
+    $(window).bind("beforeunload", function() { 
+        $.post('script/remove_tmp_files.php');
+    });
 });
 
 

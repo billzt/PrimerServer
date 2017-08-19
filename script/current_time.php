@@ -14,7 +14,7 @@ $path_primer3 = $config['primer3'];
 $path_blastn = $config['blastn'];
 $show_info = $config['showInfo'];
 
-if ($show_info==1) {
+if ($show_info) {
     // memory
     exec("less /proc/meminfo | grep MemTotal | awk '{print $2}'", $mem_total);
     $mem_total_result = number_format($mem_total[0]);
@@ -49,4 +49,3 @@ if ($show_info==1) {
     <li>Current Time: <?php echo $time, " GMT ", $time_diff ?></li>
 </ul>
 
-<?php
