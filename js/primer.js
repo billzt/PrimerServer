@@ -634,6 +634,11 @@ $(function () {
     });
     
     // Save webpage
+    // system info
+    $.get('script/current_time.php', function(data){
+        $('#saved .alert-info').html(data);
+    });
+    
     // render table from localStorage
     var rows = [];
     var storage = window.localStorage;
@@ -645,14 +650,36 @@ $(function () {
             rows.push({
                 time: storage_key_array[1].replace(/-/g,'/')+' '+storage_key_array[2].replace(/-/g,':'),
                 title: localStorage.getItem(storage_key),
+                file_status: '<span class="file-status glyphicon" data-url="save/'+storage_key+'"></span>',
                 url: storage_key,
             });
         }
     }
-    $('#saved_table').bootstrapTable({data:rows});
-    $.get('script/current_time.php', function(data){
-        $('#saved .alert-info').html(data);
+    $('#saved_table').on('post-body.bs.table', function (){
+        var file_status = $('.file-status');
+        for (var i=0; i<file_status.length; i++) {
+            var fileURL = $(file_status[i]).data('url');
+            $.ajax({
+                url : fileURL,
+                type : 'HEAD',
+                statusCode: {
+                    200: function() {
+                            var thisURL = $(this)[0].url;
+                            $('[data-url="'+thisURL+'"]').removeClass('glyphicon-remove').addClass('glyphicon-ok');
+                         },
+                    404: function() {
+                            var thisURL = $(this)[0].url;
+                            $('[data-url="'+thisURL+'"]').removeClass('glyphicon-ok').addClass('glyphicon-remove');
+                         }
+                }
+            });
+        }
     });
+    
+    $('#saved_table').bootstrapTable({data:rows});
+
+    // show file status in table
+    
     
     // control selection
     var selections = [];
