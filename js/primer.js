@@ -543,7 +543,7 @@ $(function () {
             var progress_data = JSON.parse(data); // total, finished, percent
             if (progress_data.total>0) {
                 $('#running-modal .modal-body h4').html(progress_data.total+' primer sequences generated. <br/>Waiting for BLAST: ' + progress_data.total
-                + ' primers &times; ' + selectedDBNum + ' databases' +' <span class="fa fa-spinner fa-spin"></span>');
+                + ' primer sequences &times; ' + selectedDBNum + ' databases' +' <span class="fa fa-spinner fa-spin"></span>');
                 $('#running-modal .progress-bar').css('width', progress_data.percent+'%').html(progress_data.finished+' primer sequences finished');
                 if (progress_data.percent>=100) {
                     timer.stop();
