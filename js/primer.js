@@ -378,7 +378,7 @@ $(function () {
     });
 
     // Show initial selected databases
-    var selected_dbs = localStorage.getItem('primer-selected-databases');
+    var selected_dbs = localStorage.getItem('primer-selected-databases:'+location.href);
     $('#show-selected-databases').html(dbShow(selected_dbs));
     $('[name="selected-databases"]').val(selected_dbs);
     if (!selected_dbs) {    // inintialize
@@ -389,7 +389,7 @@ $(function () {
                 selected_dbs += selectedOptions[i].value+',';
             }
             selected_dbs = selected_dbs.replace(/,$/, '');
-            localStorage.setItem('primer-selected-databases', selected_dbs);
+            localStorage.setItem('primer-selected-databases:'+location.href, selected_dbs);
             $('#show-selected-databases').html(dbShow(selected_dbs));
             $('[name="selected-databases"]').val(selected_dbs);
         });
@@ -415,7 +415,7 @@ $(function () {
         selected_dbs = selected_dbs.replace(/,$/, '');
         $('#show-selected-databases').html(dbShow(selected_dbs));
         $('[name="selected-databases"]').val(selected_dbs);
-        localStorage.setItem('primer-selected-databases', selected_dbs);
+        localStorage.setItem('primer-selected-databases:'+location.href, selected_dbs);
     });
     
 
@@ -642,19 +642,22 @@ $(function () {
     // render table from localStorage
     var rows = [];
     var storage = window.localStorage;
-    var storage_key_pattern = new RegExp('^PrimerServer');
+    var storage_key_pattern = new RegExp('^PrimerServer.*'+location.href+'$');
     for (var i=0; i<storage.length; i++) {
         var storage_key = storage.key(i);
         if (storage_key_pattern.test(storage_key)) {
             var storage_key_array = storage_key.split('.');
+            var thisURL = storage_key.replace('.'+location.href, '');
             rows.push({
                 time: storage_key_array[1].replace(/-/g,'/')+' '+storage_key_array[2].replace(/-/g,':'),
                 title: localStorage.getItem(storage_key),
-                file_status: '<span class="file-status glyphicon" data-url="save/'+storage_key+'"></span>',
-                url: storage_key,
+                file_status: '<span class="file-status glyphicon" data-url="save/'+thisURL+'"></span>',
+                url: thisURL,
             });
         }
     }
+    
+    // show file status in table
     $('#saved_table').on('post-body.bs.table', function (){
         var file_status = $('.file-status');
         for (var i=0; i<file_status.length; i++) {
@@ -678,8 +681,6 @@ $(function () {
     
     $('#saved_table').bootstrapTable({data:rows});
 
-    // show file status in table
-    
     
     // control selection
     var selections = [];
@@ -704,7 +705,7 @@ $(function () {
             values: remove_rows
         });
         for (var i=0; i<remove_rows.length; i++) {
-            localStorage.removeItem(remove_rows[i]);
+            localStorage.removeItem(remove_rows[i]+'.'+location.href);
         }
         $.get('script/remove_webpage.php', {urls:remove_rows.join(' ')}, function(data){
             1;
@@ -717,7 +718,7 @@ $(function () {
         var region_type = $('[name="region_type"]:checked').val();
         var save_title = $('#save-webpage input').val();
         $.get('script/save_webpage.php', {type1:app_type, type2:region_type}, function(data){
-            localStorage.setItem(data, save_title); // data: PrimerServer.$date.$time.$session_id.html
+            localStorage.setItem(data+'.'+location.href, save_title); // data: PrimerServer.$date.$time.$session_id.html
             $('#save-result-modal').modal('show');
             var storage_key_array = data.split('.');
             $('#saved_table').bootstrapTable('prepend', [{
@@ -747,5 +748,4 @@ $(function () {
         $.post('script/remove_tmp_files.php');
     });
 });
-
 
