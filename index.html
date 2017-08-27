@@ -577,12 +577,10 @@
               <div class="modal-body">
                 <h4 class="page-header">Design Primers &amp; Check</h4>
                 <p>Format: One site per line, space delimited <code>TemplateID TargetPos TargetLength</code></p>
-                <p>Example (Template Database: <i>Gossypium hirsutum</i> (NAU v1.1) Genome):</p>
+                <p>Example (Using Example Database):</p>
                 <pre>
-A01	1735482	37
-A01	937504	26
-A01	2087190	30
-A01	298864	21</pre>
+seq1 200 10
+seq1 400 10</pre>
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">Acceptable Template IDs</h4>
@@ -596,14 +594,10 @@ A01	298864	21</pre>
                 
                 <h4 class="page-header">Check Primers Only</h4>
                 <p>Format: One primer group per line, space delimited: <code>PrimerID Seq1 Seq2 ...</code></p>
-                <p>Example: (Checking Database: Gossypium hirsutum (NAU v1.1) Genome):</p>
+                <p>Example: (Using Example Database):</p>
                 <pre>
-S1	CAATCTCTTCATGTTCAACCTGT	GACACGGCTAAAATCAATGGCA
-S2	AGTGTAGGCAGTGAAAGATCCT	AGTTAACTCTCAAGCCTAGGGG
-S3	AGGCAGTGAAAGATCCTAATTCT	TGTGCTCCCTCAATCCAATGT
-S4	TGTAGGCAGTGAAAGATCCTAAT	TGCTCCCTCAATCCAATGTAGT
-S5	CACACACACAAGCAAGCCTG	TGCTCCTCAATCGATTCAGGT
-S6	GCAGCAAACGGGTTCAGTTT	TGATCCCTCCTTACACCGTCT</pre>
+P1 CTTCTGCAATGCCAAGTCCAG   GTGGTGAAGGGTCGGTTGAA
+P2 ACCAAACCCCAGAGTCAATTAA  TCTATCTATTGCACTGCCTGTTG</pre>
                 
               </div>
               <div class="modal-footer">
