@@ -289,7 +289,9 @@ $(function () {
     // modify reset button to satisfy selector
     $(':reset').click(function(){
         $('[name="select-template"]').selectpicker('val', '');
-        $('[name="select-database[]"]').selectpicker('val', ''); 
+        $('[name="select-database[]"]').selectpicker('val', '');
+        localStorage.setItem('primer-selected-databases:'+location.href, '');
+        $('#show-selected-databases').html('');
     });
     
     // change App type when user change it
