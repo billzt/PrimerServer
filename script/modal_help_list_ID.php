@@ -7,6 +7,10 @@ $working_dir = "/tmp/Primer-$date-$session_id";
 $config = parse_ini_file("../config.ini");
 $database_dir = $config['database'];
 
+if (!file_exists($working_dir)) {
+    mkdir($working_dir);
+}
+
 function download_file($file_url,$new_basename=''){
     if(!isset($file_url)||trim($file_url)==''){ // trim: remove blanks surround string
         return '500';
