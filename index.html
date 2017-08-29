@@ -310,13 +310,12 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-3 control-label">Filter with 3' End Validation:</label>
+                                <label class="col-sm-3 control-label">Min. Tm Difference:</label>
                                 <div class="col-sm-2">
-                                    <div class="radio">
-                                        <label><input type="radio" name="use_3_end" value=1 />Yes</label>
-                                    </div>
-                                    <div class="radio">
-                                        <label><input type="radio" name="use_3_end" value=0 checked />No</label>
+                                    <div class="input-group">
+                                        <input type="text" name="min_Tm_diff" value="20" 
+                                        class="form-control save-input validate[required, custom[integer], min[10], max[100]]" />
+                                        <span class="input-group-addon">(&deg;C) lower</span>
                                     </div>
                                 </div>
                                 <label class="col-sm-3 control-label">Max. Primers Return Number:</label>
@@ -326,12 +325,13 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-3 control-label">Min. Tm Difference:</label>
+                                <label class="col-sm-3 control-label">Filter with 3' End Validation:</label>
                                 <div class="col-sm-2">
-                                    <div class="input-group">
-                                        <input type="text" name="min_Tm_diff" value="20" 
-                                        class="form-control save-input validate[required, custom[integer], min[10], max[100]]" />
-                                        <span class="input-group-addon">(&deg;C) lower</span>
+                                    <div class="radio">
+                                        <label><input type="radio" name="use_3_end" value=1 />Yes</label>
+                                    </div>
+                                    <div class="radio">
+                                        <label><input type="radio" name="use_3_end" value=0 checked />No</label>
                                     </div>
                                 </div>
                                 <label class="col-sm-3 control-label">Max. Amplicons Return Per Primer:</label>
