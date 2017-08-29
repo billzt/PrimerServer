@@ -5,24 +5,24 @@ use strict;
 use warnings;
 use Fatal qw/open close chdir mkdir/;
 use Getopt::Long;
+use Pod::Usage;
 
-my $usage = <<"END_USAGE";
-usage: $0 --input=<user input file> --db=<template.fa> [Option]
-Required:
---input     a tab-delimited text file listing primer choosing regions, one per line: 
-            template_ID target_start    target_length   [product_size_min]    [product_size_max]
---db        
-Optional:
---region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
---samtools
---primer3bin
---primer3setting
---outputdir
---product_size_min
---product_size_max
---debug
---help      Print this help and exit
-END_USAGE
+# usage: $0 --input=<user input file> --db=<template.fa> [Option]
+# Required:
+# --input     a tab-delimited text file listing primer choosing regions, one per line: 
+            # template_ID target_start    target_length   [product_size_min]    [product_size_max]
+# --db        
+# Optional:
+# --region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
+# --samtools
+# --primer3bin
+# --primer3setting
+# --outputdir
+# --product_size_min
+# --product_size_max
+# --debug
+# --help      Print this help and exit
+
 
 my $help;
 my $input;
@@ -50,8 +50,7 @@ GetOptions(
 );
 
 if ($help or !$input or !$db) {
-    print "$usage";
-    exit(0);
+    pod2usage(-verbose => 2);
 }
 
 
@@ -210,3 +209,19 @@ else {
 if (!$debug) {
     system "rm -f $dir/*.tmp";
 }
+
+__END__ 
+
+=head1 DESCRIPTION
+
+Don't directly run this script. Please run pipeline_design_check.pl instead.
+
+=head1 AUTHOR
+
+Tao Zhu E<lt>zhutao@caas.cnE<gt>
+
+Copyright (c) 2017
+
+This script is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut

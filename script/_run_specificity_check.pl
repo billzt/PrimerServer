@@ -9,35 +9,34 @@ use List::Util qw/max min sum/;
 use threads;
 use threads::shared;
 use File::Basename qw/basename/;
+use Pod::Usage;
 
-my $usage = <<"END_USAGE";
-usage: $0 --input=<user input table> --db=<db> [Option]
-Required:
---input     
---db 
-Optional:
---num_cpu
---size_start
---size_stop
---outputdir
---use_3end
---samtools
---blastn
---blast_e_value
---blast_word_size
---blast_identity
---blast_max_hsps
---conc_primer
---conc_Na
---conc_K
---conc_Tris
---conc_Mg
---conc_dNTPs
---min_Tm_diff
---max_report_amplicon
---debug
---help      Print this help and exit
-END_USAGE
+# usage: $0 --input=<user input table> --db=<db> [Option]
+# Required:
+# --input     
+# --db 
+# Optional:
+# --num_cpu
+# --size_start
+# --size_stop
+# --outputdir
+# --use_3end
+# --samtools
+# --blastn
+# --blast_e_value
+# --blast_word_size
+# --blast_identity
+# --blast_max_hsps
+# --conc_primer
+# --conc_Na
+# --conc_K
+# --conc_Tris
+# --conc_Mg
+# --conc_dNTPs
+# --min_Tm_diff
+# --max_report_amplicon
+# --debug
+# --help      Print this help and exit
 
 my $help;
 my $input;
@@ -49,7 +48,7 @@ my $Tris        = 10;     #mM
 my $Mg          = 1.5;    #mM  
 my $dNTPs       = 0.2; #mM 
 my $min_Tm_diff = 20;
-my $dir = "PrimerServerOut";
+my $dir = "PrimerServerOutput";
 my $size_start = 70;
 my $size_stop = 1000;
 my $detail;
@@ -94,8 +93,7 @@ GetOptions(
 );
 
 if ($help or !$input or !$db) {
-    print "$usage";
-    exit(0);
+    pod2usage(-verbose => 2);
 }
 
 ####### Check Tool Path #########
@@ -848,3 +846,85 @@ END
 }
 
 close $out_fh;
+
+__END__ 
+
+=head1 PrimerServer Pipeline: Check
+
+pipeline_check.pl - PrimerServer Pipeline: Check
+
+=head1 SYNOPSIS
+
+pipeline_check.pl --input=<user input table> --db=<db> [Option]
+
+=head1 COMMAND-LINE OPTIONS
+
+Required Parameters:
+    --input FILE        a tab-delimited text file listing primers, one per line: 
+                        [ID] [Rank (Optional)] [Primer Seq 1] [Primer Seq 2] ([Primer Seq 3...])
+    --db FILES          one or more FASTA files (indexed with makeblastdb, separated by comma) of your background genome/transcriptome
+
+Optional Parameters: Primer Specificity Check
+    --samtools STR      Your Samtools path: /path/to/samtools   
+                        Default: [samtools] (Assume in your system PATH)
+    --blastn STR        Your blastn (NCBI BLAST+) path: /path/to/blastn
+                        Default: [blastn] (Assume in your system PATH)
+    --blast_e_value FLOAT
+                        The parameter e_value passed to blastn. Default: [30000]
+    --blast_word_size INT
+                        The parameter word_size passed to blastn. Default: [7]
+    --blast_identity  FLOAT
+                        The parameter perc_identity passed to blastn. Default: [60]
+    --blast_max_hsps  INT
+                        The parameter max_hsps passed to blastn. Default: [500]
+    --size_start INT
+                        Lower limit of the checking amplicon size range in bp. Default: [50]
+    --size_stop INT
+                        Upper limit of the checking amplicon size range in bp. Default: [5000]
+    --min_Tm_diff FLOAT 
+                        The mininum melting temperature (in ℃) suggested to produce off-target amplicon.
+                        Recommend to be at least 10℃ lower than PRIMER_MIN_TM in primer3 settings.
+                        Default: [20]
+    --max_report_amplicon INT
+                        The maximum number of amplicons for each primer in each database that will be reported.
+                        Increasing this value would generate large result files if the primer has thousands of
+                        amplicon hits. Default: [50]
+    
+    --use_3end          If turned on, primer pairs having at least one mismatch at the 3' end
+                        position with templates would not be considered to produce off-target amplicon, even if
+                        their melting temperatures are higher than [min_Tm]. Turn on this would find more
+                        candidate primers, but might also have more false positives.
+                        
+Optional Parameters: Experimental Setting
+    --conc_primer FLOAT
+                        Concentration (nM) of primers. Default: [100]
+    --conc_Na FLOAT     Concentration (mM) of Na+. Default: [0]
+    --conc_K FLOAT      Concentration (mM) of K+. Default: [50]
+    --conc_Tris FLOAT   Concentration (mM) of Tris. Default: [10]
+    --conc_Mg           Concentration (mM) of Mg2+. Default: [1.5]
+    --conc_dNTPs        Concentration (mM) of dNTPs. Default: [0.2]
+                        
+Optional Parameters: Output
+    --outputdir STR     The output directory. Default: [./PrimerServerOutput]
+    --debug             If turned on, print additional debug information. Default: [OFF]
+    
+Optional Parameters: System Configuration
+    --num_cpu INT       The number of CPUs used to run NCBI BLAST+.
+                        Default: 1
+    --help              Print this help and exit
+
+=head1 DESCRIPTION
+
+PrimerServer: a high-throughput primer design and specificity checking platform.
+
+Please refer to https://github.com/billzt/PrimerServer/wiki to see detailed description
+
+=head1 AUTHOR
+
+Tao Zhu E<lt>zhutao@caas.cnE<gt>
+
+Copyright (c) 2017
+
+This script is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut

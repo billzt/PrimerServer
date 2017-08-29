@@ -6,83 +6,8 @@ use warnings;
 use Fatal qw/open close chdir/;
 use Getopt::Long;
 use File::Basename;
+use Pod::Usage;
 
-my $usage = <<"END_USAGE";
-Usage: $0 --input=<user input file> --template=<template.fa> [Options]
-Required Parameters:
-    --input FILE        a tab-delimited text file listing primer choosing regions, one per line: 
-                        [template_ID] [target_start] [target_length] [product_size_min] [product_size_max]
-    --template FILE     a FASTA file (recommend indexed with Samtools) of your template genome/transcriptome
-
-Optional Parameters: Primer Design
-    --region_type STR   SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
-                        Default: [SEQUENCE_TARGET]
-    --samtools STR      Your Samtools path: /path/to/samtools   
-                        Default: [samtools] (Assume in your system PATH)
-    --primer3bin STR    Your primer3_core path: /path/to/primer3_core
-                        Default: [primer3_core] (Assume in your system PATH)
-    --primer3setting STR
-                        A Primer3 setting file. [STRONGLY RECOMMEND!]
-                        Default: [] (Using all the default parameters in Primer3)
-    --product_size_min INT
-                        Lower limit of designed product sizes in bp. Default: [100]
-    --product_size_max INT
-                        Upper limit of designed product sizes in bp. Default: [1000]
-                        
-
-Optional Parameters: Primer Specificity Check
-    --blastn STR        Your blastn (NCBI BLAST+) path: /path/to/blastn
-                        Default: [blastn] (Assume in your system PATH)
-    --blast_e_value FLOAT
-                        The parameter e_value passed to blastn. Default: [30000]
-    --blast_word_size INT
-                        The parameter word_size passed to blastn. Default: [7]
-    --blast_identity  FLOAT
-                        The parameter perc_identity passed to blastn. Default: [60]
-    --blast_max_hsps  INT
-                        The parameter max_hsps passed to blastn. Default: [500]
-    --checkingdb STR    The NCBI BLAST+ database of your background genome/transcriptome.
-                        Default: the same as --template
-    --checking_size_start INT
-                        Lower limit of the checking amplicon size range in bp. Default: [50]
-    --checking_size_stop INT
-                        Upper limit of the checking amplicon size range in bp. Default: [5000]
-    --primer_num_retain INT
-                        The maximum number of primers for each site to return. It must be used together with 
-                        --primer3setting and should not be larger than PRIMER_NUM_RETURN in the setting
-                        file. Default: [10]
-    --min_Tm_diff FLOAT 
-                        The mininum melting temperature (in ℃) suggested to produce off-target amplicon.
-                        Recommend to be at least 10℃ lower than PRIMER_MIN_TM in primer3 settings.
-                        Default: [20]
-    --max_report_amplicon INT
-                        The maximum number of amplicons for each primer in each database that will be reported.
-                        Increasing this value would generate large result files if the primer has thousands of
-                        amplicon hits. Default: [50]
-    
-    --use_3end          If turned on, primer pairs having at least one mismatch at the 3' end
-                        position with templates would not be considered to produce off-target amplicon, even if
-                        their melting temperatures are higher than [min_Tm]. Turn on this would find more
-                        candidate primers, but might also have more false positives.
-                        
-Optional Parameters: Experimental Setting
-    --conc_primer FLOAT
-                        Concentration (nM) of primers. Default: [100]
-    --conc_Na FLOAT     Concentration (mM) of Na+. Default: [0]
-    --conc_K FLOAT      Concentration (mM) of K+. Default: [50]
-    --conc_Tris FLOAT   Concentration (mM) of Tris. Default: [10]
-    --conc_Mg           Concentration (mM) of Mg2+. Default: [1.5]
-    --conc_dNTPs        Concentration (mM) of dNTPs. Default: [0.2]
-                        
-Optional Parameters: Output
-    --outputdir STR     The output directory. Default: [./PrimerServerOutput]
-    --debug             If turned on, print additional debug information. Default: [OFF]
-    
-Optional Parameters: System Configuration
-    --num_cpu INT       The number of CPUs used to run NCBI BLAST+.
-                        Default: 1
-    --help              Print this help and exit
-END_USAGE
 
 my $help;
 my $input;
@@ -154,10 +79,8 @@ if (!$checkingdb) {
     $checkingdb = $template;
 }
 
-
 if ($help or !$input or !$template) {
-    print "$usage";
-    exit(0);
+    pod2usage(-verbose => 2);
 }
 
 ####### Check Included Scripts #########
@@ -251,3 +174,105 @@ if ($status!=0) {
 }
 
 
+__END__ 
+
+=head1 PrimerServer Pipeline: Design & Check
+
+pipeline_design_check.pl - PrimerServer Pipeline: Design & Check
+
+=head1 SYNOPSIS
+
+pipeline_design_check.pl --input=<user input file> --template=<template.fa> [Options]
+
+=head1 COMMAND-LINE OPTIONS
+
+Required Parameters:
+    --input FILE        a tab-delimited text file listing primer choosing regions, one per line: 
+                        [template_ID] [target_start] [target_length] [product_size_min] [product_size_max]
+    --template FILE     a FASTA file (recommend indexed with Samtools) of your template genome/transcriptome
+
+Optional Parameters: Primer Design
+    --region_type STR   SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
+                        Default: [SEQUENCE_TARGET]
+    --samtools STR      Your Samtools path: /path/to/samtools   
+                        Default: [samtools] (Assume in your system PATH)
+    --primer3bin STR    Your primer3_core path: /path/to/primer3_core
+                        Default: [primer3_core] (Assume in your system PATH)
+    --primer3setting STR
+                        A Primer3 setting file. [STRONGLY RECOMMEND!]
+                        Default: [] (Using all the default parameters in Primer3)
+    --product_size_min INT
+                        Lower limit of designed product sizes in bp. Default: [100]
+    --product_size_max INT
+                        Upper limit of designed product sizes in bp. Default: [1000]
+                        
+
+Optional Parameters: Primer Specificity Check
+    --blastn STR        Your blastn (NCBI BLAST+) path: /path/to/blastn
+                        Default: [blastn] (Assume in your system PATH)
+    --blast_e_value FLOAT
+                        The parameter e_value passed to blastn. Default: [30000]
+    --blast_word_size INT
+                        The parameter word_size passed to blastn. Default: [7]
+    --blast_identity  FLOAT
+                        The parameter perc_identity passed to blastn. Default: [60]
+    --blast_max_hsps  INT
+                        The parameter max_hsps passed to blastn. Default: [500]
+    --checkingdb STR    The NCBI BLAST+ database of your background genome/transcriptome.
+                        Multiple databases are allowed (separated by comma)
+                        Default: the same as --template
+    --checking_size_start INT
+                        Lower limit of the checking amplicon size range in bp. Default: [50]
+    --checking_size_stop INT
+                        Upper limit of the checking amplicon size range in bp. Default: [5000]
+    --primer_num_retain INT
+                        The maximum number of primers for each site to return. It must be used together with 
+                        --primer3setting and should not be larger than PRIMER_NUM_RETURN in the setting
+                        file. Default: [10]
+    --min_Tm_diff FLOAT 
+                        The mininum melting temperature (in ℃) suggested to produce off-target amplicon.
+                        Recommend to be at least 10℃ lower than PRIMER_MIN_TM in primer3 settings.
+                        Default: [20]
+    --max_report_amplicon INT
+                        The maximum number of amplicons for each primer in each database that will be reported.
+                        Increasing this value would generate large result files if the primer has thousands of
+                        amplicon hits. Default: [50]
+    
+    --use_3end          If turned on, primer pairs having at least one mismatch at the 3' end
+                        position with templates would not be considered to produce off-target amplicon, even if
+                        their melting temperatures are higher than [min_Tm]. Turn on this would find more
+                        candidate primers, but might also have more false positives.
+                        
+Optional Parameters: Experimental Setting
+    --conc_primer FLOAT
+                        Concentration (nM) of primers. Default: [100]
+    --conc_Na FLOAT     Concentration (mM) of Na+. Default: [0]
+    --conc_K FLOAT      Concentration (mM) of K+. Default: [50]
+    --conc_Tris FLOAT   Concentration (mM) of Tris. Default: [10]
+    --conc_Mg           Concentration (mM) of Mg2+. Default: [1.5]
+    --conc_dNTPs        Concentration (mM) of dNTPs. Default: [0.2]
+                        
+Optional Parameters: Output
+    --outputdir STR     The output directory. Default: [./PrimerServerOutput]
+    --debug             If turned on, print additional debug information. Default: [OFF]
+    
+Optional Parameters: System Configuration
+    --num_cpu INT       The number of CPUs used to run NCBI BLAST+.
+                        Default: 1
+    --help              Print this help and exit
+
+=head1 DESCRIPTION
+
+PrimerServer: a high-throughput primer design and specificity checking platform.
+
+Please refer to https://github.com/billzt/PrimerServer/wiki to see detailed description
+
+=head1 AUTHOR
+
+Tao Zhu E<lt>zhutao@caas.cnE<gt>
+
+Copyright (c) 2017
+
+This script is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut

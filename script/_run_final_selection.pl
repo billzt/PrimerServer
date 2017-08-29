@@ -7,18 +7,17 @@ use Fatal qw/open close chdir/;
 use Getopt::Long;
 use List::Util qw/sum/;
 use File::Basename qw/basename/;
+use Pod::Usage;
 
-my $usage = <<"END_USAGE";
-usage: $0 --primer3result=<primer3 result> --specificity=<specificity result> [Option]
---primer3result     
---specificity 
---db 
---region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
---outputdir
---retain
---amplicon
---help      Print this help and exit
-END_USAGE
+# usage: $0 --primer3result=<primer3 result> --specificity=<specificity result> [Option]
+# --primer3result     
+# --specificity 
+# --db 
+# --region_type SEQUENCE_TARGET; SEQUENCE_INCLUDED_REGION; FORCE_END
+# --outputdir
+# --retain
+# --amplicon
+# --help      Print this help and exit
 
 my $help;
 my $primer3result;
@@ -43,8 +42,7 @@ GetOptions(
 );
 
 if ($help or !$primer3result or !$specificity) {
-    print "$usage";
-    exit(0);
+    pod2usage(-verbose => 2);
 }
 
 my @dbs = split /,/, $db;
@@ -419,4 +417,20 @@ END
     close $out_fh;
     close $in_fh;
 }
+
+__END__ 
+
+=head1 DESCRIPTION
+
+Don't directly run this script. Please run pipeline_design_check.pl instead.
+
+=head1 AUTHOR
+
+Tao Zhu E<lt>zhutao@caas.cnE<gt>
+
+Copyright (c) 2017
+
+This script is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
 
