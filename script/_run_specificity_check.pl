@@ -229,6 +229,8 @@ for my $thread (@threads) {
 
 
 ####### Run Tm and 3'end mismatch check  #########
+####### Francis, F. et al. ThermoAlign: a genome-aware primer design tool for 
+####### tiled amplicon resequencing. Scientific Reports 2017;7:44437.
 ############################################################
 #### FUNCTIONS AND TABLES
 ############################################################
