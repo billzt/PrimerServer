@@ -1,5 +1,7 @@
 # PrimerServer
-a high-throughput primer design and specificity-checking platform
+A high-throughput primer design and specificity-checking platform
+
+![screenshot]( https://raw.githubusercontent.com/billzt/figure/master/PrimerServer-UI-typeA.png ) <br/>
 
 ## Wiki
 Please see the [wiki](https://github.com/billzt/PrimerServer/wiki) for this repository
