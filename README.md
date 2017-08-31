@@ -2,7 +2,7 @@
 a high-throughput primer design and specificity-checking platform
 
 ## Wiki
-Please see the wiki in this repository
+Please see the [wiki](https://github.com/billzt/PrimerServer/wiki) for this repository
 
 ## Pre-Print
 Zhu T, Liang CZ, Meng ZG, Li YY, Wu YY, Guo SD* and Zhang R* (2017). PrimerServer: a high-throughput primer design and specificity-checking platform. bioRxiv 181941
