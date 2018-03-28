@@ -10,6 +10,8 @@ use threads;
 use threads::shared;
 use File::Basename qw/basename/;
 use Pod::Usage;
+# For smart matching ~~, see http://blogs.perl.org/users/mike_b/2013/06/a-little-nicer-way-to-use-smartmatch-on-perl-518.html
+no if $] >= 5.017011, warnings => 'experimental::smartmatch';
 
 # usage: $0 --input=<user input table> --db=<db> [Option]
 # Required:
@@ -49,8 +51,8 @@ my $Mg          = 1.5;    #mM
 my $dNTPs       = 0.2; #mM 
 my $min_Tm_diff = 20;
 my $dir = "PrimerServerOutput";
-my $size_start = 70;
-my $size_stop = 1000;
+my $size_start = 50;
+my $size_stop = 5000;
 my $detail;
 my $use_3end;
 my $report_last_5bp_in_3end;
@@ -168,7 +170,7 @@ sub runblast {
     my $db_name = shift;
     my $blastcmd = "$blastn -task blastn-short -query $query_file -db $db_file -evalue $blast_e_value "
                     ." -word_size $blast_word_size -perc_identity $blast_identity -dust no -ungapped -reward 1 -penalty -1 "
-                    ." -max_hsps $blast_identity -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
+                    ." -max_hsps $blast_max_hsps -outfmt '6 qseqid qstart qend sseqid sstart send sstrand' "
                     ." -out $query_file.$db_name.out -num_threads $run_cpu";
     system $blastcmd;
     ####### Filter BLAST Results by Product Sizes #########
@@ -535,7 +537,7 @@ for my $each_db (@dbs) {
     close $tmp_out_fh;
 
     system "sort $dir/tmp.specificity.check/retrieve.region.tmp | uniq >$dir/tmp.specificity.check/retrieve.region.uniq.tmp";
-    system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $each_db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";    
+    system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $each_db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";
     {
         local $/ = ">";
         open my $fh, "<", "$dir/tmp.specificity.check/retrieve.region.tmp.fa";
