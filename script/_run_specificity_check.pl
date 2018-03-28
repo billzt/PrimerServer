@@ -537,7 +537,12 @@ for my $each_db (@dbs) {
     close $tmp_out_fh;
 
     system "sort $dir/tmp.specificity.check/retrieve.region.tmp | uniq >$dir/tmp.specificity.check/retrieve.region.uniq.tmp";
-    system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $each_db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";
+    if (-s "$dir/tmp.specificity.check/retrieve.region.uniq.tmp") {    # File "retrieve.region.uniq.tmp" can not be blank, otherwise there woulb be serious error!!!
+        system "xargs --arg-file=$dir/tmp.specificity.check/retrieve.region.uniq.tmp $samtools faidx $each_db >$dir/tmp.specificity.check/retrieve.region.tmp.fa";
+    }
+    else {
+        system "touch $dir/tmp.specificity.check/retrieve.region.tmp.fa";
+    }
     {
         local $/ = ">";
         open my $fh, "<", "$dir/tmp.specificity.check/retrieve.region.tmp.fa";
