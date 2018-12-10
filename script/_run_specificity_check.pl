@@ -95,7 +95,7 @@ GetOptions(
 );
 
 if ($help or !$input or !$db) {
-    pod2usage(-verbose => 2);
+    pod2usage(-verbose => 0);
 }
 
 ####### Check Tool Path #########
@@ -865,6 +865,13 @@ pipeline_check.pl - PrimerServer Pipeline: Check
 =head1 SYNOPSIS
 
 pipeline_check.pl --input=<user input table> --db=<db> [Option]
+
+Optional Parameters:
+--blast_max_hsps
+--size_start
+--size_stop
+--min_Tm_diff
+--outputdir
 
 =head1 COMMAND-LINE OPTIONS
 

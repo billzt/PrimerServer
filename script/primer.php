@@ -179,6 +179,9 @@ END;
     exec("$command 2>$working_dir/pipeline.log");
     if (filesize("$working_dir/pipeline.log")>0) {
         $msg = file_get_contents("$working_dir/pipeline.log");
+        if (preg_match("/Truncated sequence/", $msg)==0) {
+
+        
 ?>
 <div class="alert alert-danger alert-dismissible" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -187,6 +190,7 @@ END;
 </div>
 <?php
         exit(0);
+        }
     }
     
     echo file_get_contents("$working_dir/primer.final.result.html");
