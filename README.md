@@ -1,6 +1,10 @@
 # PrimerServer
 A high-throughput primer design and specificity-checking platform
 
+## Warning (2019/06/26):
+
+I've stopped to update it, and prepare to re-write using Python (and a Flask app). It might not be faster, but definitely easier to install and use!!! 
+
 ![screenshot]( https://raw.githubusercontent.com/billzt/figure/master/PrimerServer-UI-typeA.png ) <br/>
 
 ## Wiki
