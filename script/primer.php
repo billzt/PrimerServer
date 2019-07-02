@@ -255,11 +255,11 @@ else {
 ?>
 <div class="alert alert-danger alert-dismissible" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <p>Warning: Error when running the pipeline.</p> 
+    <p>Warning: when running the pipeline.</p> 
     <p><?php echo $msg ?></p>
 </div>
 <?php
-        exit(0);
+        # exit(0);
     }
     
     echo file_get_contents("$working_dir/specificity.check.result.html");
